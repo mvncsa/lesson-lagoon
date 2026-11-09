@@ -119,3 +119,4 @@ export function generateClientThumbnail(file: File): Promise<string> {
     reader.readAsDataURL(file);
   });
 }
+

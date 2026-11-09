@@ -43,3 +43,4 @@ describe('Deterministic File Type & Meta Detection (NO AI)', () => {
     expect(oversized.error).toContain('exceeds maximum');
   });
 });
+

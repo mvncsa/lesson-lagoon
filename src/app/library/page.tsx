@@ -31,8 +31,10 @@ export default function LibraryPage() {
 
   const ownedProducts = products.filter((p) => ownedProductIds.includes(p.id));
 
-  const handleDownload = (title: string, format: string) => {
-    showToast(`Downloading stamped copy of "${title}" (${format})...`, 'success');
+  const handleDownload = (prod: (typeof products)[0]) => {
+    showToast(`Downloading stamped copy of "${prod.title}" (${prod.type})...`, 'success');
+    const url = `/api/library/download?productId=${prod.id}&email=${encodeURIComponent(user.email)}`;
+    window.open(url, '_blank');
   };
 
   // Recommendations based on Library (Section 15.9)
@@ -109,7 +111,7 @@ export default function LibraryPage() {
               {/* Download & Rate Footer */}
               <div className="p-4 bg-bg border-t border-line flex items-center justify-between gap-2">
                 <button
-                  onClick={() => handleDownload(prod.title, prod.type)}
+                  onClick={() => handleDownload(prod)}
                   className="btn sm flex-1 justify-center shadow-xs"
                 >
                   <Download className="w-3.5 h-3.5" /> Download {prod.type}
