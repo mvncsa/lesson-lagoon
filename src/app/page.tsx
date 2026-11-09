@@ -95,7 +95,7 @@ export default function HomePage() {
               </div>
 
               {/* Quick Stats */}
-              <div className="flex gap-8 pt-6 border-t border-line/60">
+              <div className="flex flex-wrap gap-6 sm:gap-8 pt-6 border-t border-line/60">
                 {INITIAL_STATS.map(([stat, label]) => (
                   <div key={label}>
                     <b className="text-2xl sm:text-3xl font-extrabold text-ink block">{stat}</b>
@@ -139,7 +139,7 @@ export default function HomePage() {
 
       <div className="wrap space-y-16">
         {/* 2. TRUST STRIP */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 -mt-24 relative z-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:-mt-20 md:-mt-24 relative z-20">
           {INITIAL_TRUST_ITEMS.map(([icon, title, desc]) => (
             <div
               key={title}

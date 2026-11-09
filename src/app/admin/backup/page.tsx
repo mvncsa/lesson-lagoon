@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { Database, Download, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Database, Download, RefreshCw, CheckCircle2, Trash2 } from 'lucide-react';
 
 export default function AdminBackupPage() {
-  const { showToast } = useApp();
+  const { showToast, clearTestData } = useApp();
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const handleDownloadBackup = () => {
     showToast('Snapshot backup archive generated and downloading...', 'success');
@@ -48,6 +49,61 @@ export default function AdminBackupPage() {
           </button>
         </div>
       </div>
+
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-rose-200 shadow-xs space-y-4 text-xs">
+        <div className="flex items-center gap-2">
+          <Trash2 className="w-5 h-5 text-rose-600" />
+          <h3 className="font-extrabold text-base text-rose-900">Purge Sandbox & Test Data</h3>
+        </div>
+        <p className="text-mut">
+          Instantly clear all simulated orders, pending slip attachments, and active cart items from the current test environment.
+        </p>
+
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={() => setShowClearConfirm(true)}
+            className="btn sm bg-rose-600 hover:bg-rose-700 text-white font-bold flex items-center gap-2"
+          >
+            <Trash2 className="w-4 h-4" /> Clear Test Data
+          </button>
+        </div>
+      </div>
+
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-line shadow-2xl space-y-4 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center text-xl mx-auto">
+              ⚠️
+            </div>
+            <div>
+              <h3 className="font-extrabold text-base text-ink">Clear All Test Data?</h3>
+              <p className="text-xs text-mut mt-1">
+                This will reset your local mock orders, pending slips, and test session data while keeping all educational resources and categories intact.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowClearConfirm(false)}
+                className="btn sm ghost flex-1 text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearTestData();
+                  setShowClearConfirm(false);
+                }}
+                className="btn sm bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs font-bold"
+              >
+                Yes, Clear Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

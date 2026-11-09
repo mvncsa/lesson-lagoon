@@ -85,6 +85,8 @@ interface AppContextType {
   toasts: ToastItem[];
   showToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
 
+  clearTestData: () => void;
+
   isSignInModalOpen: boolean;
   setIsSignInModalOpen: (open: boolean) => void;
 }
@@ -94,7 +96,7 @@ const AppContext = createContext<AppContextType | null>(null);
 const STORAGE_KEY = 'lessonlagoon_state_v1';
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(INITIAL_USERS[1]); // Mariyam Shifa by default
+  const [user, setUser] = useState<User | null>(() => INITIAL_USERS.find((u) => u.id === 'u1') || INITIAL_USERS[0] || null); // Mariyam Shifa by default
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [categories] = useState<Category[]>(INITIAL_CATEGORIES);
   const [campaigns] = useState<Campaign[]>(INITIAL_CAMPAIGNS);
@@ -221,14 +223,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const switchUserRole = (role: 'guest' | 'customer' | 'admin') => {
     if (role === 'guest') {
       setUser(null);
-      showToast('Switched to Guest mode');
+      showToast('Signed out');
     } else if (role === 'customer') {
-      setUser(INITIAL_USERS[1]); // Mariyam Shifa
+      setUser(INITIAL_USERS.find((u) => u.id === 'u1') || INITIAL_USERS[0] || null); // Mariyam Shifa
       showToast('Switched to Customer: Mariyam Shifa');
-    } else if (role === 'admin') {
-      setUser(INITIAL_USERS[0]); // Shaina Ali (Admin)
-      showToast('Switched to Admin: Shaina Ali');
     }
+  };
+
+  const clearTestData = () => {
+    setOrders([]);
+    setCart([]);
+    setEntitlements([]);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {}
+    showToast('Test orders, carts, and mock slips purged successfully.', 'success');
   };
 
   const addToCart = (item: CartItem) => {
@@ -460,6 +469,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addNewsletter,
         toasts,
         showToast,
+        clearTestData,
         isSignInModalOpen,
         setIsSignInModalOpen,
       }}

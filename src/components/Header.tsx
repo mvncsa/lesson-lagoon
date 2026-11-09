@@ -149,39 +149,15 @@ export function Header() {
                     )}
                   </div>
 
-                  {/* Persona Switcher for easy testing and walkthrough */}
                   <div className="pt-2 border-t border-line">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-mut px-3 mb-1">
-                      Quick Switcher
-                    </p>
-                    <button
-                      onClick={() => {
-                        switchUserRole('customer');
-                        setRoleMenuOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-1 rounded-md text-xs hover:bg-slate-100 flex items-center justify-between"
-                    >
-                      <span>Customer: Mariyam</span>
-                      {user.role === 'CUSTOMER' && <UserCheck className="w-3.5 h-3.5 text-pri" />}
-                    </button>
-                    <button
-                      onClick={() => {
-                        switchUserRole('admin');
-                        setRoleMenuOpen(false);
-                      }}
-                      className="w-full text-left px-3 py-1 rounded-md text-xs hover:bg-slate-100 flex items-center justify-between"
-                    >
-                      <span>Owner: Shaina (Admin)</span>
-                      {user.role === 'ADMIN' && <UserCheck className="w-3.5 h-3.5 text-pri" />}
-                    </button>
                     <button
                       onClick={() => {
                         switchUserRole('guest');
                         setRoleMenuOpen(false);
                       }}
-                      className="w-full text-left px-3 py-1 rounded-md text-xs hover:bg-slate-100 text-rose-600"
+                      className="w-full text-left px-3 py-1.5 rounded-lg text-xs hover:bg-rose-50 text-rose-600 font-semibold"
                     >
-                      Sign Out (Guest)
+                      Sign Out
                     </button>
                   </div>
                 </div>

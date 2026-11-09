@@ -404,21 +404,6 @@ export const INITIAL_PRODUCTS: Product[] = [
 
 export const INITIAL_USERS: User[] = [
   {
-    id: 'admin',
-    name: 'Shaina Ali',
-    email: 'owner@lessonlagoon.mv',
-    role: 'ADMIN',
-    color: '#14213D',
-    points: 1500,
-    pending: 0,
-    held: 0,
-    code: 'SHAINA1',
-    joined: '2026-01-01',
-    source: 'Owner',
-    consent: true,
-    paid: true,
-  },
-  {
     id: 'u1',
     name: 'Mariyam Shifa',
     email: 'mariyam.shifa@gmail.com',
@@ -1211,7 +1196,7 @@ export const INITIAL_TRUST_ITEMS = [
 
 export const INITIAL_STATS = [
   ['1,240+', 'Resources'],
-  ['3,800+', 'Teachers'],
+  ['100%', 'National Curriculum'],
   ['4.8★', 'Avg rating'],
 ];
 

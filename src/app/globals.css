@@ -48,9 +48,26 @@ input, select, textarea {
 }
 
 .wrap {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+  width: 100%;
+  max-width: 1320px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .wrap {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .wrap {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
 }
 
 /* Prototype standard button classes */

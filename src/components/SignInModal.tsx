@@ -152,20 +152,6 @@ export function SignInModal() {
         {/* Quick test accounts */}
         <div className="space-y-2 mb-5">
           <button
-            onClick={() => handleSimulate('mvncsa@gmail.com')}
-            className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-pri hover:bg-teal-50/40 text-left transition group"
-          >
-            <div className="w-8 h-8 rounded-full bg-ink text-white font-bold flex items-center justify-center text-xs flex-none">
-              M
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-ink group-hover:text-pri">Admin / Owner Account</p>
-              <p className="text-[11px] text-mut truncate">mvncsa@gmail.com</p>
-            </div>
-            <span className="badge b-wait text-[10px]">Admin</span>
-          </button>
-
-          <button
             onClick={() => handleSimulate('mariyam.shifa@gmail.com')}
             className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-pri hover:bg-teal-50/40 text-left transition group"
           >

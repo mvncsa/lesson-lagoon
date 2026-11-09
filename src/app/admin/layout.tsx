@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
@@ -25,39 +25,133 @@ import {
   History,
   Database,
   ArrowLeft,
+  Trash2,
+  LogOut,
+  Lock,
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user, orders, reviews, resourceRequests, switchUserRole } = useApp();
+  const { user, setUser, orders, reviews, resourceRequests, clearTestData, showToast } = useApp();
 
-  // P1-AUTH-07: Admin access requires allowlist / role = ADMIN
-  const isAdmin =
-    user &&
-    (user.role === 'ADMIN' ||
-      user.email?.toLowerCase() === 'mvncsa@gmail.com' ||
-      user.email?.toLowerCase() === 'owner@lessonlagoon.mv');
+  const [usernameInput, setUsernameInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  // Secure admin check
+  const isAdmin = user && user.role === 'ADMIN';
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError('');
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: usernameInput,
+          password: passwordInput,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setLoginError(data.error || 'Invalid credentials');
+        setIsSubmitting(false);
+        return;
+      }
+
+      setUser({
+        id: 'admin_owner',
+        name: 'Store Administrator',
+        email: 'owner@lessonlagoon.mv',
+        role: 'ADMIN',
+        points: 0,
+        pending: 0,
+        held: 0,
+        code: 'ADMIN',
+        joined: new Date().toISOString().slice(0, 10),
+        source: 'Admin Portal',
+        consent: true,
+        paid: true,
+      });
+
+      showToast('Welcome to LessonLagoon Admin Backend!', 'success');
+    } catch (err: any) {
+      setLoginError('Could not connect to authentication service.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAdminLogout = () => {
+    setUser(null);
+    showToast('Signed out of admin portal.', 'info');
+  };
 
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-line shadow-xl text-center">
-          <div className="w-16 h-16 rounded-3xl bg-amber-100 text-amber-700 flex items-center justify-center text-3xl mx-auto mb-4">
-            🔒
+        <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-line shadow-2xl space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 rounded-2xl bg-ink text-white flex items-center justify-center text-2xl mx-auto shadow-md">
+              <Lock className="w-6 h-6 text-amber-400" />
+            </div>
+            <h1 className="text-2xl font-black text-ink tracking-tight">LessonLagoon Admin</h1>
+            <p className="text-xs text-mut">
+              Protected management backend. Enter your administrator credentials.
+            </p>
           </div>
-          <h1 className="text-xl font-black text-ink mb-2">Not an admin account</h1>
-          <p className="text-xs text-mut leading-relaxed mb-6">
-            The account ({user?.email || 'Guest'}) does not have administrator access. LessonLagoon admin requires your Google account to be on the verified allowlist.
-          </p>
-          <div className="space-y-2.5">
+
+          {loginError && (
+            <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-semibold">
+              ⚠️ {loginError}
+            </div>
+          )}
+
+          <form onSubmit={handleAdminLogin} className="space-y-4 text-xs">
+            <div>
+              <label className="font-bold text-ink block mb-1">Admin Username</label>
+              <input
+                type="text"
+                required
+                autoComplete="username"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                placeholder="Enter admin username"
+                className="inp text-xs py-2.5 w-full font-medium"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-ink block mb-1">Admin Password</label>
+              <input
+                type="password"
+                required
+                autoComplete="current-password"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                placeholder="Enter admin password"
+                className="inp text-xs py-2.5 w-full font-medium"
+              />
+            </div>
+
             <button
-              onClick={() => switchUserRole('admin')}
-              className="btn acc w-full text-xs font-bold"
+              type="submit"
+              disabled={isSubmitting}
+              className="btn acc w-full py-3 text-sm font-bold shadow-md cursor-pointer disabled:opacity-50"
             >
-              Sign In as Admin
+              {isSubmitting ? 'Verifying...' : 'Unlock Admin Portal →'}
             </button>
-            <Link href="/" className="btn sm w-full block text-xs">
-              Return to Storefront
+          </form>
+
+          <div className="pt-2 border-t border-line text-center">
+            <Link href="/" className="text-xs text-mut hover:text-pri font-medium">
+              ← Return to Storefront
             </Link>
           </div>
         </div>
@@ -156,13 +250,68 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
         </div>
 
-        <div className="flex items-center gap-3 text-xs">
-          <span className="font-semibold text-mut">Owner: Shaina Ali</span>
+        <div className="flex items-center gap-2 sm:gap-3 text-xs">
+          {/* Clear Test Data Button */}
+          <button
+            onClick={() => setShowClearConfirm(true)}
+            className="btn xs ghost text-amber-700 hover:bg-amber-50 flex items-center gap-1"
+            title="Purge test orders, test slips and reset localStorage"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Clear Test Data</span>
+          </button>
+
+          <span className="text-slate-300 hidden sm:inline">|</span>
+
+          <span className="font-semibold text-mut hidden sm:inline">Administrator</span>
           <div className="w-8 h-8 rounded-full bg-ink text-white font-bold flex items-center justify-center text-xs">
-            S
+            A
           </div>
+
+          <button
+            onClick={handleAdminLogout}
+            className="btn xs ghost text-bad hover:bg-rose-50 flex items-center gap-1"
+            title="Sign out of admin"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Log Out</span>
+          </button>
         </div>
       </header>
+
+      {/* Confirmation Modal: Clear Test Data */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-line shadow-2xl space-y-4 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center text-xl mx-auto">
+              🗑️
+            </div>
+            <div>
+              <h3 className="font-extrabold text-base text-ink">Clear All Test Data?</h3>
+              <p className="text-xs text-mut mt-1">
+                This will purge all mock orders, test slips, and reset browser state while preserving core catalog resources and categories.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                className="btn sm ghost flex-1 text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  clearTestData();
+                  setShowClearConfirm(false);
+                }}
+                className="btn sm bg-bad hover:bg-rose-700 text-white font-bold flex-1 text-xs"
+              >
+                Clear Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Admin Body Layout */}
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[240px_1fr] items-start">
@@ -216,4 +365,3 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
-

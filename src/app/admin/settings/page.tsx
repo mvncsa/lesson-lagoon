@@ -3,10 +3,11 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { INITIAL_BANK_DETAILS } from '@/lib/data';
-import { Settings, Landmark, ShieldCheck, Mail } from 'lucide-react';
+import { Settings, Landmark, ShieldCheck, Mail, Trash2, KeyRound, AlertTriangle } from 'lucide-react';
 
 export default function AdminSettingsPage() {
-  const { showToast } = useApp();
+  const { showToast, clearTestData } = useApp();
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const [storeName, setStoreName] = useState('LessonLagoon');
   const [tagline, setTagline] = useState('Teacher-made resources for Maldivian classrooms');
@@ -155,6 +156,85 @@ export default function AdminSettingsPage() {
           ))}
         </div>
       </div>
+
+      {/* Admin Credentials & Authentication Status */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-line shadow-xs space-y-4 text-xs">
+        <div className="flex items-center gap-2">
+          <KeyRound className="w-5 h-5 text-pri" />
+          <h3 className="font-extrabold text-base text-ink">Admin Portal Credentials</h3>
+        </div>
+        <p className="text-mut">
+          Direct administrator access to the backend is guarded by server environment variables.
+        </p>
+
+        <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-mut font-medium">Configured Username:</span>
+            <span className="font-mono font-bold text-ink bg-white px-2.5 py-1 rounded-md border border-line">admin</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-mut font-medium">Password Protection:</span>
+            <span className="badge b-ok font-bold">Encrypted in .env (Active)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Data & Maintenance: Clear Test Data */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-rose-200 shadow-xs space-y-4 text-xs">
+        <div className="flex items-center gap-2">
+          <Trash2 className="w-5 h-5 text-rose-600" />
+          <h3 className="font-extrabold text-base text-rose-900">Data & Maintenance</h3>
+        </div>
+        <p className="text-mut">
+          Clear mock orders, test slips, cart sessions, and local storage state. Content catalogue and curricula remain intact.
+        </p>
+
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={() => setShowClearConfirm(true)}
+            className="btn sm bg-rose-600 hover:bg-rose-700 text-white font-bold flex items-center gap-2"
+          >
+            <Trash2 className="w-4 h-4" /> Clear Test Data
+          </button>
+        </div>
+      </div>
+
+      {/* Clear Test Data Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/50 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-line shadow-2xl space-y-4 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center text-xl mx-auto">
+              ⚠️
+            </div>
+            <div>
+              <h3 className="font-extrabold text-base text-ink">Clear All Test Data?</h3>
+              <p className="text-xs text-mut mt-1">
+                This will reset your local mock orders, pending slips, and test session data while keeping all educational resources and categories intact.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowClearConfirm(false)}
+                className="btn sm ghost flex-1 text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  clearTestData();
+                  setShowClearConfirm(false);
+                }}
+                className="btn sm bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs font-bold"
+              >
+                Yes, Clear Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
