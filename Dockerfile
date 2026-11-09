@@ -14,6 +14,8 @@ COPY . .
 # Generate Prisma Client for the build
 RUN node ./node_modules/prisma/build/index.js generate
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV DATABASE_URL="file:./dev.db"
+ENV AUTH_SECRET="build-secret-placeholder-for-nextjs-compilation-only-32bytes"
 RUN npm run build
 
 FROM node:20-alpine AS runner

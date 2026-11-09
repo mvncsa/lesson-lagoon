@@ -10,31 +10,65 @@ import {
 } from 'firebase/auth';
 
 export const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'lesson-lagoon.firebaseapp.com',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'lesson-lagoon',
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'lesson-lagoon.firebasestorage.app',
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || '',
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || '',
 };
 
-// Singleton Firebase App instance for Next.js App Router
-export const app: FirebaseApp =
-  getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-
-// Firebase Auth & Google Auth Provider
-export const auth: Auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
-googleProvider.setCustomParameters({
-  prompt: 'select_account',
-});
+function hasValidApiKey(): boolean {
+  return typeof firebaseConfig.apiKey === 'string' && firebaseConfig.apiKey.length > 5;
+}
 
 /**
- * Sign in using Firebase Google popup
+ * Safely obtain Firebase App instance (never throws during SSR or static prerendering)
  */
-export async function signInWithGoogle(): Promise<FirebaseUser> {
-  const userCredential = await signInWithPopup(auth, googleProvider);
+export function getFirebaseApp(): FirebaseApp | null {
+  if (typeof window === 'undefined') return null; // Never run during Next.js server prerender
+  if (!hasValidApiKey()) return null;
+
+  try {
+    return getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  } catch (err) {
+    console.warn('Firebase App initialization warning:', err);
+    return null;
+  }
+}
+
+/**
+ * Safely obtain Firebase Auth instance on client
+ */
+export function getFirebaseAuth(): Auth | null {
+  const fbApp = getFirebaseApp();
+  if (!fbApp) return null;
+  try {
+    return getAuth(fbApp);
+  } catch (err) {
+    console.warn('Firebase Auth initialization warning:', err);
+    return null;
+  }
+}
+
+/**
+ * Sign in using Firebase Google popup (called in browser only)
+ */
+export async function signInWithGoogle(): Promise<FirebaseUser | null> {
+  if (typeof window === 'undefined') return null;
+
+  const authInstance = getFirebaseAuth();
+  if (!authInstance) {
+    throw new Error('Firebase Auth is not initialized. Please verify NEXT_PUBLIC_FIREBASE_API_KEY.');
+  }
+
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({
+    prompt: 'select_account',
+  });
+
+  const userCredential = await signInWithPopup(authInstance, provider);
   return userCredential.user;
 }
 
@@ -42,20 +76,25 @@ export async function signInWithGoogle(): Promise<FirebaseUser> {
  * Sign out of Firebase Auth
  */
 export async function logOutFirebase(): Promise<void> {
-  await firebaseSignOut(auth);
+  if (typeof window === 'undefined') return;
+  const authInstance = getFirebaseAuth();
+  if (authInstance) {
+    await firebaseSignOut(authInstance);
+  }
 }
 
-// Analytics only initialized on client-side and when supported in the browser
+// Analytics only initialized in browser when supported
 export let analytics: Analytics | null = null;
 
 if (typeof window !== 'undefined') {
-  isSupported()
-    .then((supported) => {
-      if (supported) {
-        analytics = getAnalytics(app);
-      }
-    })
-    .catch(() => {
-      // Gracefully handle browser environments where analytics is blocked or unsupported
-    });
+  const fbApp = getFirebaseApp();
+  if (fbApp) {
+    isSupported()
+      .then((supported) => {
+        if (supported) {
+          analytics = getAnalytics(fbApp);
+        }
+      })
+      .catch(() => {});
+  }
 }
