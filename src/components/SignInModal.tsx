@@ -2,14 +2,14 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
+import { signInWithGoogle } from '@/lib/firebase';
 import { signIn as nextAuthSignIn } from 'next-auth/react';
 import { X } from 'lucide-react';
 
 export function SignInModal() {
-  const { isSignInModalOpen, setIsSignInModalOpen, signIn } = useApp();
+  const { isSignInModalOpen, setIsSignInModalOpen, signIn, setUser, showToast } = useApp();
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(true);
-  const [customEmail, setCustomEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   if (!isSignInModalOpen) return null;
@@ -21,11 +21,62 @@ export function SignInModal() {
     }
     setIsLoading(true);
     try {
-      await nextAuthSignIn('google', {
-        callbackUrl: window.location.href,
-      });
-    } catch (err) {
-      console.error('Google Sign-in failed:', err);
+      // 1. Firebase Google Sign-In popup with Gmail
+      const fbUser = await signInWithGoogle();
+      if (fbUser && fbUser.email) {
+        // 2. Sync with SQLite database and persist session
+        const res = await fetch('/api/auth/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: fbUser.email,
+            name: fbUser.displayName,
+            image: fbUser.photoURL,
+            marketingConsent,
+          }),
+        });
+
+        const data = await res.json();
+        if (data.user) {
+          setUser({
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            role: data.user.role,
+            points: data.user.points,
+            pending: 0,
+            held: 0,
+            code: data.user.referralCode,
+            joined: new Date().toISOString().slice(0, 10),
+            source: 'Firebase Google Auth',
+            consent: marketingConsent,
+            paid: false,
+            welcome: {
+              status: 'active',
+              pct: 20,
+              expires: Date.now() + 7 * 86400000,
+            },
+          });
+          showToast(`Welcome back, ${data.user.name || data.user.email}!`, 'success');
+          setIsSignInModalOpen(false);
+          return;
+        }
+      }
+    } catch (fbErr: any) {
+      console.warn('Firebase Google Auth encountered:', fbErr);
+      if (fbErr?.code === 'auth/popup-closed-by-user') {
+        // User closed the popup, no need to error
+      } else {
+        // Fallback to NextAuth Google OAuth redirect if needed
+        try {
+          await nextAuthSignIn('google', {
+            callbackUrl: window.location.href,
+          });
+        } catch (err) {
+          showToast('Could not complete Google sign-in. Please try again.', 'error');
+        }
+      }
+    } finally {
       setIsLoading(false);
     }
   };
@@ -59,12 +110,12 @@ export function SignInModal() {
           </p>
         </div>
 
-        {/* Primary Action: Official Google OAuth */}
+        {/* Primary Action: Official Google / Gmail Sign-in */}
         <div className="mb-6">
           <button
             onClick={handleRealGoogleSignIn}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-2xl border-2 border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm shadow-xs transition active:scale-[0.98] disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-2xl border-2 border-slate-200 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-800 font-bold text-sm shadow-xs transition active:scale-[0.98] disabled:opacity-60 cursor-pointer"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -84,7 +135,7 @@ export function SignInModal() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
               />
             </svg>
-            <span>{isLoading ? 'Connecting to Google...' : 'Continue with Google'}</span>
+            <span>{isLoading ? 'Signing in with Google...' : 'Continue with Google'}</span>
           </button>
         </div>
 
@@ -94,12 +145,26 @@ export function SignInModal() {
             <div className="w-full border-t border-slate-200"></div>
           </div>
           <span className="relative bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Or quick-test account (local dev)
+            Or quick-test persona (offline dev)
           </span>
         </div>
 
         {/* Quick test accounts */}
         <div className="space-y-2 mb-5">
+          <button
+            onClick={() => handleSimulate('mvncsa@gmail.com')}
+            className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-pri hover:bg-teal-50/40 text-left transition group"
+          >
+            <div className="w-8 h-8 rounded-full bg-ink text-white font-bold flex items-center justify-center text-xs flex-none">
+              M
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-ink group-hover:text-pri">Admin / Owner Account</p>
+              <p className="text-[11px] text-mut truncate">mvncsa@gmail.com</p>
+            </div>
+            <span className="badge b-wait text-[10px]">Admin</span>
+          </button>
+
           <button
             onClick={() => handleSimulate('mariyam.shifa@gmail.com')}
             className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-pri hover:bg-teal-50/40 text-left transition group"
@@ -108,7 +173,7 @@ export function SignInModal() {
               M
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-ink group-hover:text-pri">Mariyam Shifa</p>
+              <p className="text-xs font-bold text-ink group-hover:text-pri">Mariyam Shifa (Customer)</p>
               <p className="text-[11px] text-mut truncate">mariyam.shifa@gmail.com</p>
             </div>
             <span className="text-xs font-semibold text-pri opacity-0 group-hover:opacity-100 transition">
@@ -124,26 +189,12 @@ export function SignInModal() {
               A
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-ink group-hover:text-pri">Ahmed Rasheed</p>
+              <p className="text-xs font-bold text-ink group-hover:text-pri">Ahmed Rasheed (Customer)</p>
               <p className="text-[11px] text-mut truncate">ahmed.rasheed.mv@gmail.com</p>
             </div>
             <span className="text-xs font-semibold text-pri opacity-0 group-hover:opacity-100 transition">
               Select →
             </span>
-          </button>
-
-          <button
-            onClick={() => handleSimulate('owner@lessonlagoon.mv')}
-            className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-pri hover:bg-teal-50/40 text-left transition group"
-          >
-            <div className="w-8 h-8 rounded-full bg-ink text-white font-bold flex items-center justify-center text-xs flex-none">
-              S
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-ink group-hover:text-pri">Shaina Ali (Owner)</p>
-              <p className="text-[11px] text-mut truncate">owner@lessonlagoon.mv</p>
-            </div>
-            <span className="badge b-wait text-[10px]">Admin</span>
           </button>
         </div>
 

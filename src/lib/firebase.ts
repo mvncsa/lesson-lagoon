@@ -1,5 +1,13 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAnalytics, isSupported, type Analytics } from 'firebase/analytics';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut as firebaseSignOut,
+  type Auth,
+  type User as FirebaseUser,
+} from 'firebase/auth';
 
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,11 +19,33 @@ export const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase (safely singleton for Next.js App Router)
+// Singleton Firebase App instance for Next.js App Router
 export const app: FirebaseApp =
   getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// Analytics is only initialized on client-side and when supported
+// Firebase Auth & Google Auth Provider
+export const auth: Auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account',
+});
+
+/**
+ * Sign in using Firebase Google popup
+ */
+export async function signInWithGoogle(): Promise<FirebaseUser> {
+  const userCredential = await signInWithPopup(auth, googleProvider);
+  return userCredential.user;
+}
+
+/**
+ * Sign out of Firebase Auth
+ */
+export async function logOutFirebase(): Promise<void> {
+  await firebaseSignOut(auth);
+}
+
+// Analytics only initialized on client-side and when supported in the browser
 export let analytics: Analytics | null = null;
 
 if (typeof window !== 'undefined') {
@@ -26,7 +56,6 @@ if (typeof window !== 'undefined') {
       }
     })
     .catch(() => {
-      // Gracefully handle environments where analytics is blocked or unsupported
+      // Gracefully handle browser environments where analytics is blocked or unsupported
     });
 }
-

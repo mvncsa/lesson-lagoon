@@ -32,7 +32,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, orders, reviews, resourceRequests, switchUserRole } = useApp();
 
   // P1-AUTH-07: Admin access requires allowlist / role = ADMIN
-  if (!user || user.role !== 'ADMIN') {
+  const isAdmin =
+    user &&
+    (user.role === 'ADMIN' ||
+      user.email?.toLowerCase() === 'mvncsa@gmail.com' ||
+      user.email?.toLowerCase() === 'owner@lessonlagoon.mv');
+
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-line shadow-xl text-center">
@@ -48,7 +54,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               onClick={() => switchUserRole('admin')}
               className="btn acc w-full text-xs font-bold"
             >
-              Sign In as Shaina Ali (Owner Admin)
+              Sign In as Admin
             </button>
             <Link href="/" className="btn sm w-full block text-xs">
               Return to Storefront
