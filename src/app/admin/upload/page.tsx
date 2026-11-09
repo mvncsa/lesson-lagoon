@@ -27,7 +27,7 @@ interface QueueItem {
 }
 
 export default function UploadPage() {
-  const { categories, products, setProducts, showToast } = useApp();
+  const { categories, products, setProducts, addProduct, showToast } = useApp();
 
   const [queue, setQueue] = useState<QueueItem[]>([
     {
@@ -80,10 +80,52 @@ export default function UploadPage() {
     showToast('Applied settings to all queued uploads.');
   };
 
-  const handlePublishAll = () => {
+  const handlePublishSingle = async (item: QueueItem) => {
+    const newProduct: Product = {
+      id: 'p_' + Math.random().toString(36).slice(2, 8),
+      slug:
+        item.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 50) || 'resource-' + Math.random().toString(36).slice(2, 6),
+      title: item.title,
+      short: `Comprehensive ${item.grade} ${item.cat} teaching resource with step-by-step activities.`,
+      cat: item.cat,
+      grade: item.grade,
+      type: item.type,
+      pages: item.pages,
+      price: item.price,
+      min: item.min,
+      featured: false,
+      rating: 5.0,
+      rc: 0,
+      color: '#0E8C7F',
+      ic: item.type === 'PPTX' ? '📊' : item.type === 'DOCX' ? '📝' : '📄',
+      status: 'Published',
+      sales: 0,
+      curr: 'National Curriculum',
+      ver: 1,
+      pv: 3,
+      created: new Date().toISOString().slice(0, 10),
+    };
+
+    await addProduct(newProduct);
+    setQueue((prev) => prev.filter((q) => q.id !== item.id));
+    showToast(`🎉 "${item.title}" saved to SQLite & published!`, 'success');
+  };
+
+  const handlePublishAll = async () => {
+    if (queue.length === 0) return;
+
     const newProducts: Product[] = queue.map((q) => ({
-      id: 'p_' + Math.random().toString(36).slice(2, 7),
-      slug: q.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 50),
+      id: 'p_' + Math.random().toString(36).slice(2, 8),
+      slug:
+        q.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .slice(0, 50) || 'resource-' + Math.random().toString(36).slice(2, 6),
       title: q.title,
       short: `Comprehensive ${q.grade} ${q.cat} teaching resource with step-by-step activities.`,
       cat: q.cat,
@@ -105,9 +147,12 @@ export default function UploadPage() {
       created: new Date().toISOString().slice(0, 10),
     }));
 
-    setProducts((prev) => [...newProducts, ...prev]);
+    for (const p of newProducts) {
+      await addProduct(p);
+    }
+
     setQueue([]);
-    showToast(`🎉 ${newProducts.length} resources published directly to catalogue!`);
+    showToast(`🎉 ${newProducts.length} resources saved to SQLite & published to storefront!`, 'success');
   };
 
   const addQueueItem = (
@@ -452,12 +497,20 @@ export default function UploadPage() {
                 <span className="text-[11px] text-mut truncate">
                   File: <code className="bg-slate-100 px-1 py-0.5 rounded">{item.name}</code>
                 </span>
-                <button
-                  onClick={() => setQueue((q) => q.filter((i) => i.id !== item.id))}
-                  className="btn xs ghost text-bad hover:bg-rose-50"
-                >
-                  Remove
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setQueue((q) => q.filter((i) => i.id !== item.id))}
+                    className="btn xs ghost text-bad hover:bg-rose-50"
+                  >
+                    Remove
+                  </button>
+                  <button
+                    onClick={() => handlePublishSingle(item)}
+                    className="btn xs acc font-bold shadow-xs cursor-pointer"
+                  >
+                    Publish to Store →
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -46,6 +46,10 @@ interface AppContextType {
 
   products: Product[];
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
+  addProduct: (product: Product) => Promise<void>;
+  updateProduct: (product: Product) => Promise<void>;
+  bulkUpdateProducts: (ids: string[], updates: Partial<Product>) => Promise<void>;
+  removeProduct: (id: string, permanent?: boolean) => Promise<void>;
   categories: Category[];
   campaigns: Campaign[];
   coupons: Coupon[];
@@ -95,6 +99,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | null>(null);
 
 const STORAGE_KEY = 'lessonlagoon_state_v1';
+const PRODUCTS_STORAGE_KEY = 'lessonlagoon_products_v1';
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null); // Clean guest state by default; no dummy customer
@@ -189,7 +194,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       .catch(() => {});
   }, []);
 
-  // Load saved state from localStorage if available
+  // Load saved state from localStorage and sync products from SQLite database
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -200,7 +205,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (parsed.entitlements) setEntitlements(parsed.entitlements);
         if (parsed.reviews) setReviews(parsed.reviews);
       }
+
+      const savedProducts = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+      if (savedProducts) {
+        const parsedP = JSON.parse(savedProducts);
+        if (Array.isArray(parsedP) && parsedP.length > 0) {
+          setProducts(parsedP);
+        }
+      }
     } catch {}
+
+    // Fetch live products from SQLite via Next.js API route
+    fetch('/api/products?status=all')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+          setProducts((prev) => {
+            // Merge with local offline items so new drafts are retained
+            const dbIds = new Set(data.products.map((p: Product) => p.id));
+            const localOnly = prev.filter((p) => !dbIds.has(p.id));
+            const combined = [...data.products, ...localOnly];
+            try {
+              localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(combined));
+            } catch {}
+            return combined;
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not fetch products from SQLite:', err);
+      });
   }, []);
 
   // Sync to localStorage
@@ -212,6 +246,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       );
     } catch {}
   }, [orders, cart, entitlements, reviews]);
+
+  // Retain products in localStorage whenever updated
+  useEffect(() => {
+    try {
+      if (products.length > 0) {
+        localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+      }
+    } catch {}
+  }, [products]);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = Math.random().toString(36).slice(2, 8);
@@ -476,6 +519,80 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast('Pricing & rules updated successfully.');
   };
 
+  const addProduct = async (product: Product) => {
+    setProducts((prev) => [product, ...prev]);
+    showToast(`Published "${product.title}" to store`, 'success');
+
+    try {
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(product),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.warn('SQLite addProduct sync warning:', data.error);
+      }
+    } catch (err) {
+      console.warn('SQLite network sync notice:', err);
+    }
+  };
+
+  const updateProduct = async (product: Product) => {
+    setProducts((prev) => prev.map((p) => (p.id === product.id ? product : p)));
+    showToast(`Updated "${product.title}"`, 'success');
+
+    try {
+      const res = await fetch('/api/products', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(product),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.warn('SQLite updateProduct sync warning:', data.error);
+      }
+    } catch (err) {
+      console.warn('SQLite update notice:', err);
+    }
+  };
+
+  const bulkUpdateProducts = async (ids: string[], updates: Partial<Product>) => {
+    setProducts((prev) =>
+      prev.map((p) => (ids.includes(p.id) ? { ...p, ...updates } : p))
+    );
+    showToast(`Applied changes to ${ids.length} resources.`, 'success');
+
+    for (const id of ids) {
+      try {
+        await fetch('/api/products', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, ...updates }),
+        });
+      } catch (err) {
+        console.warn('SQLite bulk update notice:', err);
+      }
+    }
+  };
+
+  const removeProduct = async (id: string, permanent = false) => {
+    if (permanent) {
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } else {
+      setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, status: 'Archived' } : p)));
+    }
+    showToast(permanent ? 'Resource permanently deleted.' : 'Resource archived.', 'info');
+
+    try {
+      await fetch(`/api/products?id=${id}&action=${permanent ? 'permanent' : 'archive'}`, {
+        method: 'DELETE',
+      });
+    } catch (err) {
+      console.warn('SQLite delete notice:', err);
+    }
+  };
+
   const addNewsletter = (nws: Newsletter) => {
     setNewsletters((prev) => [nws, ...prev]);
     showToast('Newsletter saved.');
@@ -491,6 +608,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         switchUserRole,
         products,
         setProducts,
+        addProduct,
+        updateProduct,
+        bulkUpdateProducts,
+        removeProduct,
         categories,
         campaigns,
         coupons,

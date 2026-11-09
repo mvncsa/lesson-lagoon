@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export default function ResourcesAdminPage() {
-  const { products, setProducts, categories, showToast } = useApp();
+  const { products, setProducts, updateProduct, bulkUpdateProducts, categories, showToast } = useApp();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -50,28 +50,23 @@ export default function ResourcesAdminPage() {
     );
   };
 
-  const handleBulkAction = (action: 'publish' | 'archive' | 'feature') => {
-    setProducts((prev) =>
-      prev.map((p) => {
-        if (!selectedIds.includes(p.id)) return p;
-        if (action === 'publish') return { ...p, status: 'Published' };
-        if (action === 'archive') return { ...p, status: 'Archived' };
-        if (action === 'feature') return { ...p, featured: !p.featured };
-        return p;
-      })
-    );
+  const handleBulkAction = async (action: 'publish' | 'archive' | 'feature') => {
+    if (selectedIds.length === 0) return;
+    if (action === 'publish') {
+      await bulkUpdateProducts(selectedIds, { status: 'Published' });
+    } else if (action === 'archive') {
+      await bulkUpdateProducts(selectedIds, { status: 'Archived' });
+    } else if (action === 'feature') {
+      await bulkUpdateProducts(selectedIds, { featured: true });
+    }
     setSelectedIds([]);
-    showToast(`Bulk action applied to ${selectedIds.length} resources.`);
   };
 
-  const handleSaveModal = (e: React.FormEvent) => {
+  const handleSaveModal = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
-    setProducts((prev) =>
-      prev.map((p) => (p.id === editingProduct.id ? editingProduct : p))
-    );
+    await updateProduct(editingProduct);
     setEditingProduct(null);
-    showToast('Resource updated successfully.');
   };
 
   return (
