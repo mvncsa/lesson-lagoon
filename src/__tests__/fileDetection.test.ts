@@ -33,14 +33,14 @@ describe('Deterministic File Type & Meta Detection (NO AI)', () => {
     expect(meta.detectedType).toBe('DOCX');
   });
 
-  it('validates file sizes within 25MB threshold', () => {
-    const valid = validateUploadFileSize(5 * 1024 * 1024, 25);
+  it('validates file sizes within 10MB threshold', () => {
+    const valid = validateUploadFileSize(5 * 1024 * 1024);
     expect(valid.valid).toBe(true);
     expect(valid.formattedSize).toBe('5.0 MB');
 
-    const oversized = validateUploadFileSize(30 * 1024 * 1024, 25);
+    const oversized = validateUploadFileSize(12 * 1024 * 1024);
     expect(oversized.valid).toBe(false);
-    expect(oversized.error).toContain('exceeds maximum');
+    expect(oversized.error).toContain('exceeds maximum allowed 10 MB');
   });
 });
 

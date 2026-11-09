@@ -143,9 +143,9 @@ export default function UploadPage() {
     if (!files || files.length === 0) return;
 
     for (const file of Array.from(files)) {
-      const validation = validateUploadFileSize(file.size, 50);
+      const validation = validateUploadFileSize(file.size, 10);
       if (!validation.valid) {
-        showToast(validation.error || 'File too large', 'error');
+        showToast(validation.error || 'File too large (10MB limit)', 'error');
         continue;
       }
 

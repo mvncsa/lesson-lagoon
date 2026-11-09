@@ -80,11 +80,14 @@ export function parseResourceFilename(filename: string): DetectedResourceMeta {
 }
 
 /**
- * Validate upload file size against maximum bytes limit
+ * Validate upload file size against maximum bytes limit (10MB limit for local ephemeral mode)
  */
+export const MAX_UPLOAD_SIZE_MB = 10;
+export const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
+
 export function validateUploadFileSize(
   sizeBytes: number,
-  maxMegabytes = 25
+  maxMegabytes = MAX_UPLOAD_SIZE_MB
 ): { valid: boolean; formattedSize: string; error?: string } {
   const mb = sizeBytes / (1024 * 1024);
   const formattedSize = mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.round(sizeBytes / 1024)} KB`;
