@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LessonLagoon – Teacher-made resources, instant download</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--pri:#0E8C7F;--pri2:#0B6F65;--acc:#FF7A59;--ink:#14213D;--mut:#5B6475;--line:#E7E9EE;--bg:#FAFAF7;--card:#fff;--gold:#F5B300;--ok:#16A34A;--warn:#D97706;--bad:#DC2626;--r:14px}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5}
+a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}input,select,textarea{font:inherit}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:11px 20px;font-weight:700;background:var(--pri);color:#fff;transition:.15s;white-space:nowrap}
+.btn:hover{background:var(--pri2);transform:translateY(-1px)}.btn.acc{background:var(--acc)}.btn.acc:hover{background:#ec6544}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}.btn.ghost:hover{border-color:var(--ink)}
+.btn.sm{padding:7px 14px;font-size:13px}.btn.block{width:100%;justify-content:center}.btn.dark{background:var(--ink)}.btn.red{background:var(--bad)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#fff;border:1.5px solid var(--line);font-size:13px;font-weight:600;cursor:pointer}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.2px}
+.b-free{background:#DCFCE7;color:#166534}.b-off{background:#FFE4DC;color:#C2410C}.b-own{background:#E0E7FF;color:#3730A3}.b-type{background:#F1F5F9;color:#334155}
+.b-wait{background:#FEF3C7;color:#92400E}.b-paid{background:#DCFCE7;color:#166534}.b-rej{background:#FEE2E2;color:#991B1B}.b-grey{background:#F1F5F9;color:#475569}
+/* header */
+.ann{background:var(--ink);color:#fff;font-size:13.5px;text-align:center;padding:8px 12px}.ann b{color:#FFD7C9}
+header.top{position:sticky;top:0;z-index:40;background:rgba(250,250,247,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:16px;height:66px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:19px;letter-spacing:-.3px}
+.logo i{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--pri),#38C6B3);display:grid;place-items:center;color:#fff;font-style:normal;font-size:18px}
+.search{flex:1;max-width:460px;position:relative}.search input{width:100%;padding:10px 14px 10px 38px;border-radius:999px;border:1.5px solid var(--line);background:#fff}
+.search:before{content:"⌕";position:absolute;left:14px;top:7px;font-size:19px;color:var(--mut)}
+.navr{margin-left:auto;display:flex;align-items:center;gap:10px}
+.icbtn{position:relative;width:42px;height:42px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center;font-size:18px}
+.icbtn .n{position:absolute;top:-4px;right:-4px;background:var(--acc);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:1px 6px}
+.pts{display:flex;align-items:center;gap:6px;background:#FFF7E0;border:1.5px solid #F8E3A6;padding:7px 12px;border-radius:999px;font-weight:700;font-size:13.5px}
+.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;background:var(--acc)}
+/* hero */
+.hero{position:relative;overflow:hidden;background:linear-gradient(160deg,#E9F7F4 0%,#FFF4EE 100%);border-bottom:1px solid var(--line)}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%}
+.hero .in{position:relative;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:70px 20px 80px;pointer-events:none}
+.hero .in *{pointer-events:auto}
+.hero h1{font-size:52px;line-height:1.05;letter-spacing:-1.5px;margin:14px 0 16px}
+.hero h1 em{font-style:normal;color:var(--pri);background:linear-gradient(transparent 62%,#FFD7C9 62%)}
+.hero p.sub{font-size:18px;color:var(--mut);max-width:520px;margin:0 0 26px}
+.kicker{display:inline-flex;gap:8px;align-items:center;background:#fff;border:1.5px solid var(--line);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:700}
+.collage{position:relative;height:400px}
+.collage .cv{position:absolute;width:210px;border-radius:14px;box-shadow:0 20px 50px rgba(20,33,61,.22);transition:.4s}
+.collage .cv:hover{transform:scale(1.04) rotate(0)!important;z-index:5}
+.hero-stats{display:flex;gap:26px;margin-top:30px}.hero-stats b{display:block;font-size:24px}.hero-stats span{color:var(--mut);font-size:13px}
+/* sections */
+section.s{padding:56px 0}.sh{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:22px}
+.sh h2{font-size:30px;letter-spacing:-.6px;margin:0}.sh p{margin:4px 0 0;color:var(--mut)}
+.trust{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:-34px;position:relative;z-index:3}
+.trust>div{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 20px rgba(20,33,61,.05)}
+.trust span{font-size:26px}.trust b{display:block}.trust small{color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.pc{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;transition:.2s;cursor:pointer}
+.pc:hover{transform:translateY(-4px);box-shadow:0 16px 36px rgba(20,33,61,.12)}
+.pc .im{aspect-ratio:4/3.2;background:#f3f4f6;position:relative;overflow:hidden}.pc .im img{width:100%;height:100%;object-fit:cover}
+.pc .im .tl{position:absolute;top:10px;left:10px;display:flex;gap:6px}
+.pc .bd{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.pc h3{font-size:15.5px;margin:0;line-height:1.3}.pc .meta{font-size:12.5px;color:var(--mut)}
+.pc .ft{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px}
+.price{font-weight:800;font-size:17px}.price s{color:var(--mut);font-weight:500;font-size:13px;margin-left:6px}.price.free{color:var(--ok)}
+.stars{color:var(--gold);font-size:13px;letter-spacing:1px}.stars small{color:var(--mut);letter-spacing:0}
+.cats{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.cat{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:20px 12px;text-align:center;cursor:pointer;transition:.2s}
+.cat:hover{border-color:var(--pri);transform:translateY(-3px)}.cat span{font-size:32px;display:block}.cat b{display:block;margin-top:6px}.cat small{color:var(--mut)}
+.camp{border-radius:22px;padding:34px;color:#fff;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;position:relative;overflow:hidden}
+.camp h2{font-size:32px;margin:6px 0}.cd{display:flex;gap:8px}.cd div{background:rgba(255,255,255,.18);border-radius:12px;padding:10px 12px;text-align:center;min-width:62px}.cd b{display:block;font-size:24px}
+.revs{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px}
+.rv{min-width:330px;scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.rv p{margin:10px 0 14px}.rv .who{display:flex;gap:10px;align-items:center}.rv .who .av{width:34px;height:34px;font-size:13px}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.how div{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:24px}
+.how .n{width:38px;height:38px;border-radius:50%;background:#E6F5F2;color:var(--pri);font-weight:800;display:grid;place-items:center;margin-bottom:10px}
+.ptspromo{background:linear-gradient(120deg,#14213D,#22335C);color:#fff;border-radius:22px;padding:36px;display:grid;grid-template-columns:1.2fr 1fr;gap:26px;align-items:center}
+.ptspromo .rules{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ptspromo .rules div{background:rgba(255,255,255,.08);border-radius:12px;padding:12px}.ptspromo .rules b{color:#FFD27A;font-size:20px;display:block}
+details.fq{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:10px}details.fq summary{font-weight:700;cursor:pointer}
+footer{background:var(--ink);color:#C9D1E3;padding:40px 0;margin-top:40px;font-size:14px}footer .cols{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:20px}footer b{color:#fff;display:block;margin-bottom:8px}
+.welcome{background:linear-gradient(90deg,#FFEDE6,#FFF8E6);border:1.5px dashed var(--acc);border-radius:16px;padding:16px 20px;display:flex;align-items:center;gap:16px;margin-top:22px}
+.welcome .big{font-size:30px}
+/* product */
+.pg{display:grid;grid-template-columns:1.15fr .85fr;gap:36px;padding:30px 0}
+.gal .main{background:#EEF0F3;border-radius:var(--r);padding:20px;display:grid;place-items:center;position:relative;user-select:none}
+.gal .main img{max-width:100%;max-height:560px;border-radius:6px;box-shadow:0 10px 30px rgba(0,0,0,.15);-webkit-user-drag:none}
+.gal .th{display:flex;gap:10px;margin-top:12px;overflow-x:auto}.gal .th img,.gal .th div{width:84px;height:100px;object-fit:cover;border-radius:8px;border:2px solid transparent;cursor:pointer;flex:none}
+.gal .th .on{border-color:var(--pri)}.gal .th div{background:var(--ink);color:#fff;font-size:11px;display:grid;place-items:center;text-align:center;padding:6px}
+.nav-ar{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:#fff;border:0;box-shadow:0 4px 12px rgba(0,0,0,.15);font-size:18px}
+.lockcard{max-width:380px;background:#fff;border-radius:14px;padding:30px;text-align:center}
+.buybox{background:#fff;border:1px solid var(--line);border-radius:18px;padding:24px;position:sticky;top:86px}
+.buybox h1{font-size:27px;line-height:1.2;letter-spacing:-.5px;margin:8px 0}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0}.facts div{background:var(--bg);border-radius:10px;padding:9px 12px;font-size:13px}.facts b{display:block;font-size:14px}
+.bigprice{font-size:32px;font-weight:800}.bigprice s{font-size:17px;color:var(--mut);font-weight:500;margin-left:8px}
+.offerline{background:#FFF1EC;color:#B33E1E;border-radius:10px;padding:8px 12px;font-size:13.5px;font-weight:600;margin:8px 0}
+.earn{background:#FFF8E1;border-radius:10px;padding:8px 12px;font-size:13px;margin-top:10px}
+/* drawer/modal */
+.ov{position:fixed;inset:0;background:rgba(20,33,61,.45);z-index:80;display:flex;justify-content:center;align-items:center;animation:fi .15s}
+@keyframes fi{from{opacity:0}}
+.modal{background:#fff;border-radius:20px;max-width:560px;width:calc(100% - 30px);max-height:90vh;overflow:auto;padding:26px;position:relative;animation:pu .2s}
+.modal.wide{max-width:860px}@keyframes pu{from{transform:translateY(16px);opacity:0}}
+.modal .x{position:absolute;right:14px;top:12px;border:0;background:#F1F5F9;width:34px;height:34px;border-radius:50%;font-size:16px}
+.drawer{position:fixed;right:0;top:0;bottom:0;width:420px;max-width:100%;background:#fff;z-index:90;display:flex;flex-direction:column;box-shadow:-10px 0 40px rgba(0,0,0,.15);animation:sl .2s}
+@keyframes sl{from{transform:translateX(40px);opacity:0}}
+.drawer header{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.drawer .body{flex:1;overflow:auto;padding:16px 20px}.drawer .foot{border-top:1px solid var(--line);padding:16px 20px}
+.ci{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.ci img{width:56px;height:56px;border-radius:10px;object-fit:cover}
+.ci .t{flex:1;font-size:14px;font-weight:600}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;z-index:120;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:pu .2s;max-width:90vw}
+/* google picker */
+.gpick{border:1px solid #dadce0;border-radius:12px;overflow:hidden}.gpick div{display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid #eee;cursor:pointer}.gpick div:hover{background:#F8FAFC}
+.gbtn{display:flex;gap:10px;align-items:center;justify-content:center;border:1px solid #dadce0;border-radius:999px;padding:11px;width:100%;background:#fff;font-weight:600}
+/* checkout */
+.ck{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;padding:30px 0}
+.box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:18px}.box h3{margin:0 0 14px;font-size:17px}
+.row{display:flex;justify-content:space-between;padding:6px 0;font-size:14.5px}.row.tot{font-size:19px;font-weight:800;border-top:1px solid var(--line);margin-top:6px;padding-top:12px}
+.row.dis{color:#B33E1E}
+.inp{width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff}.inp:focus{outline:2px solid #BFE8E2;border-color:var(--pri)}
+label.f{display:block;font-size:13px;font-weight:700;margin:12px 0 6px}
+.pm{display:flex;gap:12px;align-items:center;border:2px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}.pm.on{border-color:var(--pri);background:#F2FBF9}.pm.off{opacity:.55}
+.copy{display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.copy b{font-family:ui-monospace,Menlo,monospace;font-size:15px}
+.drop{border:2px dashed #B8C2D3;border-radius:16px;padding:28px;text-align:center;background:#FBFCFE;cursor:pointer}.drop:hover,.drop.hv{border-color:var(--pri);background:#F2FBF9}
+.steps{display:flex;gap:6px;margin:14px 0}.steps div{flex:1;height:6px;border-radius:6px;background:var(--line)}.steps .d{background:var(--pri)}
+input[type=range]{width:100%;accent-color:var(--pri)}
+/* admin */
+.adm{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 66px)}
+.side{background:var(--ink);color:#C9D1E3;padding:18px 12px}.side a{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;font-weight:600;font-size:14px;margin-bottom:2px}
+.side a.on,.side a:hover{background:rgba(255,255,255,.1);color:#fff}.side .n{margin-left:auto;background:var(--acc);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px}
+.side small{display:block;padding:14px 12px 6px;text-transform:uppercase;letter-spacing:1px;font-size:10.5px;opacity:.6}
+.main{padding:26px 30px;overflow:auto}.main h1{margin:0 0 4px;font-size:26px}.main .subt{color:var(--mut);margin-bottom:20px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}.kpi small{color:var(--mut);font-weight:600}.kpi b{display:block;font-size:26px;margin-top:4px}.kpi.hot{border-color:var(--acc);background:#FFF6F2}
+table.t{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:14px}
+.t th{text-align:left;background:#F7F8FA;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);padding:10px 12px}.t td{padding:11px 12px;border-top:1px solid var(--line);vertical-align:middle}
+.t tr:hover td{background:#FAFBFC}
+.bars{display:flex;align-items:end;gap:10px;height:160px;padding:10px 0}.bars div{flex:1;background:linear-gradient(var(--pri),#38C6B3);border-radius:8px 8px 0 0;position:relative}.bars span{position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:11px;color:var(--mut)}.bars em{position:absolute;top:-20px;left:0;right:0;text-align:center;font-size:11px;font-style:normal;font-weight:700}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tog{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.sw{width:42px;height:24px;border-radius:999px;background:#CBD5E1;position:relative;cursor:pointer;border:0;flex:none}.sw:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s}.sw.on{background:var(--pri)}.sw.on:after{left:21px}
+.proc{display:flex;flex-direction:column;gap:8px;margin:14px 0}.proc div{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--mut)}.proc .ok{color:var(--ink);font-weight:600}.proc .run{color:var(--pri);font-weight:700}
+.pvrow{display:flex;gap:10px;flex-wrap:wrap}.pvrow img{width:120px;border-radius:8px;border:1px solid var(--line)}
+/* gmail */
+.gm{border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;font-family:Arial,Helvetica,sans-serif}.gm .hd{background:#F6F8FC;padding:14px 18px;border-bottom:1px solid #e0e0e0;font-size:13px;color:#444}
+.gm .hd h3{margin:0 0 8px;font-size:20px;font-weight:400;color:#1f1f1f}.gm .bd{padding:22px;font-size:14px;color:#222}
+.gm .abtn{display:inline-block;padding:14px 34px;border-radius:8px;font-weight:700;color:#fff;font-size:16px;margin-right:10px;cursor:pointer}
+.demo{position:fixed;left:16px;bottom:16px;z-index:70;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.15);padding:10px 12px;font-size:12.5px;max-width:300px}
+.demo b{display:block;margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--mut)}.demo .chips{display:flex;flex-wrap:wrap;gap:6px}.demo .chip{font-size:12px;padding:4px 10px}
+.lib{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ledger td:last-child{text-align:right;font-weight:700}
+.empty{text-align:center;padding:50px;color:var(--mut)}.empty span{font-size:46px;display:block}
+.pbar{height:10px;border-radius:10px;background:rgba(255,255,255,.2);overflow:hidden}.pbar div{height:100%;background:linear-gradient(90deg,#FFD27A,var(--acc))}
+.mut{color:var(--mut)}.sm{font-size:13px}.mt{margin-top:14px}.flex{display:flex;gap:10px;align-items:center}.wr{flex-wrap:wrap}
+@media (max-width:900px){.hero .in,.pg,.ck,.ptspromo,.two{grid-template-columns:1fr}.collage{display:none}.hero h1{font-size:38px}.grid,.lib{grid-template-columns:repeat(2,1fr)}.cats{grid-template-columns:repeat(3,1fr)}.trust,.kpis{grid-template-columns:1fr 1fr}.how{grid-template-columns:1fr}.adm{grid-template-columns:1fr}.side{display:flex;overflow-x:auto;gap:4px}.side small{display:none}.side a{white-space:nowrap}.search{display:none}footer .cols{grid-template-columns:1fr 1fr}.camp{grid-template-columns:1fr}.buybox{position:static}.three{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="ann"></div>
+<header class="top"><div class="wrap nav" id="hdr"></div></header>
+<main id="app"></main>
+<div id="layer"></div>
+<div class="demo" id="demo"></div>
+
+<script type="application/json" id="seed">
+{
+ "settings":{"store":"LessonLagoon","tagline":"Teacher-made resources for Maldivian classrooms","ptsPerMVR":1,"ptsPerMVRValue":10,"maxPointsPct":80,"signupPts":50,"reviewPts":20,"sharePts":10,"shareFirstOrderPct":5,"shareMonthlyCap":200,"refReferrer":100,"refFriend":50,"holdDays":7,"welcome":{"enabled":true,"pct":20,"days":7},"freeDailyLimit":20,"slipExpiryHours":48,"watermark":"LESSONLAGOON · PREVIEW","previewPages":3,
+  "bank":{"bank":"Bank of Maldives","name":"LessonLagoon Pvt Ltd","number":"7730 0000 1245 6","currency":"MVR"}},
+ "landing":{"variant":0,"bg":"shapes",
+  "variants":[
+   {"kicker":"🏝️ Made by Maldivian teachers","h1":"Teach brilliant lessons <em>tonight</em>, not next week.","sub":"Ready-to-use worksheets, slides and lesson plans aligned to the Maldives National Curriculum. Preview free, download instantly.","cta":"Browse resources","cta2":"Get free packs"},
+   {"kicker":"⚡ Instant download","h1":"Classroom-ready resources in <em>one tap</em>.","sub":"Over 1,200 teachers save hours every week with LessonLagoon.","cta":"Start exploring","cta2":"See free resources"}],
+  "sections":[{"k":"trust","on":true},{"k":"welcome","on":true},{"k":"featured","on":true},{"k":"campaign","on":true},{"k":"free","on":true},{"k":"categories","on":true},{"k":"all","on":true},{"k":"reviews","on":true},{"k":"how","on":true},{"k":"points","on":true},{"k":"faq","on":true}],
+  "trust":[["⚡","Instant download","Right after approval"],["🧑‍🏫","Teacher-made","By classroom experts"],["🔒","Secure payment","Verified by our team"],["⭐","4.8 / 5 rating","From 640+ reviews"]],
+  "stats":[["1,240+","Resources"],["3,800+","Teachers"],["4.8★","Avg rating"]],
+  "faq":[["How do I pay?","Choose bank transfer at checkout, transfer the exact amount with your order number as reference, and upload the slip. We verify it, usually within a few hours, and your downloads unlock automatically."],["Can I preview before buying?","Yes. Every resource shows watermarked preview pages so you know exactly what you are getting."],["How do points work?","Earn points when you buy, share a resource with a friend, or when someone uses your referral code. Use points to pay up to 80% of any resource."],["Can I use resources in my classroom?","Yes. Each purchase includes a single-teacher classroom licence. Please don't re-share the files."],["Are free resources really free?","Yes, sign in with Google and download instantly. No payment details needed."]]},
+ "categories":[{"id":"maths","name":"Mathematics","ic":"➗"},{"id":"english","name":"English","ic":"📖"},{"id":"dhivehi","name":"Dhivehi","ic":"✍️"},{"id":"science","name":"Science","ic":"🔬"},{"id":"islam","name":"Islam","ic":"🕌"},{"id":"social","name":"Social Studies","ic":"🌏"}],
+ "products":[
+  {"id":"p1","slug":"grade-4-fractions-mastery-pack","title":"Grade 4 Fractions Mastery Pack","short":"24 differentiated worksheets taking learners from halves to equivalent fractions, with answer keys.","cat":"maths","grade":"Grade 4","type":"PDF","pages":24,"price":7500,"min":1500,"featured":true,"rating":4.9,"rc":38,"color":"#0E8C7F","ic":"🍕","status":"Published","sales":214,"curr":"National Curriculum"},
+  {"id":"p2","slug":"dhivehi-akuru-tracing-workbook","title":"Dhivehi Akuru Tracing Workbook","short":"Trace and write every Thaana letter with fun picture prompts. Perfect for KG and Grade 1.","cat":"dhivehi","grade":"Grade 1","type":"PDF","pages":32,"price":0,"min":0,"featured":false,"rating":4.8,"rc":96,"color":"#7C3AED","ic":"✍️","status":"Published","sales":1120,"curr":"National Curriculum"},
+  {"id":"p3","slug":"coral-reefs-of-the-maldives-slides","title":"Our Ocean: Coral Reefs of the Maldives","short":"A 28-slide interactive lesson on reef ecosystems, bleaching and protecting our atolls.","cat":"science","grade":"Grade 5","type":"PPTX","pages":28,"price":9500,"min":1900,"featured":true,"rating":4.9,"rc":52,"color":"#0284C7","ic":"🐠","status":"Published","sales":176,"curr":"National Curriculum"},
+  {"id":"p4","slug":"independence-day-reading-comprehension","title":"Independence Day Reading Comprehension Set","short":"Four leveled passages on 26 July with questions, vocabulary and a writing task.","cat":"english","grade":"Grade 6","type":"DOCX","pages":12,"price":4500,"min":900,"featured":false,"rating":4.7,"rc":21,"color":"#DC2626","ic":"🇲🇻","status":"Published","sales":98,"curr":"National Curriculum"},
+  {"id":"p5","slug":"phonics-flashcards-a-z","title":"Phonics Flashcards A–Z","short":"Bright, printable flashcards with pictures for every sound. Free for all teachers.","cat":"english","grade":"KG","type":"PDF","pages":26,"price":0,"min":0,"featured":true,"rating":4.9,"rc":143,"color":"#F59E0B","ic":"🔤","status":"Published","sales":1890,"curr":"Cambridge"},
+  {"id":"p6","slug":"grade-8-algebra-exam-practice","title":"Grade 8 Algebra Exam Practice Papers","short":"5 full mock papers with marking schemes and worked solutions.","cat":"maths","grade":"Grade 8","type":"PDF","pages":40,"price":12000,"min":2400,"featured":true,"rating":4.8,"rc":44,"color":"#14213D","ic":"📐","status":"Published","sales":132,"curr":"Cambridge"},
+  {"id":"p7","slug":"stories-of-the-prophets-lesson-plans","title":"Stories of the Prophets – Lesson Plans","short":"10 ready lesson plans with discussion prompts, colouring sheets and short quizzes.","cat":"islam","grade":"Grade 3","type":"DOCX","pages":18,"price":6500,"min":1300,"featured":false,"rating":4.9,"rc":30,"color":"#15803D","ic":"🌙","status":"Published","sales":87,"curr":"National Curriculum"},
+  {"id":"p8","slug":"climate-change-and-our-islands","title":"Climate Change & Our Islands Project Pack","short":"A project-based unit: sea-level rise, data activities and a student presentation template.","cat":"social","grade":"Grade 7","type":"PPTX","pages":22,"price":8500,"min":1700,"featured":true,"rating":4.7,"rc":19,"color":"#0F766E","ic":"🌊","status":"Published","sales":64,"curr":"National Curriculum"},
+  {"id":"p9","slug":"teachers-day-classroom-decor-kit","title":"Teachers' Day Classroom Décor Kit","short":"Bunting, name tags, thank-you cards and a display banner. Print and go.","cat":"english","grade":"All grades","type":"PDF","pages":15,"price":3500,"min":700,"featured":false,"rating":4.6,"rc":12,"color":"#DB2777","ic":"🎉","status":"Published","sales":41,"curr":"—"},
+  {"id":"p10","slug":"times-tables-speed-drills","title":"Times Tables Speed Drills","short":"20 timed drills from 2× to 12× with progress trackers. Free download.","cat":"maths","grade":"Grade 3","type":"PDF","pages":20,"price":0,"min":0,"featured":false,"rating":4.8,"rc":77,"color":"#EA580C","ic":"✖️","status":"Published","sales":940,"curr":"National Curriculum"}
+ ],
+ "users":[
+  {"id":"admin","name":"Shaina Ali","email":"owner@lessonlagoon.mv","role":"ADMIN","color":"#14213D"},
+  {"id":"u1","name":"Mariyam Shifa","email":"mariyam.shifa@gmail.com","role":"CUSTOMER","points":640,"pending":75,"held":0,"code":"MARIYAM25","refBy":null,"joined":"2026-06-02","source":"Direct","consent":true,"paid":true,"color":"#FF7A59","tags":["Primary","Malé"],"notes":"Grade 4 teacher, buys maths packs."},
+  {"id":"u2","name":"Ahmed Rasheed","email":"ahmed.rasheed.mv@gmail.com","role":"CUSTOMER","points":120,"pending":0,"held":0,"code":"AHMED7K","refBy":"u1","joined":"2026-09-18","source":"Referral (MARIYAM25)","consent":true,"paid":false,"color":"#0284C7","tags":["Secondary"],"notes":""},
+  {"id":"u3","name":"Fathimath Zeena","email":"zeena.fathimath@gmail.com","role":"CUSTOMER","points":310,"pending":0,"held":0,"code":"ZEENA4Q","refBy":null,"joined":"2026-08-11","source":"Teachers' Day share link","consent":false,"paid":true,"color":"#7C3AED","tags":["Addu"],"notes":""},
+  {"id":"u4","name":"Ibrahim Naseer","email":"ibu.naseer@gmail.com","role":"CUSTOMER","points":45,"pending":0,"held":0,"code":"IBUN3R","refBy":null,"joined":"2026-10-29","source":"Direct","consent":true,"paid":false,"color":"#15803D","tags":[],"notes":""},
+  {"id":"u5","name":"Aminath Rifa","email":"rifa.aminath@gmail.com","role":"CUSTOMER","points":890,"pending":0,"held":0,"code":"RIFA88","refBy":null,"joined":"2026-03-14","source":"Facebook","consent":true,"paid":true,"color":"#DB2777","tags":["Top buyer","Kulhudhuffushi"],"notes":"Asked for Dhivehi grammar packs."},
+  {"id":"u6","name":"Hassan Shareef","email":"hassan.shareef22@gmail.com","role":"CUSTOMER","points":50,"pending":0,"held":0,"code":"HASS22","refBy":"u5","joined":"2026-11-05","source":"Referral (RIFA88)","consent":true,"paid":false,"color":"#EA580C","tags":[],"notes":""}
+ ],
+ "entitlements":[["u1","p2"],["u1","p5"],["u1","p1"],["u3","p8"],["u5","p6"],["u5","p3"],["u5","p2"]],
+ "reviews":[
+  {"id":"r1","pid":"p1","uid":"u1","name":"Mariyam S.","rating":5,"text":"My Grade 4s finally get equivalent fractions! The differentiated sheets saved me a whole weekend.","status":"approved","home":true,"date":"2026-10-12"},
+  {"id":"r2","pid":"p3","uid":"u5","name":"Aminath R.","rating":5,"text":"The reef slides are stunning and so relevant for our kids. They loved the bleaching activity.","status":"approved","home":true,"date":"2026-09-30"},
+  {"id":"r3","pid":"p5","uid":"u1","name":"Mariyam S.","rating":5,"text":"Free and better than paid ones I've bought before. Printed on card for my reading corner.","status":"approved","home":true,"date":"2026-08-21"},
+  {"id":"r4","pid":"p6","uid":"u5","name":"Aminath R.","rating":4,"text":"Excellent mock papers with clear marking schemes. Would love a Grade 9 version.","status":"approved","home":true,"date":"2026-10-25"},
+  {"id":"r5","pid":"p8","uid":"u3","name":"Fathimath Z.","rating":5,"text":"Project pack worked perfectly for our island exhibition. Students presented to parents!","status":"approved","home":true,"date":"2026-11-01"},
+  {"id":"r6","pid":"p2","uid":null,"name":"Hawwa N. (testimonial)","rating":5,"text":"Our KG teachers use the tracing workbook every single day.","status":"approved","home":true,"date":"2026-07-15"},
+  {"id":"r7","pid":"p1","uid":"u3","name":"Fathimath Z.","rating":3,"text":"Good content but please add more word problems.","status":"pending","home":false,"date":"2026-11-07"}
+ ],
+ "campaigns":[
+  {"id":"c1","name":"Teachers' Day Sale","type":"Teachers' Day","pct":15,"scope":"all","mult":2,"active":true,"startOffsetH":-48,"endOffsetH":70,"accent":"#DB2777","banner":"Celebrate our teachers – 15% off everything + double points","coupon":""},
+  {"id":"c2","name":"Independence Day 2026","type":"Independence Day","pct":20,"scope":"all","mult":1,"active":false,"start":"2026-07-20","end":"2026-07-27","accent":"#DC2626","banner":"Independence Day – 20% off","coupon":"","ended":true}
+ ],
+ "coupons":[{"code":"TEACH10","pct":10,"limit":200,"used":37,"expires":"2026-12-31"},{"code":"WELCOMEBACK","pct":15,"limit":50,"used":4,"expires":"2026-12-15"}],
+ "orders":[
+  {"no":"LL-2026-000118","uid":"u5","items":[{"pid":"p6","title":"Grade 8 Algebra Exam Practice Papers","list":12000,"final":10200}],"subtotal":12000,"discount":1800,"pointsUsed":0,"total":10200,"status":"PAID","at":"2026-11-06T10:12:00","method":"Bank transfer"},
+  {"no":"LL-2026-000119","uid":"u1","items":[{"pid":"p1","title":"Grade 4 Fractions Mastery Pack","list":7500,"final":6375}],"subtotal":7500,"discount":1125,"pointsUsed":300,"total":3375,"status":"PAID","at":"2026-11-07T08:40:00","method":"Bank transfer"},
+  {"no":"LL-2026-000120","uid":"u4","items":[{"pid":"p10","title":"Times Tables Speed Drills","list":0,"final":0}],"subtotal":0,"discount":0,"pointsUsed":0,"total":0,"status":"COMPLETED_FREE","at":"2026-11-07T15:02:00","method":"Free"},
+  {"no":"LL-2026-000121","uid":"u2","items":[{"pid":"p6","title":"Grade 8 Algebra Exam Practice Papers","list":12000,"final":10200}],"subtotal":12000,"discount":1800,"pointsUsed":0,"total":10200,"status":"AWAITING_VERIFICATION","at":"2026-11-08T07:55:00","method":"Bank transfer","slip":{"amount":10200,"ref":"LL-2026-000121","sender":"AHMED RASHEED","date":"2026-11-08"}},
+  {"no":"LL-2026-000122","uid":"u3","items":[{"pid":"p3","title":"Our Ocean: Coral Reefs of the Maldives","list":9500,"final":8075},{"pid":"p4","title":"Independence Day Reading Comprehension Set","list":4500,"final":3825}],"subtotal":14000,"discount":2100,"pointsUsed":0,"total":11900,"status":"AWAITING_VERIFICATION","at":"2026-11-08T09:20:00","method":"Bank transfer","slip":{"amount":11900,"ref":"LL-2026-000122","sender":"F ZEENA","date":"2026-11-08"},"dup":true},
+  {"no":"LL-2026-000123","uid":"u6","items":[{"pid":"p9","title":"Teachers' Day Classroom Décor Kit","list":3500,"final":2975}],"subtotal":3500,"discount":525,"pointsUsed":0,"total":2975,"status":"AWAITING_TRANSFER","at":"2026-11-08T11:05:00","method":"Bank transfer"}
+ ],
+ "sales7":[["Mon",1840],["Tue",2310],["Wed",1520],["Thu",2980],["Fri",3420],["Sat",2760],["Sun",3105]]
+}
+</script>
+
+<script>
+/* ================= STATE ================= */
+const SEED=JSON.parse(document.getElementById('seed').textContent);
+let S;
+function boot(){
+  S=JSON.parse(JSON.stringify(SEED));
+  const now=Date.now();
+  S.campaigns.forEach(c=>{if(c.startOffsetH!=null){c.start=now+c.startOffsetH*3600e3;c.end=now+c.endOffsetH*3600e3}else{c.start=+new Date(c.start);c.end=+new Date(c.end)}});
+  S.ent=S.entitlements.map(([u,p])=>({uid:u,pid:p,at:'2026-10-01'}));
+  S.ledger=[];
+  S.users.filter(u=>u.role==='CUSTOMER').forEach(u=>{
+    S.ledger.push({uid:u.id,type:'Sign-up bonus',pts:50,status:'available',at:u.joined});
+    if(u.points>50)S.ledger.push({uid:u.id,type:'Purchases & shares',pts:u.points-50,status:'available',at:u.joined});
+    if(u.pending)S.ledger.push({uid:u.id,type:'Purchase LL-2026-000119',pts:u.pending,status:'pending',at:'2026-11-07'});
+  });
+  S.outbox=[];S.cart=[];S.session=null;S.ref=null;S.coupon=null;S.usePts=0;S.filter={cat:null,q:'',price:'all'};S.seq=124;S.shares=[];
+  S.orders.filter(o=>o.status==='AWAITING_VERIFICATION').forEach(o=>{o.slipImg=slipImage(o);ownerEmail(o)});
+}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mvr=l=>'MVR '+(l/100).toLocaleString('en-US',{minimumFractionDigits:l%100?2:0,maximumFractionDigits:2});
+const P=id=>S.products.find(p=>p.id===id);const U=id=>S.users.find(u=>u.id===id);
+const me=()=>S.session?U(S.session):null;const isAdmin=()=>me()?.role==='ADMIN';
+const owns=(uid,pid)=>S.ent.some(e=>e.uid===uid&&e.pid===pid);
+const initials=n=>n.split(' ').map(x=>x[0]).slice(0,2).join('');
+const tok=()=>Math.random().toString(36).slice(2,10)+Math.random().toString(36).slice(2,10);
+function toast(m){document.querySelectorAll('.toast').forEach(x=>x.remove());const t=document.createElement('div');t.className='toast';t.innerHTML=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3200)}
+function addPts(uid,pts,type,status='available'){const u=U(uid);if(!u)return;S.ledger.unshift({uid,type,pts,status,at:new Date().toISOString().slice(0,10)});
+  if(status==='available')u.points+=pts;else if(status==='pending')u.pending+=pts}
+
+/* ================= PRICING (single source of truth) ================= */
+const activeCampaign=()=>S.campaigns.find(c=>c.active&&Date.now()>=c.start&&Date.now()<=c.end);
+function welcomeActive(u){return u&&u.welcome&&u.welcome.status==='active'&&u.welcome.expires>Date.now()&&!u.paid&&S.settings.welcome.enabled}
+function price(p,u=me(),withCoupon=false){
+  if(p.price===0)return{free:true,list:0,final:0,maxPts:0};
+  let best=p.price,label=null,steps=[];
+  const c=activeCampaign();if(c&&(c.scope==='all'||c.scope===p.cat)){const v=Math.round(p.price*(1-c.pct/100));if(v<best){best=v;label=c.name}}
+  if(welcomeActive(u)){const v=Math.round(p.price*(1-u.welcome.pct/100));if(v<best){best=v;label='Your welcome offer'}}
+  if(label)steps.push([label,p.price-best]);
+  if(withCoupon&&S.coupon){const cp=S.coupons.find(x=>x.code===S.coupon);if(cp){const v=Math.round(best*(1-cp.pct/100));steps.push(['Coupon '+cp.code,best-v]);best=v}}
+  let floor=false;if(best<p.min){floor=true;best=p.min}
+  const cashMin=Math.max(p.min,Math.ceil(best*(1-S.settings.maxPointsPct/100)));
+  return{free:false,list:p.price,final:best,label,steps,floor,maxPts:Math.max(0,best-cashMin)};
+}
+const ptVal=()=>100/S.settings.ptsPerMVRValue; // laari per point
+function priceHTML(p,big){const pr=price(p);if(pr.free)return`<span class="${big?'bigprice':'price'} free">Free</span>`;
+  return`<span class="${big?'bigprice':'price'}">${mvr(pr.final)}${pr.final<pr.list?`<s>${mvr(pr.list)}</s>`:''}</span>`}
+
+/* ================= CANVAS ART: covers, watermarked previews, slips ================= */
+const imgCache={};
+function cover(p){const k='c'+p.id+p.color+p.title;if(imgCache[k])return imgCache[k];
+  const c=document.createElement('canvas');c.width=640;c.height=512;const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,640,512);g.addColorStop(0,p.color);g.addColorStop(1,shade(p.color,-35));x.fillStyle=g;x.fillRect(0,0,640,512);
+  x.globalAlpha=.12;x.fillStyle='#fff';for(let i=0;i<9;i++){x.beginPath();x.arc(60+i*80,(i%2?80:440),40+i*6,0,7);x.fill()}x.globalAlpha=1;
+  x.save();x.translate(400,70);x.rotate(.06);x.fillStyle='#fff';x.shadowColor='rgba(0,0,0,.3)';x.shadowBlur=24;x.fillRect(0,0,200,260);x.shadowBlur=0;
+  x.fillStyle=p.color;x.fillRect(0,0,200,38);x.fillStyle='#d6dae2';for(let i=0;i<9;i++)x.fillRect(18,58+i*21,i%3?150:110,7);x.restore();
+  x.font='120px serif';x.fillText(p.ic,44,190);
+  x.fillStyle='rgba(255,255,255,.9)';x.font='700 22px "Plus Jakarta Sans",sans-serif';x.fillText((p.grade+' · '+p.type).toUpperCase(),46,262);
+  x.fillStyle='#fff';x.font='800 38px "Plus Jakarta Sans",sans-serif';wrapText(x,p.title,46,312,340,44,4);
+  return imgCache[k]=c.toDataURL('image/jpeg',.85)}
+function shade(h,a){let n=parseInt(h.slice(1),16),r=Math.max(0,Math.min(255,(n>>16)+a)),g=Math.max(0,Math.min(255,(n>>8&255)+a)),b=Math.max(0,Math.min(255,(n&255)+a));return`rgb(${r},${g},${b})`}
+function wrapText(x,t,X,Y,w,lh,max=9){const ws=t.split(' ');let l='',n=0;for(const wd of ws){const tt=l+wd+' ';if(x.measureText(tt).width>w&&l){x.fillText(l,X,Y);Y+=lh;l=wd+' ';if(++n>=max)return}else l=tt}x.fillText(l,X,Y)}
+function watermark(x,W,H,viewer){x.save();x.globalAlpha=.16;x.fillStyle='#0b1220';x.font='800 26px "Plus Jakarta Sans",sans-serif';x.translate(W/2,H/2);x.rotate(-Math.PI/6);
+  for(let yy=-H;yy<H;yy+=110)for(let xx=-W;xx<W;xx+=470)x.fillText(S.settings.watermark,xx+(yy/110%2?200:0),yy);x.restore();
+  x.save();x.globalAlpha=.75;x.fillStyle='#0b1220';x.fillRect(0,H-30,W,30);x.fillStyle='#fff';x.font='600 13px monospace';
+  x.fillText(viewer?`Viewer ${viewer} · ${new Date().toLocaleString('en-GB')} · Preview only`:'Preview only · '+S.settings.store,14,H-11);x.restore()}
+function viewerCode(){const u=me();if(!u)return'GUEST-'+(sessionStorage.vc||(sessionStorage.vc=Math.random().toString(16).slice(2,6).toUpperCase()));
+  let h=0;for(const ch of u.id+u.email)h=(h*31+ch.charCodeAt(0))>>>0;return'#'+h.toString(16).slice(0,6).toUpperCase()}
+function previewPage(p,n){const vc=viewerCode();const k='pv'+p.id+n+vc;if(imgCache[k])return imgCache[k];
+  if(p.custom&&p.custom[n-1]){return imgCache[k]=stampOver(p.custom[n-1],vc)}
+  const slide=p.type==='PPTX';const W=slide?1200:900,H=slide?675:1165;const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,W,H);
+  if(slide){const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,p.color);g.addColorStop(1,shade(p.color,-40));x.fillStyle=g;x.fillRect(0,0,W,H);
+    x.fillStyle='#fff';x.font='800 50px "Plus Jakarta Sans",sans-serif';
+    const titles=['',p.title,'Learning objectives','Key vocabulary','Explore: what do you notice?','Activity time'];x.fillText(n===1?'':titles[Math.min(n,5)],70,110);
+    if(n===1){x.font='130px serif';x.fillText(p.ic,70,250);x.font='800 58px "Plus Jakarta Sans",sans-serif';wrapText(x,p.title,70,370,1000,66,3);x.font='500 28px "Plus Jakarta Sans",sans-serif';x.globalAlpha=.85;x.fillText(p.grade+' · '+S.settings.store,70,590);x.globalAlpha=1}
+    else{x.fillStyle='rgba(255,255,255,.95)';x.fillRect(70,150,620,420);x.fillStyle=p.color;for(let i=0;i<5;i++){x.beginPath();x.arc(105,200+i*72,12,0,7);x.fill()}
+      x.fillStyle='#cfd5df';for(let i=0;i<5;i++)x.fillRect(135,192+i*72,380+(i%2)*120,16);x.font='200px serif';x.fillText(p.ic,780,450)}}
+  else{x.fillStyle=p.color;x.fillRect(0,0,W,110);x.fillStyle='#fff';x.font='800 32px "Plus Jakarta Sans",sans-serif';wrapText(x,p.title,50,55,700,36,2);
+    x.font='600 18px "Plus Jakarta Sans",sans-serif';x.fillText(p.grade+' · Page '+n+' of '+p.pages,50,96);x.font='60px serif';x.fillText(p.ic,780,78);
+    x.fillStyle='#14213D';x.font='600 20px "Plus Jakarta Sans",sans-serif';x.fillText('Name: ____________________    Class: ______    Date: ________',50,160);
+    x.font='800 26px "Plus Jakarta Sans",sans-serif';x.fillText(n===1?'Warm-up':'Section '+String.fromCharCode(64+n),50,220);
+    for(let q=0;q<6;q++){const y=270+q*140;x.fillStyle=p.color;x.beginPath();x.arc(68,y,18,0,7);x.fill();x.fillStyle='#fff';x.font='800 18px sans-serif';x.fillText(q+1,62,y+6);
+      x.fillStyle='#9aa3b2';x.fillRect(100,y-10,520+(q%3)*90,12);x.strokeStyle='#d5dae3';x.lineWidth=2;
+      if(q%2){x.strokeRect(100,y+18,300,80);x.strokeRect(430,y+18,300,80)}else{for(let l=0;l<3;l++){x.beginPath();x.moveTo(100,y+40+l*28);x.lineTo(820,y+40+l*28);x.stroke()}}}}
+  watermark(x,W,H,vc);return imgCache[k]=c.toDataURL('image/webp',.8)}
+function stampOver(src,vc){return src} // custom uploads already watermarked at upload time (burned into pixels)
+function slipImage(o){const c=document.createElement('canvas');c.width=520;c.height=700;const x=c.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,520,700);x.fillStyle='#1f4e9c';x.fillRect(0,0,520,90);x.fillStyle='#fff';x.font='800 26px sans-serif';x.fillText('Transfer Successful ✓',30,55);
+  x.fillStyle='#16A34A';x.beginPath();x.arc(260,170,46,0,7);x.fill();x.fillStyle='#fff';x.font='800 50px sans-serif';x.fillText('✓',240,188);
+  x.fillStyle='#111';x.font='800 34px sans-serif';x.textAlign='center';x.fillText(mvr((o.slip||{}).amount||o.total),260,270);x.textAlign='left';
+  const rows=[['From',(o.slip||{}).sender||U(o.uid).name.toUpperCase()],['To','LESSONLAGOON PVT LTD'],['Account','7730000012456'],['Remarks',o.no],['Date',(o.slip||{}).date||new Date().toISOString().slice(0,10)],['Ref no.','BLAZ'+Math.floor(1e8+Math.random()*9e8)]];
+  rows.forEach((r,i)=>{x.fillStyle='#6b7280';x.font='16px sans-serif';x.fillText(r[0],30,340+i*52);x.fillStyle='#111';x.font='700 18px sans-serif';x.fillText(r[1],190,340+i*52);x.fillStyle='#eee';x.fillRect(30,356+i*52,460,1)});
+  return c.toDataURL('image/jpeg',.85)}
+
+/* ================= EMAIL (simulated outbox) ================= */
+function ownerEmail(o){const t1=tok(),t2=tok();o.tokens={approve:t1,reject:t2,used:false};
+  S.outbox.unshift({id:tok(),to:S.users[0].email,subject:`Payment slip to verify – ${o.no} – ${mvr(o.total)}`,type:'approval',orderNo:o.no,at:new Date().toLocaleTimeString()})}
+function custEmail(uid,subject,body){S.outbox.unshift({id:tok(),to:U(uid).email,subject,body,type:'customer',at:new Date().toLocaleTimeString()})}
+
+/* ================= HEADER / ANNOUNCEMENT / DEMO ================= */
+function renderChrome(){const c=activeCampaign(),u=me();
+  $('#ann').innerHTML=c?`<div class="ann" style="background:${c.accent}">🎉 <b>${esc(c.banner)}</b> · ends in <span data-cd="${c.end}"></span></div>`:'';
+  const cartN=S.cart.length;
+  $('#hdr').innerHTML=`<a class="logo" href="#/"><i>🌊</i>${esc(S.settings.store)}</a>
+   <div class="search"><input id="q" placeholder="Search worksheets, slides, grades…" value="${esc(S.filter.q)}"></div>
+   <div class="navr">
+    ${isAdmin()?`<a class="btn sm dark" href="#/admin">⚙️ Admin</a>`:''}
+    ${u&&!isAdmin()?`<a class="pts" href="#/points">🪙 ${u.points.toLocaleString()} pts</a><a class="btn sm ghost" href="#/library">📚 Library</a>`:''}
+    <button class="icbtn" data-a="openCart" title="Cart">🛒${cartN?`<span class="n">${cartN}</span>`:''}</button>
+    ${u?`<div class="av" style="background:${u.color}" title="${esc(u.name)}" data-a="signout">${initials(u.name)}</div>`:`<button class="btn sm" data-a="login">Sign in</button>`}
+   </div>`;
+  const q=$('#q');if(q)q.oninput=e=>{S.filter.q=e.target.value;if(location.hash.startsWith('#/admin')||location.hash.length>2&&location.hash!=='#/')location.hash='#/';renderAllGrid();document.getElementById('all')?.scrollIntoView({behavior:'smooth'})};
+  const who=u?u.name:'Guest';
+  $('#demo').innerHTML=`<b>Demo · viewing as ${esc(who)}</b><div class="chips">
+   <span class="chip" data-a="as" data-id="">Guest</span><span class="chip" data-a="as" data-id="u1">Mariyam (customer)</span>
+   <span class="chip" data-a="newcust">New customer</span><span class="chip" data-a="as" data-id="admin">Owner</span>
+   <span class="chip" data-a="reset">↺ Reset</span></div>`;
+}
+
+/* ================= ROUTER ================= */
+let heroAnim=null;
+function route(){const h=location.hash||'#/';const [_,a,b]=h.split('/');if(heroAnim){heroAnim.stop();heroAnim=null}
+  const app=$('#app');window.scrollTo(0,0);
+  if(h.includes('?ref=')){const code=h.split('?ref=')[1];S.ref=code;toast('🔗 Referral link from <b>'+esc(code)+'</b> saved (30-day cookie)')}
+  if(!a)app.innerHTML=homeView();
+  else if(a==='p')app.innerHTML=productView(b.split('?')[0]);
+  else if(a==='checkout')app.innerHTML=checkoutView();
+  else if(a==='order')app.innerHTML=orderView(b);
+  else if(a==='library')app.innerHTML=libraryView();
+  else if(a==='points')app.innerHTML=pointsView();
+  else if(a==='approve')app.innerHTML=approveView(b);
+  else if(a==='admin')app.innerHTML=adminView(b||'dash');
+  else app.innerHTML=homeView();
+  renderChrome();after();
+}
+function after(){const hc=$('#herocv');if(hc)heroAnim=startHero(hc,S.landing.bg);tick();
+  const d=$('#drop');if(d){['dragover','dragenter'].forEach(e=>d.addEventListener(e,ev=>{ev.preventDefault();d.classList.add('hv')}));['dragleave','drop'].forEach(e=>d.addEventListener(e,ev=>{ev.preventDefault();d.classList.remove('hv')}));d.addEventListener('drop',ev=>{const f=ev.dataTransfer.files;if(f.length)(d.dataset.kind==='slip'?handleSlip:handleUpload)(f)})}
+  document.querySelectorAll('.gal img,.collage img').forEach(i=>{i.oncontextmenu=e=>e.preventDefault();i.draggable=false});
+}
+
+/* ================= HERO INTERACTIVE BACKGROUND ================= */
+function startHero(cv,preset){const x=cv.getContext('2d');let W,H,raf,run=true,vis=true;const m={x:-999,y:-999};const dpr=Math.min(2,devicePixelRatio||1);
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function size(){W=cv.clientWidth;H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;x.setTransform(dpr,0,0,dpr,0,0)}size();
+  const N=innerWidth<700?26:(preset==='network'?70:46);const cols=['#0E8C7F','#FF7A59','#F5B300','#38C6B3','#7C3AED'];
+  const ps=Array.from({length:N},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:-.15-Math.random()*.35,r:6+Math.random()*14,k:Math.floor(Math.random()*5),c:cols[Math.floor(Math.random()*5)],a:Math.random()*6,va:(Math.random()-.5)*.01}));
+  const par=cv.parentElement;par.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();m.x=e.clientX-r.left;m.y=e.clientY-r.top});par.addEventListener('pointerleave',()=>{m.x=m.y=-999});
+  const io=new IntersectionObserver(es=>{vis=es[0].isIntersecting});io.observe(cv);addEventListener('resize',size);
+  function shape(p){x.save();x.translate(p.x,p.y);x.rotate(p.a);x.globalAlpha=.22;x.fillStyle=p.c;x.strokeStyle=p.c;x.lineWidth=3;
+    if(p.k===0){x.beginPath();x.arc(0,0,p.r,0,7);x.fill()}
+    else if(p.k===1){x.beginPath();for(let i=0;i<10;i++){const rr=i%2?p.r*.45:p.r;x.lineTo(Math.cos(i*Math.PI/5)*rr,Math.sin(i*Math.PI/5)*rr)}x.fill()}
+    else if(p.k===2){x.fillRect(-p.r*1.4,-p.r*.3,p.r*2.4,p.r*.6);x.beginPath();x.moveTo(p.r,-p.r*.3);x.lineTo(p.r*1.6,0);x.lineTo(p.r,p.r*.3);x.fill()}
+    else if(p.k===3){x.strokeRect(-p.r,-p.r*.7,p.r*2,p.r*1.4);x.beginPath();x.moveTo(0,-p.r*.7);x.lineTo(0,p.r*.7);x.stroke()}
+    else{x.beginPath();x.moveTo(0,-p.r);x.lineTo(p.r,p.r);x.lineTo(-p.r,p.r);x.closePath();x.fill()}x.restore()}
+  let t=0;function frame(){if(!run)return;raf=requestAnimationFrame(frame);if(!vis||document.hidden)return;t+=.005;x.clearRect(0,0,W,H);
+    if(preset==='gradient'){[[.2,.3,'#38C6B355'],[.75,.4,'#FF7A5944'],[.5,.8,'#F5B30033']].forEach(([a,b,c],i)=>{const cx=W*(a+.12*Math.sin(t*2+i)),cy=H*(b+.1*Math.cos(t*1.6+i));const px=m.x>0?(m.x-cx)*.08:0;const g=x.createRadialGradient(cx+px,cy,0,cx+px,cy,Math.max(W,H)*.45);g.addColorStop(0,c);g.addColorStop(1,'transparent');x.fillStyle=g;x.fillRect(0,0,W,H)});return}
+    for(const p of ps){const dx=p.x-m.x,dy=p.y-m.y,d=Math.hypot(dx,dy);
+      if(preset==='network'){if(d<140){p.vx-=dx/d*.02;p.vy-=dy/d*.02}p.vx*=.99;p.vy*=.99;p.vx+=(Math.random()-.5)*.02;p.vy+=(Math.random()-.5)*.02}
+      else if(d<120){p.x+=dx/d*3;p.y+=dy/d*3}
+      p.x+=p.vx;p.y+=p.vy;p.a+=p.va;if(p.y<-30)p.y=H+30;if(p.y>H+30)p.y=-30;if(p.x<-30)p.x=W+30;if(p.x>W+30)p.x=-30}
+    if(preset==='network'){x.lineWidth=1;for(let i=0;i<ps.length;i++){const a=ps[i];for(let j=i+1;j<ps.length;j++){const b=ps[j],d=Math.hypot(a.x-b.x,a.y-b.y);if(d<120){x.strokeStyle=`rgba(14,140,127,${.25*(1-d/120)})`;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}
+      x.fillStyle='rgba(14,140,127,.55)';x.beginPath();x.arc(a.x,a.y,2.6,0,7);x.fill();const dm=Math.hypot(a.x-m.x,a.y-m.y);if(dm<160){x.strokeStyle=`rgba(255,122,89,${.5*(1-dm/160)})`;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(m.x,m.y);x.stroke()}}}
+    else ps.forEach(shape)}
+  if(reduce){ps.forEach(shape)}else frame();
+  return{stop(){run=false;cancelAnimationFrame(raf);io.disconnect();removeEventListener('resize',size)}}}
+
+/* ================= STOREFRONT ================= */
+function card(p){const pr=price(p),u=me(),own=u&&owns(u.id,p.id);
+  return`<div class="pc" data-a="go" data-h="#/p/${p.slug}"><div class="im"><img src="${cover(p)}" alt="${esc(p.title)} cover"><div class="tl">
+    <span class="badge b-type">${p.type}</span>${pr.free?'<span class="badge b-free">FREE</span>':''}${!pr.free&&pr.final<pr.list?`<span class="badge b-off">-${Math.round((1-pr.final/pr.list)*100)}%</span>`:''}${own?'<span class="badge b-own">Owned</span>':''}</div></div>
+   <div class="bd"><div class="meta">${esc(p.grade)} · ${esc(catName(p.cat))} · ${p.pages} ${p.type==='PPTX'?'slides':'pages'}</div><h3>${esc(p.title)}</h3>
+    <div class="stars">${'★'.repeat(Math.round(p.rating))}${'☆'.repeat(5-Math.round(p.rating))} <small>${p.rating} (${p.rc})</small></div>
+    <div class="ft">${priceHTML(p)}${own?'<span class="btn sm ghost">Download</span>':pr.free?`<button class="btn sm" data-a="free" data-id="${p.id}">Get free</button>`:`<button class="btn sm acc" data-a="add" data-id="${p.id}">Add</button>`}</div></div></div>`}
+const catName=id=>(S.categories.find(c=>c.id===id)||{}).name||id;
+const pub=()=>S.products.filter(p=>p.status==='Published');
+function homeView(){const L=S.landing,v=L.variants[L.variant],u=me(),c=activeCampaign();
+  const covers=pub().filter(p=>p.featured).slice(0,4);
+  const sec={
+  trust:()=>`<div class="wrap"><div class="trust">${L.trust.map(t=>`<div><span>${t[0]}</span><div><b>${esc(t[1])}</b><small>${esc(t[2])}</small></div></div>`).join('')}</div></div>`,
+  welcome:()=>welcomeActive(u)?`<div class="wrap"><div class="welcome"><span class="big">🎁</span><div style="flex:1"><b>Welcome, ${esc(u.name.split(' ')[0])}! ${u.welcome.pct}% off your first resource.</b><div class="sm mut">Applied automatically at checkout · ends in <b data-cd="${u.welcome.expires}"></b></div></div><a class="btn acc sm" href="#/" data-a="scrollAll">Use my offer</a></div></div>`:'',
+  featured:()=>`<section class="s"><div class="wrap"><div class="sh"><div><h2>Teacher favourites</h2><p>Our best-selling, highest-rated resources this term.</p></div></div><div class="grid">${pub().filter(p=>p.featured).map(card).join('')}</div></div></section>`,
+  campaign:()=>c?`<section class="s" style="padding-top:0"><div class="wrap"><div class="camp" style="background:linear-gradient(120deg,${c.accent},${shade(c.accent,-50)})"><div><span class="badge" style="background:rgba(255,255,255,.2);color:#fff">${esc(c.type)} · ${c.mult}× points</span><h2>${esc(c.banner)}</h2><p style="opacity:.9;margin:0">Discount applied automatically to every resource. No code needed.</p></div><div><div class="cd" data-cdbox="${c.end}"></div><button class="btn mt" style="background:#fff;color:${c.accent}" data-a="scrollAll">Shop the sale →</button></div></div></div></section>`:'',
+  free:()=>`<section class="s" style="background:#F0FAF8"><div class="wrap"><div class="sh"><div><h2>Start free 🎁</h2><p>Sign in with Google and download instantly. No payment needed.</p></div></div><div class="grid">${pub().filter(p=>!p.price).map(card).join('')}</div></div></section>`,
+  categories:()=>`<section class="s"><div class="wrap"><div class="sh"><div><h2>Shop by subject</h2></div></div><div class="cats">${S.categories.map(k=>`<div class="cat" data-a="cat" data-id="${k.id}"><span>${k.ic}</span><b>${k.name}</b><small>${pub().filter(p=>p.cat===k.id).length} resources</small></div>`).join('')}</div></div></section>`,
+  all:()=>`<section class="s" id="all" style="padding-top:10px"><div class="wrap"><div class="sh"><div><h2>All resources</h2><p id="cnt"></p></div><div class="flex wr" id="fchips"></div></div><div class="grid" id="allgrid"></div></div></section>`,
+  reviews:()=>`<section class="s" style="background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><div class="wrap"><div class="sh"><div><h2>Loved by teachers across the atolls</h2><p>Verified reviews from customers who own the resource.</p></div><div class="stars" style="font-size:20px">★★★★★ <small>4.8 average</small></div></div><div class="revs">${S.reviews.filter(r=>r.status==='approved'&&r.home).map(r=>`<div class="rv"><div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div><p>“${esc(r.text)}”</p><div class="who"><div class="av" style="background:${r.uid?U(r.uid).color:'#64748B'}">${initials(r.name)}</div><div><b class="sm">${esc(r.name)}</b><div class="sm mut">${r.uid?'✓ Verified purchase · ':''}${esc(P(r.pid).title)}</div></div></div></div>`).join('')}</div></div></section>`,
+  how:()=>`<section class="s"><div class="wrap"><div class="sh"><div><h2>How it works</h2></div></div><div class="how"><div><div class="n">1</div><b>Preview & choose</b><p class="mut sm">See watermarked sample pages of every resource before you decide.</p></div><div><div class="n">2</div><b>Claim free or pay by transfer</b><p class="mut sm">Free items download instantly. For paid items, upload your transfer slip and we verify it fast.</p></div><div><div class="n">3</div><b>Download & teach</b><p class="mut sm">Everything lives in your Library forever, including future updates.</p></div></div></div></section>`,
+  points:()=>`<section class="s" style="padding-top:0"><div class="wrap"><div class="ptspromo"><div><span class="badge" style="background:#FFD27A;color:#14213D">LagoonPoints</span><h2 style="font-size:30px;margin:10px 0">Earn points. Pay up to 80% with them.</h2><p style="opacity:.85">Every purchase, every share that brings a friend, and every referral earns points. ${S.settings.ptsPerMVRValue} points = MVR 1.</p>${u&&!isAdmin()?`<a class="btn acc" href="#/points">My points & referral code</a>`:`<button class="btn acc" data-a="login">Join free & get ${S.settings.signupPts} points</button>`}</div>
+   <div class="rules"><div><b>+${S.settings.signupPts}</b>for joining</div><div><b>1 / MVR</b>on every purchase</div><div><b>+${S.settings.sharePts}</b>per friend via your share link</div><div><b>+${S.settings.refReferrer}</b>when your code is used</div></div></div></div></section>`,
+  faq:()=>`<section class="s" style="padding-top:0"><div class="wrap" style="max-width:820px"><div class="sh"><div><h2>Questions? Answers.</h2></div></div>${L.faq.map(f=>`<details class="fq"><summary>${esc(f[0])}</summary><p class="mut">${esc(f[1])}</p></details>`).join('')}</div></section>`};
+  return`<div class="hero"><canvas id="herocv" aria-hidden="true"></canvas><div class="wrap in"><div>
+   <span class="kicker">${v.kicker}</span><h1>${v.h1}</h1><p class="sub">${esc(v.sub)}</p>
+   <div class="flex wr"><button class="btn acc" data-a="scrollAll">${esc(v.cta)} →</button><button class="btn ghost" data-a="scrollFree">${esc(v.cta2)}</button></div>
+   <div class="hero-stats">${L.stats.map(s=>`<div><b>${s[0]}</b><span>${s[1]}</span></div>`).join('')}</div></div>
+   <div class="collage">${covers.map((p,i)=>`<img class="cv" data-a="go" data-h="#/p/${p.slug}" src="${cover(p)}" style="${['left:10px;top:20px;transform:rotate(-7deg)','left:200px;top:0;transform:rotate(5deg)','left:60px;top:200px;transform:rotate(4deg)','left:250px;top:190px;transform:rotate(-4deg)'][i]}" alt="">`).join('')}</div></div></div>
+   ${L.sections.filter(s=>s.on).map(s=>sec[s.k]()).join('')}
+   <footer><div class="wrap cols"><div><div class="logo" style="color:#fff"><i>🌊</i>${esc(S.settings.store)}</div><p>${esc(S.settings.tagline)}.<br>Malé, Republic of Maldives · hello@lessonlagoon.mv</p></div><div><b>Shop</b>All resources<br>Free resources<br>Points & rewards</div><div><b>Help</b>How to pay<br>FAQ<br>Contact</div><div><b>Legal</b>Terms<br>Privacy<br>Licence & refunds</div></div></footer>`}
+function renderAllGrid(){const g=$('#allgrid');if(!g)return;const f=S.filter;
+  let list=pub().filter(p=>(!f.cat||p.cat===f.cat)&&(f.price==='all'||(f.price==='free'?!p.price:p.price>0))&&(!f.q||(p.title+' '+p.short+' '+p.grade+' '+catName(p.cat)).toLowerCase().includes(f.q.toLowerCase())));
+  g.innerHTML=list.length?list.map(card).join(''):`<div class="empty" style="grid-column:1/-1"><span>🔍</span>No resources match “${esc(f.q)}”. Try another word.</div>`;
+  $('#cnt').textContent=list.length+' resources'+(f.cat?' in '+catName(f.cat):'');
+  $('#fchips').innerHTML=[['all','All'],['free','Free'],['paid','Paid']].map(([k,l])=>`<span class="chip ${f.price===k?'on':''}" data-a="fprice" data-id="${k}">${l}</span>`).join('')+(f.cat?`<span class="chip on" data-a="cat" data-id="">${catName(f.cat)} ✕</span>`:'')}
+
+function productView(slug){const p=S.products.find(x=>x.slug===slug);if(!p)return`<div class="wrap empty"><span>🤷</span>Resource not found.</div>`;
+  const pr=price(p),u=me(),own=u&&owns(u.id,p.id),N=S.settings.previewPages,c=activeCampaign();
+  const pages=Array.from({length:Math.min(N,p.pages)},(_,i)=>previewPage(p,i+1));
+  const revs=S.reviews.filter(r=>r.pid===p.id&&r.status==='approved');
+  const earn=pr.free?0:Math.floor(pr.final/100)*S.settings.ptsPerMVR*(c?c.mult:1);
+  window._gal={i:0,pages,p};
+  return`<div class="wrap"><div class="sm mut" style="padding-top:20px"><a href="#/">Home</a> › ${esc(catName(p.cat))} › ${esc(p.grade)}</div><div class="pg">
+   <div class="gal"><div class="main" id="gmain">${galMain()}</div>
+    <div class="th">${pages.map((s,i)=>`<img src="${s}" class="${i?'':'on'}" data-a="gal" data-i="${i}" alt="Preview page ${i+1}">`).join('')}<div data-a="gal" data-i="${pages.length}">🔒 +${p.pages-pages.length} more ${p.type==='PPTX'?'slides':'pages'}</div></div>
+    <p class="sm mut mt">🛡️ Preview pages are images with the watermark built into the pixels. Your viewer code <b>${viewerCode()}</b> is stamped on every page.</p>
+    <div class="box mt"><h3>About this resource</h3><p>${esc(p.short)}</p><p class="mut sm">Includes printable ${p.type} file${p.type!=='PDF'?' (editable) plus a PDF version':''}. Aligned to ${esc(p.curr)}. Single-teacher classroom licence.</p></div>
+    <div class="box"><h3>Reviews (${revs.length}) <span class="stars">★ ${p.rating}</span></h3>${revs.map(r=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div class="stars">${'★'.repeat(r.rating)}</div><b class="sm">${esc(r.name)}</b> <span class="sm mut">${r.uid?'✓ Verified purchase':''} · ${r.date}</span><p style="margin:6px 0 0">${esc(r.text)}</p></div>`).join('')||'<p class="mut">No reviews yet.</p>'}
+     ${own&&!S.reviews.some(r=>r.pid===p.id&&r.uid===u.id)?`<div class="mt"><b class="sm">Write a review (+${S.settings.reviewPts} points)</b><select class="inp mt" id="rvr"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><textarea class="inp mt" id="rvt" rows="3" placeholder="How did it work in your class?"></textarea><button class="btn sm mt" data-a="review" data-id="${p.id}">Submit review</button></div>`:''}</div></div>
+   <div><div class="buybox"><div class="flex wr"><span class="badge b-type">${p.type}</span><span class="badge b-grey">${esc(p.grade)}</span>${pr.free?'<span class="badge b-free">FREE</span>':''}${own?'<span class="badge b-own">You own this</span>':''}</div>
+    <h1>${esc(p.title)}</h1><div class="stars">${'★'.repeat(Math.round(p.rating))} <small>${p.rating} · ${p.rc} reviews · ${p.sales.toLocaleString()} teachers</small></div>
+    <div class="mt">${priceHTML(p,true)}</div>
+    ${pr.label?`<div class="offerline">🏷️ ${esc(pr.label)} applied${pr.label.includes('welcome')?` · ends in <b data-cd="${u.welcome.expires}"></b>`:c?` · ends in <b data-cd="${c.end}"></b>`:''}</div>`:''}
+    <div class="facts"><div>Format<b>${p.type}${p.type!=='PDF'?' + PDF':''}</b></div><div>${p.type==='PPTX'?'Slides':'Pages'}<b>${p.pages}</b></div><div>Grade<b>${esc(p.grade)}</b></div><div>Curriculum<b>${esc(p.curr)}</b></div></div>
+    ${own?`<button class="btn block" data-a="dl" data-id="${p.id}">⬇️ Download now</button>`:pr.free?`<button class="btn block" data-a="free" data-id="${p.id}">🎁 Get it free</button>`:`<button class="btn acc block" data-a="buy" data-id="${p.id}">Buy now · ${mvr(pr.final)}</button><button class="btn ghost block mt" data-a="add" data-id="${p.id}">Add to cart</button>`}
+    ${earn?`<div class="earn">🪙 Earn <b>${earn} points</b> with this purchase${c&&c.mult>1?` (${c.mult}× ${esc(c.type)} bonus)`:''}. Pay up to ${S.settings.maxPointsPct}% with points.</div>`:''}
+    <button class="btn ghost block mt" data-a="share" data-id="${p.id}">🔗 Share & earn ${S.settings.sharePts} points</button>
+    <p class="sm mut mt" style="text-align:center">⚡ Instant download · 🔒 Verified payments · 🧑‍🏫 Teacher-made</p></div></div></div></div>`}
+function galMain(){const g=window._gal;if(!g)return'';const p=g.p;
+  if(g.i>=g.pages.length)return`<div class="lockcard"><div style="font-size:44px">🔒</div><h3>You've seen ${g.pages.length} of ${p.pages} ${p.type==='PPTX'?'slides':'pages'}</h3><p class="mut">Get the full resource to unlock every page, editable files and answer keys.</p>${price(p).free?`<button class="btn" data-a="free" data-id="${p.id}">Get it free</button>`:`<button class="btn acc" data-a="buy" data-id="${p.id}">Get the full resource</button>`}</div>`;
+  return`<button class="nav-ar" style="left:10px" data-a="gnav" data-d="-1">‹</button><img src="${g.pages[g.i]}" alt="Preview page ${g.i+1}" draggable="false"><button class="nav-ar" style="right:10px" data-a="gnav" data-d="1">›</button>`}
+
+/* ================= CART / CHECKOUT ================= */
+function cartLines(){return S.cart.map(id=>{const p=P(id);return{p,pr:price(p,me(),true)}})}
+function totals(){const L=cartLines();const sub=L.reduce((a,l)=>a+l.p.price,0),after=L.reduce((a,l)=>a+l.pr.final,0),maxPtsL=L.reduce((a,l)=>a+l.pr.maxPts,0);
+  const u=me();const availL=u?u.points*ptVal():0;const capPts=Math.floor(Math.min(maxPtsL,availL)/ptVal());S.usePts=Math.min(S.usePts,capPts);
+  const ptsL=S.usePts*ptVal();return{L,sub,after,disc:sub-after,capPts,ptsL,total:after-ptsL,floor:L.some(l=>l.pr.floor)}}
+function openCart(){const u=me();const T=totals();
+  $('#layer').innerHTML=`<div class="ov" data-a="close" style="justify-content:flex-end"></div><div class="drawer"><header><b style="font-size:18px">🛒 Your cart (${S.cart.length})</b><button class="btn sm ghost" data-a="close">✕</button></header>
+  <div class="body">${S.cart.length?T.L.map(({p,pr})=>`<div class="ci"><img src="${cover(p)}" alt=""><div class="t">${esc(p.title)}<div class="sm mut">${p.type} · ${esc(p.grade)}</div></div><div style="text-align:right"><b>${mvr(pr.final)}</b>${pr.final<p.price?`<div class="sm mut"><s>${mvr(p.price)}</s></div>`:''}<div><a class="sm" style="color:var(--bad);cursor:pointer" data-a="rm" data-id="${p.id}">Remove</a></div></div></div>`).join(''):`<div class="empty"><span>🛒</span>Your cart is empty.<br><button class="btn sm mt" data-a="close">Browse resources</button></div>`}
+  ${S.cart.length&&u&&!isAdmin()?`<div class="earn mt">🪙 You have <b>${u.points} points</b> (${mvr(u.points*ptVal())}). Use them at checkout for up to ${S.settings.maxPointsPct}% off.</div>`:''}</div>
+  ${S.cart.length?`<div class="foot"><div class="row"><span>Subtotal</span><span>${mvr(T.sub)}</span></div>${T.disc?`<div class="row dis"><span>Discounts</span><span>−${mvr(T.disc)}</span></div>`:''}<div class="row tot"><span>Total</span><span>${mvr(T.after)}</span></div><button class="btn acc block mt" data-a="toCheckout">Checkout →</button></div>`:''}</div>`}
+function checkoutView(){const u=me();if(!S.cart.length)return`<div class="wrap empty"><span>🛒</span>Your cart is empty. <a href="#/" style="color:var(--pri)">Browse resources</a></div>`;
+  const T=totals(),c=activeCampaign();
+  return`<div class="wrap"><h1 style="margin:28px 0 0">Checkout</h1><p class="mut">One page. About a minute.</p><div class="ck"><div>
+   <div class="box"><h3>1 · Your account</h3>${u?`<div class="flex"><div class="av" style="background:${u.color}">${initials(u.name)}</div><div><b>${esc(u.name)}</b><div class="sm mut">${esc(u.email)} · signed in with Google</div></div></div>`:`<p class="mut sm">Sign in to keep your downloads in your Library forever.</p><button class="gbtn" data-a="login">${gIcon()} Continue with Google</button>`}</div>
+   <div class="box"><h3>2 · Payment method</h3><div class="pm on"><span style="font-size:24px">🏦</span><div style="flex:1"><b>Bank transfer</b><div class="sm mut">Transfer, upload your slip, we verify and unlock your downloads.</div></div>✅</div>
+    <div class="pm off"><span style="font-size:24px">💳</span><div style="flex:1"><b>Card (BML Connect)</b><div class="sm mut">Coming soon</div></div></div></div>
+   <div class="box"><h3>3 · Agreement</h3><label class="flex sm"><input type="checkbox" id="agree"> I agree to the Terms, Licence and Refund Policy, and understand this is a digital download delivered after payment verification.</label></div></div>
+   <div><div class="box"><h3>Order summary</h3>${T.L.map(({p,pr})=>`<div class="ci"><img src="${cover(p)}" alt=""><div class="t">${esc(p.title)}${pr.steps.map(s=>`<div class="sm" style="color:#B33E1E">${esc(s[0])} −${mvr(s[1])}</div>`).join('')}</div><b>${mvr(pr.final)}</b></div>`).join('')}
+    <div class="flex mt"><input class="inp" id="cpn" placeholder="Coupon code (try TEACH10)" value="${esc(S.coupon||'')}"><button class="btn sm ghost" data-a="coupon">Apply</button></div>
+    ${u&&!isAdmin()?`<div class="mt" style="background:#FFF8E1;border-radius:12px;padding:14px"><div class="flex" style="justify-content:space-between"><b>🪙 Use my points</b><span class="sm">${u.points} available</span></div>
+     ${T.capPts>0?`<input type="range" id="ptsr" min="0" max="${T.capPts}" step="10" value="${S.usePts}"><div class="flex sm" style="justify-content:space-between"><span>Using <b id="ptsv">${S.usePts}</b> pts</span><span>−<b id="ptsm">${mvr(T.ptsL)}</b></span></div><div class="sm mut">Points can cover up to ${S.settings.maxPointsPct}% of each item. You always pay at least ${100-S.settings.maxPointsPct}%.</div>`:'<div class="sm mut">No points available to use yet.</div>'}</div>`:''}
+    <div class="mt"><div class="row"><span>Subtotal</span><span>${mvr(T.sub)}</span></div>${T.disc?`<div class="row dis"><span>Discounts</span><span>−${mvr(T.disc)}</span></div>`:''}${T.ptsL?`<div class="row dis"><span>Points (${S.usePts})</span><span>−${mvr(T.ptsL)}</span></div>`:''}${T.floor?'<div class="sm mut">Maximum discount applied.</div>':''}
+    <div class="row tot"><span>Total to pay</span><span>${mvr(T.total)}</span></div>
+    <div class="sm mut">🪙 You'll earn ${Math.floor(T.total/100)*S.settings.ptsPerMVR*(c?c.mult:1)} points after verification.</div></div>
+    <button class="btn acc block mt" data-a="place" style="padding:15px">Place order · ${mvr(T.total)}</button><p class="sm mut" style="text-align:center">🔒 Prices are recalculated securely on our server.</p></div></div></div></div>`}
+function orderView(no){const o=S.orders.find(x=>x.no===no);const u=me();if(!o||!u||(o.uid!==u.id&&!isAdmin()))return`<div class="wrap empty"><span>🔎</span>We couldn't find that order.</div>`;
+  const b=S.settings.bank;const st={AWAITING_TRANSFER:['b-wait','Awaiting transfer'],AWAITING_VERIFICATION:['b-wait','Awaiting verification'],PAID:['b-paid','Paid · downloads ready'],PAYMENT_REJECTED:['b-rej','Slip rejected'],COMPLETED_FREE:['b-paid','Completed'],EXPIRED:['b-grey','Expired']}[o.status]||['b-grey',o.status];
+  const stepIdx={AWAITING_TRANSFER:1,AWAITING_VERIFICATION:2,PAID:4,PAYMENT_REJECTED:2}[o.status]||4;
+  return`<div class="wrap" style="max-width:760px;padding:30px 20px"><div class="flex" style="justify-content:space-between"><h1 style="margin:0">Order ${o.no}</h1><span class="badge ${st[0]}" style="font-size:13px">${st[1]}</span></div>
+   <div class="steps">${[1,2,3,4].map(i=>`<div class="${i<=stepIdx?'d':''}"></div>`).join('')}</div><div class="flex sm mut" style="justify-content:space-between"><span>Order placed</span><span>Slip uploaded</span><span>Verifying</span><span>Downloads ready</span></div>
+   ${o.status==='AWAITING_TRANSFER'||o.status==='PAYMENT_REJECTED'?`
+   ${o.status==='PAYMENT_REJECTED'?`<div class="box mt" style="border-color:var(--bad)"><b style="color:var(--bad)">Your slip was not accepted:</b> ${esc(o.reason)}<br><span class="sm mut">Please upload a new slip below.</span></div>`:''}
+   <div class="box mt"><h3>Step 1 · Transfer exactly ${mvr(o.total)}</h3>
+    ${[['Bank',b.bank],['Account name',b.name],['Account number',b.number],['Amount',mvr(o.total)],['Reference / remarks',o.no]].map(r=>`<div class="copy"><div><div class="sm mut">${r[0]}</div><b>${esc(r[1])}</b></div><button class="btn sm ghost" data-a="copy" data-v="${esc(r[1])}">Copy</button></div>`).join('')}
+    <p class="sm mut">Please transfer within ${S.settings.slipExpiryHours} hours or the order will expire and your points will be returned.</p></div>
+   <div class="box"><h3>Step 2 · Upload your transfer slip</h3><div class="drop" id="drop" data-kind="slip" data-a="pickSlip"><div style="font-size:36px">📸</div><b>Tap to take a photo or choose a file</b><div class="sm mut">JPG, PNG, HEIC or PDF · max 10 MB · or drag it here</div></div>
+    <input type="file" id="slipf" accept="image/*,application/pdf" capture="environment" hidden>
+    <div class="two mt"><div><label class="f">Transfer reference (optional)</label><input class="inp" id="sref" placeholder="e.g. BLAZ123456789"></div><div><label class="f">Transfer date</label><input class="inp" type="date" id="sdate" value="${new Date().toISOString().slice(0,10)}"></div></div>
+    <button class="btn ghost sm mt" data-a="sampleSlip" data-id="${o.no}">🧪 Demo: use a sample slip</button></div>`:''}
+   ${o.status==='AWAITING_VERIFICATION'?`<div class="box mt" style="text-align:center"><div style="font-size:46px">⏳</div><h3>We received your slip</h3><p class="mut">Our team has been notified by email and will verify your payment shortly. You'll get an email the moment your downloads are ready. This page updates automatically.</p><img src="${o.slipImg}" style="max-width:180px;border-radius:10px;border:1px solid var(--line)" alt="Your slip"></div>`:''}
+   ${o.status==='PAID'||o.status==='COMPLETED_FREE'?`<div class="box mt" style="text-align:center"><div style="font-size:46px">🎉</div><h3>Your downloads are ready!</h3>${o.items.map(i=>`<div class="ci"><img src="${cover(P(i.pid))}"><div class="t">${esc(i.title)}</div><button class="btn sm" data-a="dl" data-id="${i.pid}">⬇️ Download</button></div>`).join('')}${o.earned?`<div class="earn mt">🪙 ${o.earned} points added (available after ${S.settings.holdDays} days)</div>`:''}<a class="btn ghost mt" href="#/library">Go to my Library</a></div>`:''}
+   <div class="box"><h3>Items</h3>${o.items.map(i=>`<div class="row"><span>${esc(i.title)}</span><span>${mvr(i.final)}</span></div>`).join('')}${o.pointsUsed?`<div class="row dis"><span>Points used (${o.pointsUsed})</span><span>−${mvr(o.pointsUsed*ptVal())}</span></div>`:''}<div class="row tot"><span>Total</span><span>${mvr(o.total)}</span></div></div></div>`}
+function libraryView(){const u=me();if(!u)return`<div class="wrap empty"><span>📚</span>Sign in to see your Library.<br><button class="btn mt" data-a="login">Sign in with Google</button></div>`;
+  const items=S.ent.filter(e=>e.uid===u.id).map(e=>P(e.pid));const ords=S.orders.filter(o=>o.uid===u.id);
+  return`<div class="wrap" style="padding:30px 20px"><h1 style="margin:0">My Library</h1><p class="mut">${items.length} resources · download anytime, including future updates.</p>
+   ${items.length?`<div class="lib">${items.map(p=>`<div class="pc"><div class="im"><img src="${cover(p)}" alt=""></div><div class="bd"><h3>${esc(p.title)}</h3><div class="meta">${p.type} · v1.${p.id.length} · licensed to ${esc(u.name)}</div><div class="flex mt"><button class="btn sm" data-a="dl" data-id="${p.id}">⬇️ PDF</button>${p.type!=='PDF'?`<button class="btn sm ghost" data-a="dl" data-id="${p.id}" data-f="${p.type}">⬇️ ${p.type==='PPTX'?'PowerPoint':'Word'}</button>`:''}</div></div></div>`).join('')}</div>`:`<div class="empty"><span>📭</span>No resources yet. <a href="#/" style="color:var(--pri)">Start with a free one</a>.</div>`}
+   <h2 class="mt">Orders</h2><table class="t"><tr><th>Order</th><th>Date</th><th>Total</th><th>Status</th><th></th></tr>${ords.map(o=>`<tr><td><b>${o.no}</b></td><td>${o.at.slice(0,10)}</td><td>${mvr(o.total)}</td><td>${statusBadge(o.status)}</td><td><a class="btn sm ghost" href="#/order/${o.no}">View</a></td></tr>`).join('')||'<tr><td colspan=5 class="mut">No orders yet.</td></tr>'}</table></div>`}
+function pointsView(){const u=me();if(!u)return`<div class="wrap empty"><span>🪙</span>Sign in to earn points.<br><button class="btn mt" data-a="login">Sign in with Google</button></div>`;
+  const next=Math.ceil((u.points+1)/200)*200;const link=location.origin+location.pathname+'#/?ref='+u.code;
+  const refs=S.users.filter(x=>x.refBy===u.id);
+  return`<div class="wrap" style="max-width:900px;padding:30px 20px"><div class="ptspromo" style="grid-template-columns:1fr 1fr"><div><span class="sm" style="opacity:.8">Available balance</span><div style="font-size:48px;font-weight:800">🪙 ${u.points.toLocaleString()}</div><div style="opacity:.85">= ${mvr(u.points*ptVal())} to spend · ${u.pending} pending · ${u.held} held</div>
+    <div class="pbar mt"><div style="width:${(u.points%200)/2}%"></div></div><div class="sm mt" style="opacity:.85">${next-u.points} points to your next MVR ${next/S.settings.ptsPerMVRValue} reward</div></div>
+   <div style="background:rgba(255,255,255,.08);border-radius:16px;padding:20px"><div class="sm" style="opacity:.8">Your referral code</div><div style="font-size:32px;font-weight:800;letter-spacing:2px;color:#FFD27A">${u.code}</div><div class="sm" style="opacity:.85">Friends get ${S.settings.refFriend} points, you get ${S.settings.refReferrer} after their first purchase.</div><div class="flex mt wr"><button class="btn sm acc" data-a="copy" data-v="${esc(link)}">Copy invite link</button><a class="btn sm" style="background:#25D366" target="_blank" href="https://wa.me/?text=${encodeURIComponent('Join me on LessonLagoon for great teaching resources: '+link)}">WhatsApp</a></div></div></div>
+   <div class="three mt"><div class="box"><b>🛍️ Buy</b><p class="sm mut">${S.settings.ptsPerMVR} point per MVR 1 paid. Bonus during campaigns.</p></div><div class="box"><b>🔗 Share</b><p class="sm mut">+${S.settings.sharePts} when a new person signs up from your share link, plus ${S.settings.shareFirstOrderPct}% of their first order.</p></div><div class="box"><b>🎟️ Refer</b><p class="sm mut">+${S.settings.refReferrer} when someone uses your code. ${refs.length} friends joined so far.</p></div></div>
+   <h2>Points history</h2><table class="t ledger"><tr><th>Date</th><th>Activity</th><th>Status</th><th>Points</th></tr>${S.ledger.filter(l=>l.uid===u.id).map(l=>`<tr><td>${l.at}</td><td>${esc(l.type)}</td><td><span class="badge ${l.status==='available'?'b-paid':l.status==='pending'||l.status==='held'?'b-wait':'b-grey'}">${l.status}</span></td><td style="color:${l.pts<0?'var(--bad)':'var(--ok)'}">${l.pts>0?'+':''}${l.pts}</td></tr>`).join('')}</table></div>`}
+const statusBadge=s=>`<span class="badge ${{PAID:'b-paid',COMPLETED_FREE:'b-paid',AWAITING_VERIFICATION:'b-wait',AWAITING_TRANSFER:'b-wait',PAYMENT_REJECTED:'b-rej'}[s]||'b-grey'}">${s.replace(/_/g,' ').toLowerCase()}</span>`;
+const gIcon=()=>`<svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.9z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.9z"/></svg>`;
+
+/* ================= APPROVAL PAGE (from owner email link) ================= */
+function approveView(t){const o=S.orders.find(x=>x.tokens&&(x.tokens.approve===t||x.tokens.reject===t));
+  if(!o||o.tokens.used)return`<div class="wrap empty"><span>⛔</span><b>This link is no longer valid.</b><br>It may have been used already or expired. Open the Approvals queue in the admin panel.</div>`;
+  const isRej=o.tokens.reject===t;const cu=U(o.uid);
+  if(!isAdmin())return`<div class="wrap" style="max-width:520px;padding:50px 20px;text-align:center"><div style="font-size:46px">🔐</div><h2>Confirm it's you</h2><p class="mut">For security, approvals require the owner to be signed in. Opening this link did not change anything.</p><button class="gbtn" data-a="as" data-id="admin" data-back="1">${gIcon()} Sign in as owner with Google</button></div>`;
+  return`<div class="wrap" style="max-width:760px;padding:30px 20px"><span class="badge ${isRej?'b-rej':'b-paid'}">${isRej?'REJECT':'APPROVE'} payment</span><h1>${o.no} · ${mvr(o.total)}</h1><p class="mut">Opening this page changed nothing. Please confirm below (single-use link, expires in 7 days).</p>
+   <div class="two"><div class="box"><h3>Order</h3><div class="row"><span>Customer</span><b>${esc(cu.name)}</b></div><div class="row"><span>Email</span><span>${esc(cu.email)}</span></div>${o.items.map(i=>`<div class="row"><span>${esc(i.title)}</span><span>${mvr(i.final)}</span></div>`).join('')}<div class="row tot"><span>Expected</span><span>${mvr(o.total)}</span></div>
+    <div class="row"><span>Slip amount (entered)</span><b>${mvr(o.slip.amount)}</b></div><div class="row"><span>Reference</span><span>${esc(o.slip.ref)}</span></div>
+    ${o.dup?'<div class="offerline">⚠️ Possible duplicate: this slip image matches a slip used on order LL-2026-000097.</div>':''}</div>
+   <div class="box" style="text-align:center"><h3>Slip</h3><img src="${o.slipImg}" style="max-width:100%;border-radius:10px;border:1px solid var(--line)" alt="slip"></div></div>
+   ${isRej?`<label class="f">Reason (sent to the customer)</label><select class="inp" id="rreason"><option>Amount does not match the order total</option><option>Slip is unclear, please upload a clearer photo</option><option>Transfer not received in our account</option><option>Reference does not match the order number</option></select><button class="btn red block mt" data-a="confirmReject" data-id="${o.no}">Confirm rejection</button>`
+   :`<button class="btn block" style="padding:16px;font-size:17px" data-a="confirmApprove" data-id="${o.no}">✅ Confirm approval · ${mvr(o.total)}</button>`}</div>`}
+
+/* ================= ADMIN ================= */
+const tabs=[['dash','📊','Dashboard'],['approvals','✅','Approvals'],['orders','🧾','Orders'],['products','📦','Products'],['landing','🎨','Landing page'],['reviews','⭐','Reviews'],['customers','👥','Customers'],['campaigns','📣','Campaigns & coupons'],['points','🪙','Points & offers'],['inbox','📧','Owner inbox'],['settings','⚙️','Settings']];
+function adminView(tab){if(!isAdmin())return`<div class="wrap empty"><span>🔒</span>Admin area. Sign in as the owner.<br><button class="btn mt" data-a="as" data-id="admin">Sign in as owner</button></div>`;
+  const pend=S.orders.filter(o=>o.status==='AWAITING_VERIFICATION').length;
+  return`<div class="adm"><nav class="side"><small>Store</small>${tabs.map(t=>`<a href="#/admin/${t[0]}" class="${tab===t[0]?'on':''}">${t[1]} ${t[2]}${t[0]==='approvals'&&pend?`<span class="n">${pend}</span>`:''}${t[0]==='inbox'?`<span class="n">${S.outbox.filter(e=>e.to===S.users[0].email).length}</span>`:''}</a>`).join('')}<small>Shortcuts</small><a href="#/">🌐 View store</a></nav>
+   <div class="main">${(A[tab]||A.dash)()}</div></div>`}
+const A={
+dash(){const paid=S.orders.filter(o=>o.status==='PAID');const rev=paid.reduce((a,o)=>a+o.total,0);const pend=S.orders.filter(o=>o.status==='AWAITING_VERIFICATION');const mx=Math.max(...S.sales7.map(s=>s[1]));const c=activeCampaign();
+  const issued=S.ledger.filter(l=>l.pts>0).reduce((a,l)=>a+l.pts,0),red=-S.ledger.filter(l=>l.pts<0).reduce((a,l)=>a+l.pts,0)+S.orders.reduce((a,o)=>a+(o.pointsUsed||0),0);
+  return`<h1>Good afternoon, Shaina 👋</h1><div class="subt">Here's how ${esc(S.settings.store)} is doing.</div>
+  <div class="kpis"><div class="kpi hot"><small>Pending approvals</small><b>${pend.length}</b><a class="sm" style="color:var(--acc)" href="#/admin/approvals">Review now →</a></div><div class="kpi"><small>Revenue (7 days)</small><b>${mvr(S.sales7.reduce((a,s)=>a+s[1],0)*100+rev)}</b></div><div class="kpi"><small>Customers</small><b>${S.users.length-1}</b><span class="sm mut">+${S.users.filter(u=>u.joined>='2026-11-01').length} this month</span></div><div class="kpi"><small>Points issued / redeemed</small><b>${issued.toLocaleString()} / ${red}</b></div></div>
+  <div class="two"><div class="box"><h3>Sales this week (MVR)</h3><div class="bars">${S.sales7.map(s=>`<div style="height:${s[1]/mx*100}%"><em>${s[1].toLocaleString()}</em><span>${s[0]}</span></div>`).join('')}</div><div style="height:16px"></div></div>
+  <div class="box"><h3>Top resources</h3>${[...S.products].sort((a,b)=>b.sales-a.sales).slice(0,5).map(p=>`<div class="ci"><img src="${cover(p)}"><div class="t">${esc(p.title)}<div class="sm mut">${p.sales.toLocaleString()} downloads/sales</div></div>${priceHTML(p)}</div>`).join('')}</div></div>
+  ${c?`<div class="box" style="border-left:5px solid ${c.accent}"><b>📣 ${esc(c.name)}</b> is live · ${c.pct}% off · ${c.mult}× points · ends in <b data-cd="${c.end}"></b></div>`:''}`},
+approvals(){const L=S.orders.filter(o=>o.status==='AWAITING_VERIFICATION');
+  return`<h1>Pending verifications</h1><div class="subt">Slips waiting for your approval. Owner also receives each one by email with Approve / Reject buttons.</div>
+  ${L.length?L.map(o=>{const cu=U(o.uid);const age=Math.round((Date.now()-new Date(o.at))/36e5);return`<div class="box"><div class="flex wr" style="align-items:flex-start;gap:20px"><img src="${o.slipImg}" style="width:140px;border-radius:10px;border:1px solid var(--line);cursor:zoom-in" data-a="zoom" data-src="${o.slipImg}">
+   <div style="flex:1;min-width:240px"><div class="flex wr"><b style="font-size:18px">${o.no}</b>${statusBadge(o.status)}${age>12?'<span class="badge b-rej">⏰ '+age+'h waiting</span>':`<span class="badge b-grey">${Math.max(age,0)}h ago</span>`}${o.dup?'<span class="badge b-rej">⚠️ Possible duplicate slip</span>':''}</div>
+    <div class="mt"><b>${esc(cu.name)}</b> · ${esc(cu.email)}</div><div class="sm mut">${o.items.map(i=>esc(i.title)).join(', ')}</div>
+    <div class="flex mt wr"><div class="kpi" style="padding:8px 14px"><small>Expected</small><b style="font-size:18px">${mvr(o.total)}</b></div><div class="kpi" style="padding:8px 14px;${o.slip.amount!==o.total?'border-color:var(--bad)':''}"><small>Slip says</small><b style="font-size:18px">${mvr(o.slip.amount)}</b></div><div class="kpi" style="padding:8px 14px"><small>Reference</small><b style="font-size:15px">${esc(o.slip.ref)}</b></div></div></div>
+   <div class="flex" style="flex-direction:column;align-items:stretch"><a class="btn" href="#/approve/${o.tokens.approve}">✅ Approve</a><a class="btn red" href="#/approve/${o.tokens.reject}">✕ Reject</a><button class="btn ghost sm" data-a="email" data-id="${o.no}">📧 View owner email</button></div></div></div>`}).join(''):`<div class="empty"><span>🎉</span>All caught up. No slips waiting.</div>`}`},
+orders(){return`<h1>Orders</h1><div class="subt">${S.orders.length} orders · every state change is logged.</div><table class="t"><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Points</th><th>Status</th><th>Placed</th><th></th></tr>
+  ${[...S.orders].reverse().map(o=>`<tr><td><b>${o.no}</b></td><td>${esc(U(o.uid).name)}</td><td class="sm">${o.items.map(i=>esc(i.title)).join('<br>')}</td><td>${mvr(o.total)}</td><td>${o.pointsUsed||'—'}</td><td>${statusBadge(o.status)}</td><td class="sm">${o.at.replace('T',' ').slice(0,16)}</td><td>${o.status==='AWAITING_VERIFICATION'?`<a class="btn sm" href="#/admin/approvals">Review</a>`:o.status==='PAID'?`<button class="btn sm ghost" data-a="refund" data-id="${o.no}">Refund</button>`:''}</td></tr>`).join('')}</table>`},
+products(){return`<div class="flex" style="justify-content:space-between"><div><h1>Products</h1><div class="subt">${S.products.length} resources · previews are generated and watermarked automatically.</div></div><button class="btn acc" data-a="newProduct">＋ New product</button></div>
+  <table class="t"><tr><th></th><th>Title</th><th>Type</th><th>Price</th><th>Min price 🔒</th><th>Max discount</th><th>Status</th><th>Featured</th><th>Sales</th></tr>
+  ${S.products.map(p=>`<tr><td><img src="${cover(p)}" style="width:56px;border-radius:8px"></td><td><b>${esc(p.title)}</b><div class="sm mut">${esc(p.grade)} · ${esc(catName(p.cat))}</div></td><td>${p.type}</td>
+   <td><input class="inp" style="width:100px;padding:6px 8px" value="${p.price/100}" data-ch="price" data-id="${p.id}"></td><td>${p.price?`<input class="inp" style="width:90px;padding:6px 8px" value="${p.min/100}" data-ch="min" data-id="${p.id}">`:'—'}</td>
+   <td class="sm">${p.price?Math.round((1-p.min/p.price)*100)+'%':'Free'}</td><td><span class="badge ${p.status==='Published'?'b-paid':'b-grey'}">${p.status}</span></td><td><button class="sw ${p.featured?'on':''}" data-a="feat" data-id="${p.id}"></button></td><td>${p.sales}</td></tr>`).join('')}</table>
+  <p class="sm mut mt">🔒 Minimum price is never shown to customers. Discounts, campaigns, coupons and points can never push a sale below it.</p>`},
+landing(){const L=S.landing,v=L.variants[L.variant];const names={trust:'Trust strip',welcome:'Welcome offer banner',featured:'Featured resources',campaign:'Campaign block',free:'Free resources',categories:'Shop by subject',all:'All resources grid',reviews:'Customer reviews',how:'How it works',points:'Points promo',faq:'FAQ'};
+  return`<div class="flex" style="justify-content:space-between"><div><h1>Landing page</h1><div class="subt">Everything on the home page is editable here. Changes go live when you publish.</div></div><a class="btn" href="#/">👁️ View live</a></div>
+  <div class="two"><div class="box"><h3>Hero banner</h3><label class="f">Active variant</label><div class="flex">${L.variants.map((_,i)=>`<span class="chip ${L.variant===i?'on':''}" data-a="variant" data-id="${i}">Variant ${String.fromCharCode(65+i)}</span>`).join('')}</div>
+   <label class="f">Kicker</label><input class="inp" data-lp="kicker" value="${esc(v.kicker)}"><label class="f">Headline (use &lt;em&gt; to highlight)</label><input class="inp" data-lp="h1" value="${esc(v.h1)}"><label class="f">Sub-headline</label><textarea class="inp" rows="3" data-lp="sub">${esc(v.sub)}</textarea>
+   <div class="two"><div><label class="f">Primary button</label><input class="inp" data-lp="cta" value="${esc(v.cta)}"></div><div><label class="f">Secondary button</label><input class="inp" data-lp="cta2" value="${esc(v.cta2)}"></div></div>
+   <label class="f">Interactive background</label><div class="flex wr">${[['shapes','✏️ Floating shapes'],['network','🕸️ Particle network'],['gradient','🌈 Gradient mesh']].map(([k,l])=>`<span class="chip ${L.bg===k?'on':''}" data-a="bg" data-id="${k}">${l}</span>`).join('')}</div><p class="sm mut">Pauses off-screen and turns off for visitors who prefer reduced motion.</p>
+   <button class="btn mt" data-a="publishLP">Publish changes</button></div>
+  <div class="box"><h3>Sections (drag order with arrows)</h3>${L.sections.map((s,i)=>`<div class="tog"><span>${names[s.k]}</span><span class="flex"><button class="btn sm ghost" data-a="mv" data-i="${i}" data-d="-1">↑</button><button class="btn sm ghost" data-a="mv" data-i="${i}" data-d="1">↓</button><button class="sw ${s.on?'on':''}" data-a="sec" data-i="${i}"></button></span></div>`).join('')}
+   <h3 class="mt">Live preview</h3><div style="border:1px solid var(--line);border-radius:12px;overflow:hidden;height:260px;position:relative"><div style="transform:scale(.42);transform-origin:0 0;width:238%;pointer-events:none" id="lpprev">${homeView().split('<footer')[0]}</div></div></div></div>`},
+reviews(){return`<h1>Reviews</h1><div class="subt">Only verified owners can review. Approve, hide or feature on the home page.</div><table class="t"><tr><th>Review</th><th>Product</th><th>Rating</th><th>Status</th><th>On home</th><th></th></tr>
+  ${S.reviews.map(r=>`<tr><td><b>${esc(r.name)}</b><div class="sm">${esc(r.text)}</div></td><td class="sm">${esc(P(r.pid).title)}</td><td class="stars">${'★'.repeat(r.rating)}</td><td><span class="badge ${r.status==='approved'?'b-paid':r.status==='pending'?'b-wait':'b-grey'}">${r.status}</span></td><td><button class="sw ${r.home?'on':''}" data-a="rhome" data-id="${r.id}"></button></td>
+   <td>${r.status!=='approved'?`<button class="btn sm" data-a="rapp" data-id="${r.id}">Approve</button>`:`<button class="btn sm ghost" data-a="rhide" data-id="${r.id}">Hide</button>`}</td></tr>`).join('')}</table>
+   <button class="btn ghost mt" data-a="addTesti">＋ Add testimonial</button>`},
+customers(){const q=(window._cq||'').toLowerCase();const L=S.users.filter(u=>u.role==='CUSTOMER'&&(u.name+u.email+u.tags.join(' ')).toLowerCase().includes(q));
+  return`<div class="flex" style="justify-content:space-between"><div><h1>Customers</h1><div class="subt">${L.length} customers · every new customer automatically receives the welcome offer.</div></div><button class="btn ghost" data-a="csv">⬇️ Export CSV</button></div>
+  <input class="inp" style="max-width:360px;margin-bottom:14px" placeholder="Search name, email or tag…" value="${esc(window._cq||'')}" id="cq">
+  <table class="t"><tr><th>Customer</th><th>Joined</th><th>Source</th><th>Orders</th><th>Spent</th><th>Points</th><th>Consent</th><th>Welcome offer</th></tr>
+  ${L.map(u=>{const os=S.orders.filter(o=>o.uid===u.id);const sp=os.filter(o=>o.status==='PAID').reduce((a,o)=>a+o.total,0);return`<tr style="cursor:pointer" data-a="cust" data-id="${u.id}"><td><div class="flex"><div class="av" style="background:${u.color};width:32px;height:32px;font-size:12px">${initials(u.name)}</div><div><b>${esc(u.name)}</b><div class="sm mut">${esc(u.email)}</div></div></div></td><td>${u.joined}</td><td class="sm">${esc(u.source)}</td><td>${os.length}</td><td>${mvr(sp)}</td><td><b>${u.points}</b>${u.pending?`<span class="sm mut"> +${u.pending}</span>`:''}</td><td>${u.consent?'✅':'—'}</td><td>${u.paid?'<span class="badge b-grey">used</span>':welcomeActive(u)?'<span class="badge b-off">active</span>':'<span class="badge b-grey">expired</span>'}</td></tr>`}).join('')}</table>`},
+campaigns(){const c0=S.campaigns;return`<div class="flex" style="justify-content:space-between"><div><h1>Campaigns & coupons</h1><div class="subt">Campaigns start and end automatically. Prices never go below each product's minimum.</div></div><button class="btn acc" data-a="newCamp">＋ New campaign</button></div>
+  <table class="t"><tr><th>Campaign</th><th>Type</th><th>Discount</th><th>Points</th><th>Dates</th><th>Status</th><th></th></tr>${c0.map(c=>{const live=c.active&&Date.now()>=c.start&&Date.now()<=c.end;return`<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c.accent}"></span> <b>${esc(c.name)}</b><div class="sm mut">${esc(c.banner)}</div></td><td>${esc(c.type)}</td><td>${c.pct}%</td><td>${c.mult}×</td><td class="sm">${new Date(c.start).toLocaleDateString('en-GB')} → ${new Date(c.end).toLocaleDateString('en-GB')}</td><td><span class="badge ${live?'b-paid':c.ended?'b-grey':'b-wait'}">${live?'Live':c.ended?'Ended':c.active?'Scheduled':'Paused'}</span></td><td><button class="btn sm ghost" data-a="togCamp" data-id="${c.id}">${c.active?'Pause':'Activate'}</button> <button class="btn sm ghost" data-a="dupCamp" data-id="${c.id}">Duplicate</button></td></tr>`}).join('')}</table>
+  <h2 class="mt">Coupons</h2><table class="t"><tr><th>Code</th><th>Discount</th><th>Used</th><th>Expires</th></tr>${S.coupons.map(c=>`<tr><td><b>${c.code}</b></td><td>${c.pct}%</td><td>${c.used} / ${c.limit}</td><td>${c.expires}</td></tr>`).join('')}</table>
+  <div class="flex mt"><input class="inp" id="ncode" placeholder="CODE" style="max-width:160px"><input class="inp" id="npct" type="number" placeholder="% off" style="max-width:100px"><button class="btn sm" data-a="addCoupon">Add coupon</button></div>`},
+points(){const s=S.settings;const f=(k,l,h)=>`<div><label class="f">${l}</label><input class="inp" type="number" data-set="${k}" value="${k.split('.').reduce((o,x)=>o[x],s)}"><div class="sm mut">${h||''}</div></div>`;
+  return`<h1>Points & offers</h1><div class="subt">All rules are configurable. Changes apply immediately to new activity.</div>
+  <div class="two"><div class="box"><h3>🪙 Earning</h3><div class="two">${f('signupPts','Sign-up bonus')}${f('ptsPerMVR','Points per MVR 1 paid')}${f('sharePts','Per new friend via share link','Only when the friend signs up or buys')}${f('shareMonthlyCap','Monthly share cap')}${f('refReferrer','Referral: referrer')}${f('refFriend','Referral: new friend')}${f('reviewPts','Approved review')}${f('holdDays','Hold days before available','Refund safety')}</div></div>
+  <div class="box"><h3>💸 Redemption</h3><div class="two">${f('ptsPerMVRValue','Points = MVR 1')}${f('maxPointsPct','Max % of price payable by points','Buyer always pays the rest')}</div>
+   <div class="earn mt"><b>Example:</b> MVR 100 item → up to MVR ${s.maxPointsPct} (${s.maxPointsPct*s.ptsPerMVRValue} pts) with points, customer pays at least MVR ${100-s.maxPointsPct}. Minimum price still applies.</div>
+   <h3 class="mt">🎁 Welcome offer (every new customer)</h3><div class="tog"><span>Enabled</span><button class="sw ${s.welcome.enabled?'on':''}" data-a="wtog"></button></div><div class="two">${f('welcome.pct','Discount %')}${f('welcome.days','Valid for days')}</div>
+   <button class="btn mt" data-a="saveSet">Save rules</button></div></div>
+   <div class="box"><h3>Pending points</h3><p class="sm mut">Purchase points become available after ${s.holdDays} days. Use this to simulate time passing in the demo.</p><button class="btn ghost" data-a="release">⏩ Release all pending points</button></div>`},
+inbox(){return`<h1>Owner inbox (simulated Gmail)</h1><div class="subt">Every email the system sends. In production these go through the transactional email provider.</div>
+  <table class="t"><tr><th>To</th><th>Subject</th><th>Time</th><th></th></tr>${S.outbox.map(e=>`<tr><td class="sm">${esc(e.to)}</td><td><b>${esc(e.subject)}</b></td><td class="sm">${e.at}</td><td>${e.type==='approval'?`<button class="btn sm" data-a="email" data-id="${e.orderNo}">Open</button>`:`<button class="btn sm ghost" data-a="cemail" data-id="${e.id}">Open</button>`}</td></tr>`).join('')||'<tr><td colspan=4 class="mut">No emails yet.</td></tr>'}</table>`},
+settings(){const b=S.settings.bank;return`<h1>Settings</h1><div class="subt">Store profile, bank details, watermark and previews.</div><div class="two"><div class="box"><h3>Bank account shown at checkout</h3><label class="f">Bank</label><input class="inp" data-bank="bank" value="${esc(b.bank)}"><label class="f">Account name</label><input class="inp" data-bank="name" value="${esc(b.name)}"><label class="f">Account number</label><input class="inp" data-bank="number" value="${esc(b.number)}"><p class="sm mut">🔐 Changing bank details requires re-authentication and emails all admins.</p><button class="btn mt" data-a="saveBank">Save bank details</button></div>
+  <div class="box"><h3>Previews & watermark</h3><label class="f">Watermark text (burned into preview images)</label><input class="inp" id="wmt" value="${esc(S.settings.watermark)}"><label class="f">Default preview pages</label><input class="inp" type="number" id="pvp" value="${S.settings.previewPages}"><label class="f">Slip expiry (hours)</label><input class="inp" type="number" id="sexp" value="${S.settings.slipExpiryHours}"><button class="btn mt" data-a="saveWm">Save & regenerate previews</button>
+  <h3 class="mt">Sign-in</h3><div class="tog"><span>Google (Gmail) sign-in</span><button class="sw on"></button></div><div class="tog"><span>Admin emails</span><b class="sm">owner@lessonlagoon.mv</b></div></div></div>`}};
+
+/* ================= MODALS ================= */
+function modal(html,wide){$('#layer').innerHTML=`<div class="ov" data-a="bg-close"><div class="modal ${wide?'wide':''}"><button class="x" data-a="close">✕</button>${html}</div></div>`}
+function closeLayer(){$('#layer').innerHTML=''}
+let afterLogin=null;
+function loginModal(then){afterLogin=then||null;const cs=S.users.filter(u=>u.role==='CUSTOMER').slice(0,3);
+  modal(`<div style="text-align:center"><div class="logo" style="justify-content:center"><i>🌊</i>${esc(S.settings.store)}</div><h2 style="margin:16px 0 4px">Sign in to continue</h2><p class="mut sm">Free resources, your Library, points and offers.</p></div>
+  <div class="gpick mt"><div style="background:#F8FAFC;cursor:default;justify-content:center">${gIcon()} <b>Choose an account</b></div>${cs.map(u=>`<div data-a="pick" data-id="${u.id}"><div class="av" style="background:${u.color};width:34px;height:34px;font-size:13px">${initials(u.name)}</div><div><b class="sm">${esc(u.name)}</b><div class="sm mut">${esc(u.email)}</div></div></div>`).join('')}
+  <div data-a="newcust"><div class="av" style="background:#94A3B8;width:34px;height:34px">＋</div><div><b class="sm">Use another account</b><div class="sm mut">Creates a new customer (welcome offer + ${S.settings.signupPts} points)</div></div></div></div>
+  <label class="flex sm mt"><input type="checkbox" checked disabled> I accept the Terms and Acceptable Use Policy</label><label class="flex sm"><input type="checkbox" id="mc"> Email me offers and new resources (optional)</label>`)}
+function signIn(id){S.session=id||null;closeLayer();const u=me();if(u)toast(`👋 Signed in as <b>${esc(u.name)}</b>`);const f=afterLogin;afterLogin=null;if(f)f();else route()}
+const NEW=[['Hawwa Nashidha','hawwa.nashidha@gmail.com'],['Ali Shamin','ali.shamin.edu@gmail.com'],['Mohamed Iyaz','iyaz.teacher@gmail.com'],['Aishath Leena','leena.aishath@gmail.com']];
+function newCustomer(){const n=NEW[(S.users.length)%NEW.length];const id='u'+(S.users.length+1);const code=n[0].split(' ')[0].toUpperCase().slice(0,5)+Math.floor(10+Math.random()*89);
+  const ref=S.ref?S.users.find(u=>u.code===S.ref.split('&')[0]):null;
+  const u={id,name:n[0],email:n[1],role:'CUSTOMER',points:0,pending:0,held:0,code,refBy:ref?ref.id:null,joined:new Date().toISOString().slice(0,10),source:ref?(S.refShare?'Share link ('+ref.code+')':'Referral ('+ref.code+')'):'Direct',consent:!!$('#mc')?.checked,paid:false,color:['#0EA5E9','#8B5CF6','#F43F5E','#10B981'][S.users.length%4],tags:['New'],notes:'',
+    welcome:{status:'active',pct:S.settings.welcome.pct,expires:Date.now()+S.settings.welcome.days*864e5}};
+  S.users.push(u);addPts(id,S.settings.signupPts,'Sign-up bonus');
+  if(ref){addPts(id,S.settings.refFriend,'Referral welcome from '+ref.code,'pending');
+    if(S.refShare){addPts(ref.id,S.settings.sharePts,'Friend joined via your share link ('+u.name.split(' ')[0]+')');custEmail(ref.id,`🎉 ${u.name.split(' ')[0]} joined from your link – +${S.settings.sharePts} points`)}}
+  custEmail(id,`Welcome to ${S.settings.store}! Here's ${S.settings.welcome.pct}% off your first resource 🎁`);
+  S.session=id;closeLayer();toast(`🎉 Welcome <b>${esc(u.name)}</b>! +${S.settings.signupPts} points and ${S.settings.welcome.pct}% welcome offer unlocked`);
+  const f=afterLogin;afterLogin=null;S.ref=null;S.refShare=false;if(f)f();else route()}
+function requireLogin(fn){if(me()&&!isAdmin())return fn();if(isAdmin()){toast('Switch to a customer account to buy (demo panel bottom-left)');return}loginModal(fn)}
+
+/* ================= ACTIONS ================= */
+function grant(uid,pid){if(!owns(uid,pid))S.ent.push({uid,pid,at:new Date().toISOString().slice(0,10)})}
+function download(pid,fmt){const p=P(pid),u=me();if(!u||!owns(u.id,pid))return toast('⛔ No access');
+  const c=document.createElement('canvas');c.width=900;c.height=1165;const x=c.getContext('2d');const im=new Image();
+  im.onload=()=>{x.fillStyle='#fff';x.fillRect(0,0,900,1165);x.drawImage(im,0,0,900,720);x.fillStyle='#14213D';x.font='800 34px sans-serif';wrapText(x,p.title,50,800,800,40,3);x.font='20px sans-serif';x.fillStyle='#5B6475';x.fillText('Full resource · '+p.pages+' pages · '+(fmt||'PDF'),50,920);
+   x.fillStyle='#F1F5F9';x.fillRect(0,1115,900,50);x.fillStyle='#14213D';x.font='600 15px monospace';x.fillText(`Licensed to ${u.name} · ${u.email} · Licence LIC-${pid.toUpperCase()}-${u.id.toUpperCase()}`,20,1145);
+   const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download=p.slug+'-licensed.png';a.click()};im.src=cover(p);
+  toast('⬇️ Secure link generated (valid 5 min) · licence-stamped for '+esc(u.name.split(' ')[0]))}
+function placeOrder(){if(!$('#agree')?.checked)return toast('☑️ Please accept the Terms to continue');const u=me();const T=totals();const c=activeCampaign();
+  const no='LL-2026-'+String(S.seq++).padStart(6,'0');
+  const o={no,uid:u.id,items:T.L.map(({p,pr})=>({pid:p.id,title:p.title,list:p.price,final:pr.final,floor:pr.floor})),subtotal:T.sub,discount:T.disc,pointsUsed:S.usePts,total:T.total,status:'AWAITING_TRANSFER',at:new Date().toISOString().slice(0,16),method:'Bank transfer',mult:c?c.mult:1,coupon:S.coupon,welcome:T.L.some(l=>l.pr.label==='Your welcome offer')};
+  if(S.usePts){u.points-=S.usePts;u.held+=S.usePts;S.ledger.unshift({uid:u.id,type:'Held for '+no,pts:-S.usePts,status:'held',at:o.at.slice(0,10)})}
+  if(S.coupon){const cp=S.coupons.find(x=>x.code===S.coupon);if(cp)cp.used++}
+  S.orders.push(o);S.cart=[];S.usePts=0;S.coupon=null;location.hash='#/order/'+no;toast('✅ Order placed. Transfer and upload your slip.')}
+function submitSlip(no,img,amount){const o=S.orders.find(x=>x.no===no);o.slip={amount:amount??o.total,ref:$('#sref')?.value||no,sender:U(o.uid).name.toUpperCase(),date:$('#sdate')?.value};o.slipImg=img||slipImage(o);o.status='AWAITING_VERIFICATION';o.at=new Date().toISOString().slice(0,16);
+  ownerEmail(o);custEmail(o.uid,`We received your slip for ${no}`);route();toast('📨 Slip received · owner notified by email with Approve/Reject buttons')}
+function handleSlip(files){const f=files[0];if(!f)return;if(f.size>10e6)return toast('File too large (max 10 MB)');const no=location.hash.split('/')[2];
+  if(f.type.startsWith('image/')){const r=new FileReader();r.onload=()=>submitSlip(no,r.result);r.readAsDataURL(f)}else submitSlip(no,null)}
+function approve(no){const o=S.orders.find(x=>x.no===no);if(o.tokens.used||o.status!=='AWAITING_VERIFICATION')return toast('Already processed');o.tokens.used=true;o.status='PAID';const u=U(o.uid);
+  o.items.forEach(i=>grant(u.id,i.pid));
+  if(o.pointsUsed){u.held-=o.pointsUsed;const h=S.ledger.find(l=>l.type==='Held for '+no);if(h){h.status='spent';h.type='Spent on '+no}}
+  const earn=Math.floor(o.total/100)*S.settings.ptsPerMVR*(o.mult||1);o.earned=earn;if(earn)addPts(u.id,earn,'Purchase '+no+(o.mult>1?` (${o.mult}× campaign)`:''),'pending');
+  if(!u.paid&&u.refBy){const r=U(u.refBy);addPts(r.id,S.settings.refReferrer,'Referral: '+u.name+' made first purchase','pending');const bonus=Math.round(o.total/100*S.settings.shareFirstOrderPct/100);if(bonus)addPts(r.id,bonus,`${S.settings.shareFirstOrderPct}% of friend's first order`,'pending');
+    S.ledger.filter(l=>l.uid===u.id&&l.status==='pending'&&l.type.startsWith('Referral welcome')).forEach(l=>{l.status='available';u.pending-=l.pts;u.points+=l.pts})}
+  if(o.welcome&&u.welcome)u.welcome.status='used';u.paid=true;
+  custEmail(u.id,`✅ Payment approved – your downloads are ready (${no})`);location.hash='#/admin/approvals';toast(`✅ ${no} approved · ${o.items.length} download(s) unlocked for ${esc(u.name)}`)}
+function reject(no){const o=S.orders.find(x=>x.no===no);o.tokens.used=true;o.status='PAYMENT_REJECTED';o.reason=$('#rreason').value;custEmail(o.uid,`Action needed: we couldn't verify your payment for ${no}`);location.hash='#/admin/approvals';toast('Slip rejected · customer emailed with the reason')}
+function emailModal(no){const o=S.orders.find(x=>x.no===no);const cu=U(o.uid);
+  modal(`<div class="gm"><div class="hd"><h3>Payment slip to verify – ${o.no} – ${mvr(o.total)}</h3><b>${esc(S.settings.store)}</b> &lt;noreply@lessonlagoon.mv&gt; to me</div>
+  <div class="bd"><p>Hi Shaina,</p><p><b>${esc(cu.name)}</b> (${esc(cu.email)}) uploaded a bank transfer slip.</p>
+  <table style="width:100%;border-collapse:collapse;font-size:14px">${o.items.map(i=>`<tr><td style="padding:4px 0">${esc(i.title)}</td><td style="text-align:right">${mvr(i.final)}</td></tr>`).join('')}<tr><td style="padding-top:8px"><b>Expected amount</b></td><td style="text-align:right"><b>${mvr(o.total)}</b></td></tr><tr><td>Amount on slip (entered)</td><td style="text-align:right">${mvr(o.slip.amount)}</td></tr><tr><td>Reference</td><td style="text-align:right">${esc(o.slip.ref)}</td></tr></table>
+  ${o.dup?'<p style="background:#FEF2F2;color:#991B1B;padding:10px;border-radius:6px">⚠️ This slip looks like one already used on another order.</p>':''}
+  <p><img src="${o.slipImg}" style="max-width:220px;border:1px solid #ddd;border-radius:6px"></p>
+  ${o.tokens.used?'<p><b>This payment has already been processed.</b></p>':`<p><a class="abtn" style="background:#16A34A" data-a="go" data-h="#/approve/${o.tokens.approve}">APPROVE</a><a class="abtn" style="background:#DC2626" data-a="go" data-h="#/approve/${o.tokens.reject}">REJECT</a></p>`}
+  <p style="color:#666;font-size:12px">These links are single-use and expire in 7 days. Opening a link does not approve anything; you'll be asked to confirm.<br>📎 slip-${o.no}.jpg</p></div></div>`,true)}
+function share(pid){const p=P(pid),u=me();const code=u?u.code:null;const link=location.origin+location.pathname+'#/p/'+p.slug+(code?'?ref='+code:'');
+  modal(`<h2 style="margin-top:0">🔗 Share & earn</h2><p class="mut">${u?`Share <b>${esc(p.title)}</b>. When a new teacher signs up or buys from your link, you get <b>+${S.settings.sharePts} points</b> plus ${S.settings.shareFirstOrderPct}% of their first order.`:'Sign in to get your personal share link and earn points.'}</p>
+  <div class="copy"><b style="font-size:12.5px;word-break:break-all">${esc(link)}</b><button class="btn sm ghost" data-a="copy" data-v="${esc(link)}">Copy</button></div>
+  <div class="flex wr"><a class="btn sm" style="background:#25D366" target="_blank" href="https://wa.me/?text=${encodeURIComponent(p.title+' – '+link)}">WhatsApp</a><a class="btn sm" style="background:#7360F2" target="_blank" href="viber://forward?text=${encodeURIComponent(link)}">Viber</a><a class="btn sm" style="background:#1877F2" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}">Facebook</a>${navigator.share?`<button class="btn sm ghost" data-a="nshare" data-v="${esc(link)}">More…</button>`:''}</div>
+  ${u?`<div class="earn mt">🛡️ Points are only awarded when a <b>real new person</b> acts on your link, never just for clicking share. Monthly cap: ${S.settings.shareMonthlyCap} points.</div>
+  <button class="btn ghost block mt" data-a="simShare" data-id="${u.code}">🧪 Demo: simulate a friend opening my link and signing up</button>`:`<button class="btn block mt" data-a="login">Sign in with Google</button>`}`)}
+function custModal(id){const u=U(id);const os=S.orders.filter(o=>o.uid===id);
+  modal(`<div class="flex"><div class="av" style="background:${u.color};width:52px;height:52px;font-size:18px">${initials(u.name)}</div><div><h2 style="margin:0">${esc(u.name)}</h2><div class="mut sm">${esc(u.email)} · Google account · joined ${u.joined}</div></div></div>
+  <div class="kpis mt" style="grid-template-columns:repeat(4,1fr)"><div class="kpi"><small>Points</small><b>${u.points}</b></div><div class="kpi"><small>Pending</small><b>${u.pending}</b></div><div class="kpi"><small>Orders</small><b>${os.length}</b></div><div class="kpi"><small>Library</small><b>${S.ent.filter(e=>e.uid===id).length}</b></div></div>
+  <div class="two"><div><b>Source</b><p class="sm">${esc(u.source)}</p><b>Referral code</b><p class="sm">${u.code} · ${S.users.filter(x=>x.refBy===id).length} referrals</p><b>Tags</b><p>${u.tags.map(t=>`<span class="badge b-grey">${esc(t)}</span>`).join(' ')||'—'}</p></div>
+  <div><b>Internal notes</b><textarea class="inp" rows="3" id="cnote">${esc(u.notes)}</textarea><button class="btn sm ghost mt" data-a="saveNote" data-id="${id}">Save note</button></div></div>
+  <h3>Adjust points</h3><div class="flex"><input class="inp" id="adjp" type="number" placeholder="+/- points" style="max-width:130px"><input class="inp" id="adjr" placeholder="Reason (required)"><button class="btn sm" data-a="adj" data-id="${id}">Apply</button></div>
+  <h3>Grant a product</h3><div class="flex"><select class="inp" id="gp">${S.products.map(p=>`<option value="${p.id}">${esc(p.title)}</option>`).join('')}</select><button class="btn sm" data-a="grantP" data-id="${id}">Grant</button></div>
+  <h3>Orders</h3>${os.map(o=>`<div class="row"><span>${o.no} · ${o.items.length} item(s)</span><span>${statusBadge(o.status)} ${mvr(o.total)}</span></div>`).join('')||'<p class="mut sm">No orders.</p>'}`,true)}
+function newProduct(){window._np={files:[],pages:[]};
+  modal(`<h2 style="margin-top:0">＋ New product</h2><div class="drop" id="drop" data-a="pickFile"><div style="font-size:38px">📄</div><b>Drop PDF, Word or PowerPoint files here</b><div class="sm mut">Uploaded directly to secure storage · scanned · previews generated automatically</div></div><input type="file" id="pf" accept=".pdf,.docx,.pptx,.doc,.ppt" multiple hidden>
+  <div id="procbox"></div>
+  <div class="two"><div><label class="f">Title</label><input class="inp" id="nt" placeholder="e.g. Grade 2 Addition Adventures"></div><div><label class="f">Category</label><select class="inp" id="nc">${S.categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select></div></div>
+  <div class="two"><div><label class="f">Grade</label><input class="inp" id="ng" value="Grade 2"></div><div><label class="f">Short description</label><input class="inp" id="nd" placeholder="One line that sells it"></div></div>
+  <div class="three"><div><label class="f">Price (MVR, 0 = free)</label><input class="inp" id="npr" type="number" value="50"></div><div><label class="f">Minimum price 🔒</label><input class="inp" id="nmin" type="number" value="10"></div><div><label class="f">Preview pages</label><input class="inp" id="npv" type="number" value="${S.settings.previewPages}"></div></div>
+  <p class="sm mut" id="helper">Display price MVR 50 · minimum MVR 10 · max possible discount 80%</p>
+  <div class="flex mt"><button class="btn acc" data-a="publish">Publish</button><button class="btn ghost" data-a="close">Save draft</button></div>`,true);
+  ['npr','nmin'].forEach(i=>$('#'+i).oninput=()=>{const a=+$('#npr').value,b=+$('#nmin').value;$('#helper').innerHTML=a?(b>a?'<span style="color:var(--bad)">Minimum price can\'t be higher than the price.</span>':`Display price MVR ${a} · minimum MVR ${b} · max possible discount ${Math.round((1-b/a)*100)}%`):'Free resource – no minimum price needed.'});after()}
+let pdfjsP=null;function loadPdfjs(){return pdfjsP||(pdfjsP=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';s.onload=()=>{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';res(pdfjsLib)};s.onerror=rej;document.head.appendChild(s)}))}
+async function handleUpload(files){const f=files[0];if(!f)return;const ext=f.name.split('.').pop().toLowerCase();if(!['pdf','docx','pptx','doc','ppt'].includes(ext))return toast('⛔ File type not allowed');
+  const type=ext.startsWith('ppt')?'PPTX':ext.startsWith('doc')?'DOCX':'PDF';window._np.type=type;window._np.name=f.name;if(!$('#nt').value)$('#nt').value=f.name.replace(/\.[^.]+$/,'').replace(/[-_]/g,' ');
+  const steps=[['Uploading to quarantine storage','up'],['Virus scan (ClamAV) & file-type check','scan'],[type==='PDF'?'PDF detected – no conversion needed':'Converting '+type+' → PDF (LibreOffice headless)','conv'],['Rendering pages (pdf.js → canvas)','rend'],['Burning watermark into pixels (sharp) → WebP','wm'],['Ready','ok']];
+  const box=$('#procbox');const draw=k=>{box.innerHTML=`<div class="proc">${steps.map((s,i)=>`<div class="${i<k?'ok':i===k?'run':''}">${i<k?'✅':i===k?'⏳':'○'} ${s[0]}</div>`).join('')}</div>`};
+  const npv=+$('#npv').value||3;let pages=[],count=npv*3;
+  for(let k=0;k<steps.length-1;k++){draw(k);await new Promise(r=>setTimeout(r,k===3?200:550));
+    if(k===3){try{if(type!=='PDF')throw 0;const lib=await loadPdfjs();const doc=await lib.getDocument({data:await f.arrayBuffer()}).promise;count=doc.numPages;
+      for(let i=1;i<=Math.min(npv,doc.numPages);i++){const pg=await doc.getPage(i);const vp0=pg.getViewport({scale:1});const vp=pg.getViewport({scale:900/vp0.width});const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;pages.push(c)}}
+      catch(e){pages=[]}}
+    if(k===4){window._np.pages=pages.map(c=>{const x=c.getContext('2d');watermark(x,c.width,c.height,null);return c.toDataURL('image/webp',.8)})}}
+  window._np.count=count;draw(steps.length);
+  box.innerHTML+=`<div class="sm mut">${f.name} · ${(f.size/1048576).toFixed(1)} MB · ${type==='PDF'&&pages.length?count+' pages detected':'pages estimated (conversion runs on the server in production)'}</div><div class="pvrow mt">${(window._np.pages.length?window._np.pages:[1,2,3].slice(0,npv).map(i=>previewPage({id:'tmp'+i,title:$('#nt').value,grade:$('#ng').value,type,pages:count,color:'#0E8C7F',ic:'📘'},i))).map(s=>`<img src="${s}">`).join('')}</div>`}
+function publishProduct(){const np=window._np;const t=$('#nt').value.trim();if(!t)return toast('Add a title');const pr=Math.round(+$('#npr').value*100),mn=Math.round(+$('#nmin').value*100);if(pr&&(mn<=0||mn>pr))return toast('⛔ Minimum price must be above 0 and not more than the price');
+  const id='p'+(S.products.length+1+Math.floor(Math.random()*900));const slug=t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+id;
+  S.products.unshift({id,slug,title:t,short:$('#nd').value||'A brand-new teacher-made resource.',cat:$('#nc').value,grade:$('#ng').value,type:np.type||'PDF',pages:np.count||12,price:pr,min:pr?mn:0,featured:true,rating:5,rc:0,color:['#0E8C7F','#7C3AED','#0284C7','#DB2777','#EA580C'][Math.floor(Math.random()*5)],ic:'📘',status:'Published',sales:0,curr:'National Curriculum',custom:np.pages&&np.pages.length?np.pages:null});
+  closeLayer();route();toast('🚀 Published! Now live on the store with watermarked previews.')}
+function newCampModal(){modal(`<h2 style="margin-top:0">📣 New campaign</h2><div class="two"><div><label class="f">Name</label><input class="inp" id="cn" value="Eid al-Adha Sale"></div><div><label class="f">Type</label><select class="inp" id="ct">${["Teachers' Day","Children's Day","Eid al-Fitr","Eid al-Adha","Ramazan","Back to School","Independence Day","National Day","Custom"].map(t=>`<option>${t}</option>`).join('')}</select></div></div>
+  <div class="three"><div><label class="f">Discount %</label><input class="inp" id="cp" type="number" value="25"></div><div><label class="f">Points multiplier</label><input class="inp" id="cm" type="number" value="2"></div><div><label class="f">Accent colour</label><input class="inp" id="ca" type="color" value="#15803D" style="height:46px"></div></div>
+  <div class="two"><div><label class="f">Starts</label><input class="inp" id="cs" type="datetime-local"></div><div><label class="f">Ends</label><input class="inp" id="ce" type="datetime-local"></div></div>
+  <label class="f">Banner text</label><input class="inp" id="cb" value="Eid Mubarak! 25% off every resource + double points">
+  <div class="earn mt" id="cfloor"></div><button class="btn acc mt" data-a="saveCamp">Save & schedule</button>`);
+  const d=new Date();$('#cs').value=new Date(d-6e4*d.getTimezoneOffset()).toISOString().slice(0,16);$('#ce').value=new Date(+d+5*864e5-6e4*d.getTimezoneOffset()).toISOString().slice(0,16);
+  const upd=()=>{const pc=+$('#cp').value;const lim=S.products.filter(p=>p.price&&Math.round(p.price*(1-pc/100))<p.min);$('#cfloor').innerHTML=lim.length?`⚠️ <b>${lim.length} products</b> will be limited by their minimum price: ${lim.map(p=>esc(p.title)).join(', ')}`:'✅ No products limited by their minimum price.'};$('#cp').oninput=upd;upd()}
+
+const acts={
+ go:d=>{closeLayer();location.hash=d.h},login:()=>loginModal(),pick:d=>signIn(d.id),newcust:()=>{if(!$('.gpick'))afterLogin=null;newCustomer()},
+ as:d=>{S.session=d.id||null;closeLayer();toast(d.id?'Viewing as <b>'+esc(U(d.id).name)+'</b>':'Viewing as guest');if(d.back)route();else if(d.id==='admin')location.hash='#/admin';else route()},
+ signout:()=>{if(confirm('Sign out?')){S.session=null;route()}},reset:()=>{boot();location.hash='#/';route();toast('Demo reset')},
+ close:closeLayer,'bg-close':(d,e)=>{if(e.target.classList.contains('ov'))closeLayer()},
+ openCart,rm:d=>{S.cart=S.cart.filter(x=>x!==d.id);renderChrome();openCart()},
+ add:(d,e)=>{e.stopPropagation();const u=me();if(u&&owns(u.id,d.id))return toast('You already own this');if(!S.cart.includes(d.id))S.cart.push(d.id);renderChrome();openCart()},
+ buy:d=>{if(!S.cart.includes(d.id))S.cart.push(d.id);requireLogin(()=>{location.hash='#/checkout';route()})},
+ toCheckout:()=>{closeLayer();requireLogin(()=>{location.hash='#/checkout';route()})},
+ free:(d,e)=>{e.stopPropagation();requireLogin(()=>{const u=me();if(!owns(u.id,d.id)){grant(u.id,d.id);const no='LL-2026-'+String(S.seq++).padStart(6,'0');S.orders.push({no,uid:u.id,items:[{pid:d.id,title:P(d.id).title,list:0,final:0}],subtotal:0,discount:0,pointsUsed:0,total:0,status:'COMPLETED_FREE',at:new Date().toISOString().slice(0,16),method:'Free'});P(d.id).sales++}
+   route();toast('🎁 Added to your Library! Download starting…');setTimeout(()=>download(d.id),400)})},
+ dl:(d,e)=>{e&&e.stopPropagation();download(d.id,d.f)},
+ gal:d=>{window._gal.i=+d.i;$('#gmain').innerHTML=galMain();document.querySelectorAll('.gal .th>*').forEach((t,i)=>t.classList.toggle('on',i===+d.i))},
+ gnav:d=>{const g=window._gal;g.i=Math.max(0,Math.min(g.pages.length,g.i+ +d.d));acts.gal({i:g.i})},
+ share:d=>share(d.id),nshare:d=>navigator.share({url:d.v}),
+ simShare:d=>{closeLayer();S.ref=d.id;S.refShare=true;const keep=S.session;S.session=null;afterLogin=null;toast('👤 A friend opened your link…');setTimeout(()=>{newCustomer();toast('🎉 Friend signed up via your link. Switch back to see your +'+S.settings.sharePts+' points');},900)},
+ copy:d=>{navigator.clipboard?.writeText(d.v);toast('📋 Copied')},
+ scrollAll:()=>document.getElementById('all')?.scrollIntoView({behavior:'smooth'}),scrollFree:()=>{const s=[...document.querySelectorAll('h2')].find(h=>h.textContent.startsWith('Start free'));s&&s.scrollIntoView({behavior:'smooth'})},
+ cat:d=>{S.filter.cat=d.id||null;renderAllGrid();document.getElementById('all')?.scrollIntoView({behavior:'smooth'})},fprice:d=>{S.filter.price=d.id;renderAllGrid()},
+ coupon:()=>{const c=$('#cpn').value.trim().toUpperCase();const cp=S.coupons.find(x=>x.code===c);if(!cp){S.coupon=null;route();return toast('That code is not valid')}S.coupon=c;route();toast('🏷️ Coupon '+c+' applied')},
+ place:placeOrder,pickSlip:()=>{const i=$('#slipf');i.onchange=()=>handleSlip(i.files);i.click()},sampleSlip:d=>submitSlip(d.id,null),
+ email:d=>emailModal(d.id),confirmApprove:d=>approve(d.id),confirmReject:d=>reject(d.id),
+ cemail:d=>{const e=S.outbox.find(x=>x.id===d.id);modal(`<div class="gm"><div class="hd"><h3>${esc(e.subject)}</h3><b>${esc(S.settings.store)}</b> to ${esc(e.to)}</div><div class="bd"><p>Hi there,</p><p>${esc(e.subject)}.</p><p><a class="abtn" style="background:#0E8C7F">Open ${esc(S.settings.store)}</a></p><p style="font-size:12px;color:#777">${esc(S.settings.store)} · Malé, Maldives · <u>Unsubscribe</u></p></div></div>`,true)},
+ zoom:d=>modal(`<img src="${d.src}" style="width:100%">`),
+ review:d=>{const u=me();S.reviews.unshift({id:'r'+Date.now(),pid:d.id,uid:u.id,name:u.name.split(' ')[0]+' '+u.name.split(' ')[1][0]+'.',rating:+$('#rvr').value,text:$('#rvt').value||'Great resource!',status:'pending',home:false,date:new Date().toISOString().slice(0,10)});route();toast('Thanks! Your review is awaiting moderation (+'+S.settings.reviewPts+' pts on approval)')},
+ refund:d=>{if(!confirm('Refund '+d.id+'? Access will be revoked and points reversed.'))return;const o=S.orders.find(x=>x.no===d.id);o.status='REFUNDED';o.items.forEach(i=>{S.ent=S.ent.filter(e=>!(e.uid===o.uid&&e.pid===i.pid))});if(o.earned)addPts(o.uid,-o.earned,'Reversed: refund '+o.no);if(o.pointsUsed)addPts(o.uid,o.pointsUsed,'Returned: refund '+o.no);route();toast('Refunded · access revoked · points reversed')},
+ newProduct,pickFile:()=>{const i=$('#pf');i.onchange=()=>handleUpload(i.files);i.click()},publish:publishProduct,
+ feat:d=>{const p=P(d.id);p.featured=!p.featured;route()},
+ variant:d=>{S.landing.variant=+d.id;route()},bg:d=>{S.landing.bg=d.id;route();toast('Background set. Open “View live” to try it.')},
+ sec:d=>{const s=S.landing.sections[d.i];s.on=!s.on;route()},mv:d=>{const a=S.landing.sections,i=+d.i,j=i+ +d.d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];route()},
+ publishLP:()=>{document.querySelectorAll('[data-lp]').forEach(i=>S.landing.variants[S.landing.variant][i.dataset.lp]=i.value);route();toast('✅ Landing page published (version saved)')},
+ rhome:d=>{const r=S.reviews.find(x=>x.id===d.id);r.home=!r.home;route()},rapp:d=>{const r=S.reviews.find(x=>x.id===d.id);r.status='approved';if(r.uid&&!r.ptsGiven){r.ptsGiven=1;addPts(r.uid,S.settings.reviewPts,'Approved review')}route()},rhide:d=>{S.reviews.find(x=>x.id===d.id).status='hidden';route()},
+ addTesti:()=>{const t=prompt('Testimonial text');if(!t)return;const n=prompt('Name','Principal, Thinadhoo School');S.reviews.unshift({id:'r'+Date.now(),pid:'p1',uid:null,name:n+' (testimonial)',rating:5,text:t,status:'approved',home:true,date:new Date().toISOString().slice(0,10)});route()},
+ cust:d=>custModal(d.id),saveNote:d=>{U(d.id).notes=$('#cnote').value;toast('Note saved')},
+ adj:d=>{const p=parseInt($('#adjp').value),r=$('#adjr').value.trim();if(!p||!r)return toast('Points and a reason are required');addPts(d.id,p,'Admin adjustment: '+r);custModal(d.id);toast('Points adjusted (audited)')},
+ grantP:d=>{grant(d.id,$('#gp').value);custModal(d.id);toast('Access granted (audited)')},
+ csv:()=>{const rows=[['Name','Email','Joined','Source','Points','Consent']].concat(S.users.filter(u=>u.role==='CUSTOMER').map(u=>[u.name,u.email,u.joined,u.source,u.points,u.consent?'yes':'no']));const csv=rows.map(r=>r.map(v=>{v=String(v);if(/^[=+\-@]/.test(v))v="'"+v;return'"'+v.replace(/"/g,'""')+'"'}).join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='customers.csv';a.click()},
+ newCamp:newCampModal,saveCamp:()=>{S.campaigns.forEach(c=>{if(c.active)c.active=false});S.campaigns.unshift({id:'c'+Date.now(),name:$('#cn').value,type:$('#ct').value,pct:+$('#cp').value,scope:'all',mult:+$('#cm').value||1,active:true,start:+new Date($('#cs').value),end:+new Date($('#ce').value),accent:$('#ca').value,banner:$('#cb').value});closeLayer();route();toast('📣 Campaign scheduled. Prices, banner and badges update automatically.')},
+ togCamp:d=>{const c=S.campaigns.find(x=>x.id===d.id);if(!c.active)S.campaigns.forEach(x=>x.active=false);c.active=!c.active;if(c.active&&c.ended){c.start=Date.now();c.end=Date.now()+3*864e5;c.ended=false}route()},
+ dupCamp:d=>{const c=S.campaigns.find(x=>x.id===d.id);S.campaigns.push({...c,id:'c'+Date.now(),name:c.name+' (copy)',active:false,ended:false});route();toast('Duplicated. Set the new dates and activate.')},
+ addCoupon:()=>{const c=$('#ncode').value.trim().toUpperCase(),p=+$('#npct').value;if(!c||!p)return;S.coupons.push({code:c,pct:p,limit:100,used:0,expires:'2026-12-31'});route()},
+ wtog:()=>{S.settings.welcome.enabled=!S.settings.welcome.enabled;route()},
+ saveSet:()=>{document.querySelectorAll('[data-set]').forEach(i=>{const ks=i.dataset.set.split('.');let o=S.settings;while(ks.length>1)o=o[ks.shift()];o[ks[0]]=+i.value});route();toast('✅ Rules saved')},
+ release:()=>{S.users.forEach(u=>{if(u.pending){u.points+=u.pending;u.pending=0}});S.ledger.forEach(l=>{if(l.status==='pending')l.status='available'});route();toast('⏩ Pending points released')},
+ saveBank:()=>{if(!confirm('Re-authenticate with Google to change bank details?'))return;document.querySelectorAll('[data-bank]').forEach(i=>S.settings.bank[i.dataset.bank]=i.value);custEmail('admin','Security: bank account details were changed');toast('🔐 Bank details saved · all admins notified')},
+ saveWm:()=>{S.settings.watermark=$('#wmt').value;S.settings.previewPages=+$('#pvp').value;S.settings.slipExpiryHours=+$('#sexp').value;Object.keys(imgCache).forEach(k=>{if(k.startsWith('pv'))delete imgCache[k]});toast('🔁 Previews regenerated with new watermark')}
+};
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const f=acts[el.dataset.a];if(f){if(el.tagName==='A'&&!el.getAttribute('href'))e.preventDefault();f(el.dataset,e)}});
+document.addEventListener('input',e=>{if(e.target.id==='ptsr'){S.usePts=+e.target.value;$('#ptsv').textContent=S.usePts;const T=totals();$('#ptsm').textContent=mvr(T.ptsL);clearTimeout(window._pt);window._pt=setTimeout(route,350)}
+  if(e.target.id==='cq'){window._cq=e.target.value;clearTimeout(window._cqt);window._cqt=setTimeout(()=>{route();const i=$('#cq');i.focus();i.setSelectionRange(i.value.length,i.value.length)},300)}});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset.ch){const p=P(t.dataset.id);const v=Math.round(+t.value*100);
+  if(t.dataset.ch==='price'){if(p.price&&v<p.min){toast('⛔ Price can\'t be below the minimum price');t.value=p.price/100;return}p.price=v}else{if(v<=0||v>p.price){toast('⛔ Minimum must be above 0 and ≤ price');t.value=p.min/100;return}p.min=v}route();toast('Saved · price history recorded')}});
+function tick(){document.querySelectorAll('[data-cd]').forEach(el=>{const ms=+el.dataset.cd-Date.now();if(ms<0){el.textContent='ended';return}const d=Math.floor(ms/864e5),h=Math.floor(ms/36e5)%24,m=Math.floor(ms/6e4)%60,s=Math.floor(ms/1e3)%60;el.textContent=(d?d+'d ':'')+h+'h '+m+'m '+s+'s'});
+  document.querySelectorAll('[data-cdbox]').forEach(el=>{const ms=Math.max(0,+el.dataset.cdbox-Date.now());const v=[Math.floor(ms/864e5),Math.floor(ms/36e5)%24,Math.floor(ms/6e4)%60,Math.floor(ms/1e3)%60];el.innerHTML=v.map((n,i)=>`<div><b>${String(n).padStart(2,'0')}</b><small>${['days','hrs','min','sec'][i]}</small></div>`).join('')});
+  if($('#allgrid')&&!$('#allgrid').dataset.r){$('#allgrid').dataset.r=1;renderAllGrid()}}
+setInterval(tick,1000);
+addEventListener('hashchange',route);
+boot();route();
+</script>
+</body>
+</html>

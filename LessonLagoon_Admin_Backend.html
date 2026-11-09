@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LessonLagoon Admin – Store backend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--pri:#0E8C7F;--pri2:#0B6F65;--acc:#FF7A59;--ink:#14213D;--mut:#5B6475;--line:#E7E9EE;--bg:#FAFAF7;--card:#fff;--gold:#F5B300;--ok:#16A34A;--warn:#D97706;--bad:#DC2626;--r:14px}
+*{box-sizing:border-box}html,body{margin:0}
+body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.5}
+a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}input,select,textarea{font:inherit}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:10px 18px;font-weight:700;background:var(--pri);color:#fff;transition:.15s;white-space:nowrap}
+.btn:hover{background:var(--pri2);transform:translateY(-1px)}.btn.acc{background:var(--acc)}.btn.acc:hover{background:#ec6544}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}.btn.ghost:hover{border-color:var(--ink)}
+.btn.sm{padding:6px 13px;font-size:13px}.btn.xs{padding:3px 10px;font-size:12px}.btn.block{width:100%;justify-content:center}.btn.dark{background:var(--ink)}.btn.red{background:var(--bad)}.btn.red:hover{background:#b91c1c}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:#fff;border:1.5px solid var(--line);font-size:13px;font-weight:600;cursor:pointer;user-select:none}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.2px;white-space:nowrap}
+.b-free,.b-paid{background:#DCFCE7;color:#166534}.b-off{background:#FFE4DC;color:#C2410C}.b-own{background:#E0E7FF;color:#3730A3}.b-type{background:#F1F5F9;color:#334155}
+.b-wait{background:#FEF3C7;color:#92400E}.b-rej{background:#FEE2E2;color:#991B1B}.b-grey{background:#F1F5F9;color:#475569}.b-blue{background:#DBEAFE;color:#1E40AF}
+/* top bar */
+header.top{position:sticky;top:0;z-index:40;background:rgba(250,250,247,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:14px;height:64px;padding:0 20px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;letter-spacing:-.3px;white-space:nowrap}
+.logo i{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--pri),#38C6B3);display:grid;place-items:center;color:#fff;font-style:normal;font-size:18px}
+.logo small{font-size:11px;font-weight:700;background:var(--ink);color:#fff;border-radius:6px;padding:2px 6px;letter-spacing:.5px}
+.gs{flex:1;max-width:460px;position:relative}.gs input{width:100%;padding:9px 14px 9px 36px;border-radius:999px;border:1.5px solid var(--line);background:#fff}
+.gs:before{content:"⌕";position:absolute;left:13px;top:5px;font-size:19px;color:var(--mut)}
+.gsr{position:absolute;top:46px;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 40px rgba(20,33,61,.15);max-height:420px;overflow:auto;padding:6px}
+.gsr a{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;cursor:pointer}.gsr a:hover{background:#F2FBF9}.gsr small.h{display:block;padding:6px 10px 2px;color:var(--mut);font-weight:700;text-transform:uppercase;font-size:10.5px;letter-spacing:1px}
+.navr{margin-left:auto;display:flex;align-items:center;gap:10px}
+.icbtn{position:relative;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:grid;place-items:center;font-size:17px}
+.icbtn .n{position:absolute;top:-4px;right:-4px;background:var(--acc);color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:1px 6px}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:800;background:var(--acc);flex:none;font-size:13px}
+/* layout */
+.adm{display:grid;grid-template-columns:236px 1fr;min-height:calc(100vh - 64px)}
+.side{background:var(--ink);color:#C9D1E3;padding:16px 12px;position:sticky;top:64px;height:calc(100vh - 64px);overflow:auto}
+.side a{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:10px;font-weight:600;font-size:14px;margin-bottom:2px}
+.side a.on,.side a:hover{background:rgba(255,255,255,.1);color:#fff}.side a.up{background:var(--acc);color:#fff;justify-content:center;margin:2px 0 8px}.side a.up:hover{background:#ec6544}
+.side .n{margin-left:auto;background:var(--acc);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px}
+.side small{display:block;padding:14px 12px 6px;text-transform:uppercase;letter-spacing:1px;font-size:10.5px;opacity:.55}
+.main{padding:26px 30px 80px;overflow:auto;min-width:0}.main h1{margin:0 0 4px;font-size:26px;letter-spacing:-.4px}.subt{color:var(--mut);margin-bottom:20px}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px}.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}.kpi small{color:var(--mut);font-weight:600}.kpi b{display:block;font-size:24px;margin-top:2px}.kpi.hot{border-color:var(--acc);background:#FFF6F2}
+.box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:18px}.box h3{margin:0 0 12px;font-size:16.5px}
+table.t{width:100%;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:14px}
+.t th{text-align:left;background:#F7F8FA;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);padding:10px 12px;white-space:nowrap}.t td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:middle}
+.t tr:hover td{background:#FAFBFC}.tw{overflow-x:auto;border-radius:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.four{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.inp{width:100%;padding:9px 12px;border:1.5px solid var(--line);border-radius:11px;background:#fff}.inp:focus{outline:2px solid #BFE8E2;border-color:var(--pri)}
+.inp.err{border-color:var(--bad);background:#FFF7F7}.inp.s{padding:5px 8px;border-radius:8px}
+label.f{display:block;font-size:12.5px;font-weight:700;margin:10px 0 5px}
+.help{font-size:12px;color:var(--mut);margin-top:3px}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.sw{width:42px;height:24px;border-radius:999px;background:#CBD5E1;position:relative;cursor:pointer;border:0;flex:none}.sw:after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s}.sw.on{background:var(--pri)}.sw.on:after{left:21px}
+.bars{display:flex;align-items:end;gap:10px;height:160px;padding:10px 0}.bars div{flex:1;background:linear-gradient(var(--pri),#38C6B3);border-radius:8px 8px 0 0;position:relative}.bars span{position:absolute;bottom:-22px;left:0;right:0;text-align:center;font-size:11px;color:var(--mut)}.bars em{position:absolute;top:-20px;left:0;right:0;text-align:center;font-size:11px;font-style:normal;font-weight:700}
+.ci{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}.ci:last-child{border-bottom:0}.ci img{width:52px;height:42px;border-radius:8px;object-fit:cover;flex:none}.ci .t{flex:1;font-size:14px;font-weight:600;min-width:0}
+.row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-size:14px}.row.tot{font-size:17px;font-weight:800;border-top:1px solid var(--line);margin-top:6px;padding-top:10px}
+.todo a{display:flex;gap:12px;align-items:center;padding:11px 12px;border-radius:12px;border:1px solid var(--line);margin-bottom:8px;background:#fff}.todo a:hover{border-color:var(--pri);background:#F2FBF9}.todo b{flex:1}
+/* upload */
+.drop{border:2px dashed #B8C2D3;border-radius:18px;padding:30px;text-align:center;background:#FBFCFE;cursor:pointer;transition:.15s}.drop:hover,.drop.hv{border-color:var(--pri);background:#F2FBF9}
+.drop .big{font-size:42px}
+.qcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;display:grid;grid-template-columns:220px 1fr;gap:18px}
+.qcard.bad{border-color:#FCA5A5;background:#FFFBFB}.qcard.done{opacity:.6}
+.qprev{background:#EEF0F3;border-radius:12px;padding:8px;min-height:150px;display:flex;flex-direction:column;gap:6px}
+.qprev .cv{width:100%;border-radius:8px;aspect-ratio:5/4;object-fit:cover;background:#dfe3ea}
+.qprev .pv{display:flex;gap:4px;overflow-x:auto}.qprev .pv img{height:58px;border-radius:4px;border:1px solid #d5dae3;cursor:zoom-in}
+.proc{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--mut)}.proc .ok{color:var(--ink);font-weight:600}.proc .run{color:var(--pri);font-weight:700}.proc .er{color:var(--bad);font-weight:700}
+.qf{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px}.qf2{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:10px;margin-top:8px}
+.qf label.f{margin-top:0}.qf2 label.f{margin-top:0}
+.applybar{position:sticky;top:64px;z-index:5;background:var(--ink);color:#fff;border-radius:16px;padding:12px 16px;display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:14px;box-shadow:0 10px 30px rgba(20,33,61,.2)}
+.applybar label{font-size:11px;font-weight:700;opacity:.8;display:block;margin-bottom:3px}.applybar .inp{padding:6px 9px;border-radius:9px;min-width:110px}
+.dropall{position:fixed;inset:0;z-index:200;background:rgba(14,140,127,.86);display:none;place-items:center;color:#fff;text-align:center;font-size:22px;font-weight:800}
+.dropall.on{display:grid}.dropall div{border:4px dashed rgba(255,255,255,.8);border-radius:28px;padding:60px 80px}
+.steps3{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0 4px}.steps3 div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:13px}.steps3 b{display:block;font-size:14px}
+.pbar{height:8px;border-radius:8px;background:#E7E9EE;overflow:hidden}.pbar div{height:100%;background:linear-gradient(90deg,var(--pri),#38C6B3);transition:width .3s}
+/* modal/drawer */
+.ov{position:fixed;inset:0;background:rgba(20,33,61,.45);z-index:80;display:flex;justify-content:center;align-items:center;animation:fi .15s}
+@keyframes fi{from{opacity:0}}
+.modal{background:#fff;border-radius:20px;max-width:580px;width:calc(100% - 30px);max-height:92vh;overflow:auto;padding:24px;position:relative;animation:pu .2s}
+.modal.wide{max-width:920px}@keyframes pu{from{transform:translateY(16px);opacity:0}}
+.modal .x{position:absolute;right:14px;top:12px;border:0;background:#F1F5F9;width:34px;height:34px;border-radius:50%;font-size:16px}
+.modal h2{margin:0 0 6px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;z-index:300;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:pu .2s;max-width:90vw}
+.gm{border:1px solid #e0e0e0;border-radius:12px;overflow:hidden;font-family:Arial,Helvetica,sans-serif}.gm .hd{background:#F6F8FC;padding:14px 18px;border-bottom:1px solid #e0e0e0;font-size:13px;color:#444}
+.gm .hd h3{margin:0 0 8px;font-size:19px;font-weight:400;color:#1f1f1f}.gm .bd{padding:20px;font-size:14px;color:#222;white-space:pre-wrap}
+.gm .abtn{display:inline-block;padding:12px 30px;border-radius:8px;font-weight:700;color:#fff;font-size:15px;margin-right:10px}
+.empty{text-align:center;padding:44px;color:var(--mut)}.empty span{font-size:44px;display:block}
+.lp-prev{border-radius:14px;overflow:hidden;background:linear-gradient(160deg,#E9F7F4 0%,#FFF4EE 100%);padding:26px;border:1px solid var(--line)}
+.lp-prev h1{font-size:30px;line-height:1.1;letter-spacing:-.8px;margin:10px 0}.lp-prev h1 em{font-style:normal;color:var(--pri);background:linear-gradient(transparent 62%,#FFD7C9 62%)}
+.kicker{display:inline-flex;gap:8px;align-items:center;background:#fff;border:1.5px solid var(--line);padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700}
+.secrow{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;background:#fff}.secrow span{flex:1;font-weight:600}
+.signin{min-height:100vh;display:grid;place-items:center;background:linear-gradient(160deg,#E9F7F4 0%,#FFF4EE 100%)}
+.signin .card{background:#fff;border-radius:24px;padding:38px;max-width:420px;width:calc(100% - 30px);text-align:center;box-shadow:0 30px 70px rgba(20,33,61,.15)}
+.gbtn{display:flex;gap:10px;align-items:center;justify-content:center;border:1px solid #dadce0;border-radius:999px;padding:11px;width:100%;background:#fff;font-weight:600}
+.gbtn:hover{background:#F8FAFC}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}.thumbs img{height:120px;border-radius:8px;border:1px solid var(--line);cursor:zoom-in}
+.mut{color:var(--mut)}.sm{font-size:13px}.mt{margin-top:14px}.mt0{margin-top:0}.flex{display:flex;gap:10px;align-items:center}.wr{flex-wrap:wrap}.sb{justify-content:space-between}.r{text-align:right}
+.mono{font-family:ui-monospace,Menlo,monospace}
+.note{background:#F2FBF9;border:1px solid #BFE8E2;border-radius:12px;padding:10px 14px;font-size:13px}
+.warnbox{background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:10px 14px;font-size:13px;color:#9A3412}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}.qf,.qf2{grid-template-columns:1fr 1fr}.four{grid-template-columns:1fr 1fr}}
+@media (max-width:900px){.adm{grid-template-columns:1fr}.side{display:flex;overflow-x:auto;gap:4px;position:static;height:auto;padding:8px}.side small{display:none}.side a{white-space:nowrap}.gs{display:none}.navr .lbl,.hm,.logo small{display:none}.nav{padding:0 12px;gap:8px}.two,.three,.steps3{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.qcard{grid-template-columns:1fr}.main{padding:18px 14px 80px}.applybar{position:static}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="layer"></div>
+<div class="dropall" id="dropall"><div>⬆️<br>Drop to upload resources<br><span style="font-size:15px;font-weight:600;opacity:.9">PDF · Word · PowerPoint — as many as you like</span></div></div>
+<input type="file" id="fpick" accept=".pdf,.docx,.pptx,.doc,.ppt" multiple hidden>
+<input type="file" id="fone" accept=".pdf,.docx,.pptx,.doc,.ppt" hidden>
+<input type="file" id="fcsv" accept=".csv,text/csv" hidden>
+<input type="file" id="fjson" accept=".json,application/json" hidden>
+<input type="file" id="fimg" accept="image/*" hidden>
+<script type="application/json" id="seed">
+{
+ "settings":{"store":"LessonLagoon","tagline":"Teacher-made resources for Maldivian classrooms","support":"hello@lessonlagoon.mv","ptsPerMVR":1,"ptsPerMVRValue":10,"maxPointsPct":80,"signupPts":50,"reviewPts":20,"sharePts":10,"shareFirstOrderPct":5,"shareMonthlyCap":200,"refReferrer":100,"refFriend":50,"holdDays":7,"welcome":{"enabled":true,"pct":20,"days":7},"freeDailyLimit":20,"slipExpiryHours":48,"watermark":"LESSONLAGOON · PREVIEW","previewPages":3,"maxUploadMB":100,"defaultPrice":50,"defaultMinPct":20,"autoPublish":false,"google":true,"admins":["owner@lessonlagoon.mv"],"licence":"Single-teacher classroom licence. Please do not re-share or resell the files.",
+  "bank":{"bank":"Bank of Maldives","name":"LessonLagoon Pvt Ltd","number":"7730 0000 1245 6","currency":"MVR"}},
+ "landing":{"variant":0,"bg":"shapes","announce":{"on":true,"text":"Free resources every week · Sign in with Google"},
+  "variants":[
+   {"kicker":"🏝️ Made by Maldivian teachers","h1":"Teach brilliant lessons <em>tonight</em>, not next week.","sub":"Ready-to-use worksheets, slides and lesson plans aligned to the Maldives National Curriculum. Preview free, download instantly.","cta":"Browse resources","cta2":"Get free packs"},
+   {"kicker":"⚡ Instant download","h1":"Classroom-ready resources in <em>one tap</em>.","sub":"Over 1,200 teachers save hours every week with LessonLagoon.","cta":"Start exploring","cta2":"See free resources"}],
+  "sections":[{"k":"trust","on":true},{"k":"welcome","on":true},{"k":"featured","on":true},{"k":"campaign","on":true},{"k":"free","on":true},{"k":"categories","on":true},{"k":"all","on":true},{"k":"reviews","on":true},{"k":"how","on":true},{"k":"points","on":true},{"k":"faq","on":true}],
+  "trust":[["⚡","Instant download","Right after approval"],["🧑‍🏫","Teacher-made","By classroom experts"],["🔒","Secure payment","Verified by our team"],["⭐","4.8 / 5 rating","From 640+ reviews"]],
+  "stats":[["1,240+","Resources"],["3,800+","Teachers"],["4.8★","Avg rating"]],
+  "faq":[["How do I pay?","Choose bank transfer at checkout, transfer the exact amount with your order number as reference, and upload the slip. We verify it, usually within a few hours, and your downloads unlock automatically."],["Can I preview before buying?","Yes. Every resource shows watermarked preview pages so you know exactly what you are getting."],["How do points work?","Earn points when you buy, share a resource with a friend, or when someone uses your referral code. Use points to pay up to 80% of any resource."],["Can I use resources in my classroom?","Yes. Each purchase includes a single-teacher classroom licence. Please don't re-share the files."],["Are free resources really free?","Yes, sign in with Google and download instantly. No payment details needed."]],
+  "history":[]},
+ "categories":[{"id":"maths","name":"Mathematics","ic":"➗"},{"id":"english","name":"English","ic":"📖"},{"id":"dhivehi","name":"Dhivehi","ic":"✍️"},{"id":"science","name":"Science","ic":"🔬"},{"id":"islam","name":"Islam","ic":"🕌"},{"id":"social","name":"Social Studies","ic":"🌏"}],
+ "grades":["KG","Grade 1","Grade 2","Grade 3","Grade 4","Grade 5","Grade 6","Grade 7","Grade 8","Grade 9","Grade 10","All grades"],
+ "curricula":["National Curriculum","Cambridge","—"],
+ "products":[
+  {"id":"p1","slug":"grade-4-fractions-mastery-pack","title":"Grade 4 Fractions Mastery Pack","short":"24 differentiated worksheets taking learners from halves to equivalent fractions, with answer keys.","cat":"maths","grade":"Grade 4","type":"PDF","pages":24,"price":7500,"min":1500,"featured":true,"rating":4.9,"rc":38,"color":"#0E8C7F","ic":"🍕","status":"Published","sales":214,"curr":"National Curriculum","ver":2,"pv":3},
+  {"id":"p2","slug":"dhivehi-akuru-tracing-workbook","title":"Dhivehi Akuru Tracing Workbook","short":"Trace and write every Thaana letter with fun picture prompts. Perfect for KG and Grade 1.","cat":"dhivehi","grade":"Grade 1","type":"PDF","pages":32,"price":0,"min":0,"featured":false,"rating":4.8,"rc":96,"color":"#7C3AED","ic":"✍️","status":"Published","sales":1120,"curr":"National Curriculum","ver":1,"pv":3},
+  {"id":"p3","slug":"coral-reefs-of-the-maldives-slides","title":"Our Ocean: Coral Reefs of the Maldives","short":"A 28-slide interactive lesson on reef ecosystems, bleaching and protecting our atolls.","cat":"science","grade":"Grade 5","type":"PPTX","pages":28,"price":9500,"min":1900,"featured":true,"rating":4.9,"rc":52,"color":"#0284C7","ic":"🐠","status":"Published","sales":176,"curr":"National Curriculum","ver":1,"pv":3},
+  {"id":"p4","slug":"independence-day-reading-comprehension","title":"Independence Day Reading Comprehension Set","short":"Four leveled passages on 26 July with questions, vocabulary and a writing task.","cat":"english","grade":"Grade 6","type":"DOCX","pages":12,"price":4500,"min":900,"featured":false,"rating":4.7,"rc":21,"color":"#DC2626","ic":"🇲🇻","status":"Published","sales":98,"curr":"National Curriculum","ver":1,"pv":3},
+  {"id":"p5","slug":"phonics-flashcards-a-z","title":"Phonics Flashcards A–Z","short":"Bright, printable flashcards with pictures for every sound. Free for all teachers.","cat":"english","grade":"KG","type":"PDF","pages":26,"price":0,"min":0,"featured":true,"rating":4.9,"rc":143,"color":"#F59E0B","ic":"🔤","status":"Published","sales":1890,"curr":"Cambridge","ver":1,"pv":3},
+  {"id":"p6","slug":"grade-8-algebra-exam-practice","title":"Grade 8 Algebra Exam Practice Papers","short":"5 full mock papers with marking schemes and worked solutions.","cat":"maths","grade":"Grade 8","type":"PDF","pages":40,"price":12000,"min":2400,"featured":true,"rating":4.8,"rc":44,"color":"#14213D","ic":"📐","status":"Published","sales":132,"curr":"Cambridge","ver":3,"pv":3},
+  {"id":"p7","slug":"stories-of-the-prophets-lesson-plans","title":"Stories of the Prophets – Lesson Plans","short":"10 ready lesson plans with discussion prompts, colouring sheets and short quizzes.","cat":"islam","grade":"Grade 3","type":"DOCX","pages":18,"price":6500,"min":1300,"featured":false,"rating":4.9,"rc":30,"color":"#15803D","ic":"🌙","status":"Published","sales":87,"curr":"National Curriculum","ver":1,"pv":3},
+  {"id":"p8","slug":"climate-change-and-our-islands","title":"Climate Change & Our Islands Project Pack","short":"A project-based unit: sea-level rise, data activities and a student presentation template.","cat":"social","grade":"Grade 7","type":"PPTX","pages":22,"price":8500,"min":1700,"featured":true,"rating":4.7,"rc":19,"color":"#0F766E","ic":"🌊","status":"Published","sales":64,"curr":"National Curriculum","ver":1,"pv":3},
+  {"id":"p9","slug":"teachers-day-classroom-decor-kit","title":"Teachers' Day Classroom Décor Kit","short":"Bunting, name tags, thank-you cards and a display banner. Print and go.","cat":"english","grade":"All grades","type":"PDF","pages":15,"price":3500,"min":700,"featured":false,"rating":4.6,"rc":12,"color":"#DB2777","ic":"🎉","status":"Published","sales":41,"curr":"—","ver":1,"pv":3},
+  {"id":"p10","slug":"times-tables-speed-drills","title":"Times Tables Speed Drills","short":"20 timed drills from 2× to 12× with progress trackers. Free download.","cat":"maths","grade":"Grade 3","type":"PDF","pages":20,"price":0,"min":0,"featured":false,"rating":4.8,"rc":77,"color":"#EA580C","ic":"✖️","status":"Published","sales":940,"curr":"National Curriculum","ver":1,"pv":3},
+  {"id":"p11","slug":"grade-2-addition-adventures","title":"Grade 2 Addition Adventures","short":"","cat":"maths","grade":"Grade 2","type":"PDF","pages":16,"price":5000,"min":1000,"featured":false,"rating":0,"rc":0,"color":"#0EA5E9","ic":"➕","status":"Draft","sales":0,"curr":"National Curriculum","ver":1,"pv":3}
+ ],
+ "users":[
+  {"id":"admin","name":"Shaina Ali","email":"owner@lessonlagoon.mv","role":"ADMIN","color":"#14213D"},
+  {"id":"u1","name":"Mariyam Shifa","email":"mariyam.shifa@gmail.com","role":"CUSTOMER","points":640,"pending":75,"held":0,"code":"MARIYAM25","refBy":null,"joined":"2026-06-02","source":"Direct","consent":true,"paid":true,"color":"#FF7A59","tags":["Primary","Malé"],"notes":"Grade 4 teacher, buys maths packs.","blocked":false},
+  {"id":"u2","name":"Ahmed Rasheed","email":"ahmed.rasheed.mv@gmail.com","role":"CUSTOMER","points":120,"pending":0,"held":0,"code":"AHMED7K","refBy":"u1","joined":"2026-09-18","source":"Referral (MARIYAM25)","consent":true,"paid":false,"color":"#0284C7","tags":["Secondary"],"notes":"","blocked":false},
+  {"id":"u3","name":"Fathimath Zeena","email":"zeena.fathimath@gmail.com","role":"CUSTOMER","points":310,"pending":0,"held":0,"code":"ZEENA4Q","refBy":null,"joined":"2026-08-11","source":"Teachers' Day share link","consent":false,"paid":true,"color":"#7C3AED","tags":["Addu"],"notes":"","blocked":false},
+  {"id":"u4","name":"Ibrahim Naseer","email":"ibu.naseer@gmail.com","role":"CUSTOMER","points":45,"pending":0,"held":0,"code":"IBUN3R","refBy":null,"joined":"2026-10-29","source":"Direct","consent":true,"paid":false,"color":"#15803D","tags":[],"notes":"","blocked":false},
+  {"id":"u5","name":"Aminath Rifa","email":"rifa.aminath@gmail.com","role":"CUSTOMER","points":890,"pending":0,"held":0,"code":"RIFA88","refBy":null,"joined":"2026-03-14","source":"Facebook","consent":true,"paid":true,"color":"#DB2777","tags":["Top buyer","Kulhudhuffushi"],"notes":"Asked for Dhivehi grammar packs.","blocked":false},
+  {"id":"u6","name":"Hassan Shareef","email":"hassan.shareef22@gmail.com","role":"CUSTOMER","points":50,"pending":0,"held":0,"code":"HASS22","refBy":"u5","joined":"2026-11-05","source":"Referral (RIFA88)","consent":true,"paid":false,"color":"#EA580C","tags":["New"],"notes":"","blocked":false,"welcomeDaysLeft":4}
+ ],
+ "entitlements":[["u1","p2"],["u1","p5"],["u1","p1"],["u3","p8"],["u5","p6"],["u5","p3"],["u5","p2"]],
+ "reviews":[
+  {"id":"r1","pid":"p1","uid":"u1","name":"Mariyam S.","rating":5,"text":"My Grade 4s finally get equivalent fractions! The differentiated sheets saved me a whole weekend.","status":"approved","home":true,"date":"2026-10-12"},
+  {"id":"r2","pid":"p3","uid":"u5","name":"Aminath R.","rating":5,"text":"The reef slides are stunning and so relevant for our kids. They loved the bleaching activity.","status":"approved","home":true,"date":"2026-09-30"},
+  {"id":"r3","pid":"p5","uid":"u1","name":"Mariyam S.","rating":5,"text":"Free and better than paid ones I've bought before. Printed on card for my reading corner.","status":"approved","home":true,"date":"2026-08-21"},
+  {"id":"r4","pid":"p6","uid":"u5","name":"Aminath R.","rating":4,"text":"Excellent mock papers with clear marking schemes. Would love a Grade 9 version.","status":"approved","home":true,"date":"2026-10-25"},
+  {"id":"r5","pid":"p8","uid":"u3","name":"Fathimath Z.","rating":5,"text":"Project pack worked perfectly for our island exhibition. Students presented to parents!","status":"approved","home":true,"date":"2026-11-01"},
+  {"id":"r6","pid":"p2","uid":null,"name":"Hawwa N. (testimonial)","rating":5,"text":"Our KG teachers use the tracing workbook every single day.","status":"approved","home":true,"date":"2026-07-15"},
+  {"id":"r7","pid":"p1","uid":"u3","name":"Fathimath Z.","rating":3,"text":"Good content but please add more word problems.","status":"pending","home":false,"date":"2026-11-07"}
+ ],
+ "campaigns":[
+  {"id":"c1","name":"Teachers' Day Sale","type":"Teachers' Day","pct":15,"scope":"all","mult":2,"active":true,"startOffsetH":-48,"endOffsetH":70,"accent":"#DB2777","banner":"Celebrate our teachers – 15% off everything + double points"},
+  {"id":"c2","name":"Independence Day 2026","type":"Independence Day","pct":20,"scope":"all","mult":1,"active":false,"start":"2026-07-20","end":"2026-07-27","accent":"#DC2626","banner":"Independence Day – 20% off","ended":true}
+ ],
+ "coupons":[{"code":"TEACH10","pct":10,"limit":200,"used":37,"expires":"2026-12-31","active":true},{"code":"WELCOMEBACK","pct":15,"limit":50,"used":4,"expires":"2026-12-15","active":true}],
+ "orders":[
+  {"no":"LL-2026-000118","uid":"u5","items":[{"pid":"p6","title":"Grade 8 Algebra Exam Practice Papers","list":12000,"final":10200}],"subtotal":12000,"discount":1800,"pointsUsed":0,"total":10200,"status":"PAID","at":"2026-11-06T10:12","method":"Bank transfer","earned":102},
+  {"no":"LL-2026-000119","uid":"u1","items":[{"pid":"p1","title":"Grade 4 Fractions Mastery Pack","list":7500,"final":6375}],"subtotal":7500,"discount":1125,"pointsUsed":300,"total":3375,"status":"PAID","at":"2026-11-07T08:40","method":"Bank transfer","earned":75},
+  {"no":"LL-2026-000120","uid":"u4","items":[{"pid":"p10","title":"Times Tables Speed Drills","list":0,"final":0}],"subtotal":0,"discount":0,"pointsUsed":0,"total":0,"status":"COMPLETED_FREE","at":"2026-11-07T15:02","method":"Free"},
+  {"no":"LL-2026-000121","uid":"u2","items":[{"pid":"p6","title":"Grade 8 Algebra Exam Practice Papers","list":12000,"final":10200}],"subtotal":12000,"discount":1800,"pointsUsed":0,"total":10200,"status":"AWAITING_VERIFICATION","at":"2026-11-08T07:55","method":"Bank transfer","slip":{"amount":10200,"ref":"LL-2026-000121","sender":"AHMED RASHEED","date":"2026-11-08"},"mult":2},
+  {"no":"LL-2026-000122","uid":"u3","items":[{"pid":"p3","title":"Our Ocean: Coral Reefs of the Maldives","list":9500,"final":8075},{"pid":"p4","title":"Independence Day Reading Comprehension Set","list":4500,"final":3825}],"subtotal":14000,"discount":2100,"pointsUsed":0,"total":11900,"status":"AWAITING_VERIFICATION","at":"2026-11-08T09:20","method":"Bank transfer","slip":{"amount":11000,"ref":"LL-2026-000122","sender":"F ZEENA","date":"2026-11-08"},"dup":true,"mult":2},
+  {"no":"LL-2026-000123","uid":"u6","items":[{"pid":"p9","title":"Teachers' Day Classroom Décor Kit","list":3500,"final":2975}],"subtotal":3500,"discount":525,"pointsUsed":0,"total":2975,"status":"AWAITING_TRANSFER","at":"2026-11-06T11:05","method":"Bank transfer","mult":2}
+ ],
+ "templates":{
+  "welcome":{"name":"Welcome + offer","subject":"Welcome to {store}! Here's {pct}% off your first resource","body":"Hi {name},\n\nWelcome to {store}. Your {pct}% welcome offer is applied automatically at checkout for the next {days} days, and {points} points are already in your account.\n\nHappy teaching!\n{store}"},
+  "slipReceived":{"name":"Slip received","subject":"We received your slip for {order}","body":"Hi {name},\n\nThanks! We received your transfer slip for {order} ({amount}). We'll verify it shortly and email you as soon as your downloads are ready.\n\n{store}"},
+  "approved":{"name":"Payment approved","subject":"Payment approved – your downloads are ready ({order})","body":"Hi {name},\n\nGreat news: your payment for {order} is verified. Your resources are now in your Library and ready to download.\n\nYou earned {earned} points with this purchase.\n\n{store}"},
+  "rejected":{"name":"Payment not verified","subject":"Action needed: we couldn't verify your payment for {order}","body":"Hi {name},\n\nWe couldn't verify the slip for {order}.\nReason: {reason}\n\nPlease upload a new slip from your order page. Your order and any points used are kept for you.\n\n{store}"},
+  "ownerApproval":{"name":"Owner: slip to verify","subject":"Payment slip to verify – {order} – {amount}","body":"Hi {owner},\n\n{name} uploaded a bank transfer slip for {order}.\nExpected amount: {amount}\n\n[APPROVE]  [REJECT]\n\nLinks are single-use and expire in 7 days. Opening a link changes nothing until you confirm."},
+  "newVersion":{"name":"Resource updated","subject":"Updated: {title} (version {version})","body":"Hi {name},\n\nA new version of {title} is in your Library.\nWhat changed: {note}\n\n{store}"}
+ },
+ "sales7":[["Mon",1840],["Tue",2310],["Wed",1520],["Thu",2980],["Fri",3420],["Sat",2760],["Sun",3105]]
+}
+</script>
+<script>
+/* =========================================================
+   LessonLagoon Admin – single-page backend prototype
+   State is saved in this browser (localStorage + IndexedDB).
+   ========================================================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const mvr=l=>'MVR '+((l||0)/100).toLocaleString('en-US',{minimumFractionDigits:(l||0)%100?2:0,maximumFractionDigits:2});
+const today=()=>new Date().toISOString().slice(0,10);
+const nowISO=()=>new Date().toISOString().slice(0,16);
+const tok=()=>Math.random().toString(36).slice(2,10)+Math.random().toString(36).slice(2,10);
+const initials=n=>String(n||'?').split(' ').map(x=>x[0]).slice(0,2).join('');
+const slugify=t=>String(t).toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g,'').trim().replace(/[\s_]+/g,'-').replace(/-+/g,'-').slice(0,70);
+const SEED=JSON.parse(document.getElementById('seed').textContent);
+const KEY='lessonlagoon_admin_v1';
+let S,IMG={},FILES={};
+function toast(m){document.querySelectorAll('.toast').forEach(x=>x.remove());const t=document.createElement('div');t.className='toast';t.innerHTML=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3400)}
+
+/* ---------- IndexedDB for preview images ---------- */
+const DB={db:null,
+  open(){return new Promise(r=>{try{const q=indexedDB.open('lessonlagoon_admin',1);q.onupgradeneeded=()=>q.result.createObjectStore('img');q.onsuccess=()=>{this.db=q.result;r()};q.onerror=()=>r()}catch(e){r()}})},
+  put(k,v){IMG[k]=v;if(!this.db)return;try{this.db.transaction('img','readwrite').objectStore('img').put(v,k)}catch(e){}},
+  del(k){delete IMG[k];if(!this.db)return;try{this.db.transaction('img','readwrite').objectStore('img').delete(k)}catch(e){}},
+  all(){return new Promise(r=>{if(!this.db)return r({});const out={};try{const req=this.db.transaction('img').objectStore('img').openCursor();req.onsuccess=e=>{const c=e.target.result;if(c){out[c.key]=c.value;c.continue()}else r(out)};req.onerror=()=>r({})}catch(e){r({})}})},
+  clear(){IMG={};if(!this.db)return;try{this.db.transaction('img','readwrite').objectStore('img').clear()}catch(e){}}};
+
+/* ---------- State ---------- */
+function fresh(){const s=JSON.parse(JSON.stringify(SEED));const now=Date.now();
+  s.campaigns.forEach(c=>{if(c.startOffsetH!=null){c.start=now+c.startOffsetH*36e5;c.end=now+c.endOffsetH*36e5;delete c.startOffsetH;delete c.endOffsetH}else{c.start=+new Date(c.start);c.end=+new Date(c.end)}});
+  s.ent=s.entitlements.map(([u,p])=>({uid:u,pid:p,at:'2026-10-01'}));delete s.entitlements;
+  s.users.forEach(u=>{if(u.role!=='CUSTOMER')return;u.welcome={status:u.paid?'used':(u.welcomeDaysLeft?'active':'expired'),pct:s.settings.welcome.pct,expires:now+(u.welcomeDaysLeft||-1)*864e5};delete u.welcomeDaysLeft});
+  s.ledger=[];s.users.filter(u=>u.role==='CUSTOMER').forEach(u=>{s.ledger.push({id:tok(),uid:u.id,type:'Sign-up bonus',pts:50,status:'available',at:u.joined});
+    if(u.points>50)s.ledger.push({id:tok(),uid:u.id,type:'Purchases & shares',pts:u.points-50,status:'available',at:u.joined});
+    if(u.pending)s.ledger.push({id:tok(),uid:u.id,type:'Purchase LL-2026-000119',pts:u.pending,status:'pending',at:'2026-11-07',release:Date.now()+5*864e5})});
+  s.products.forEach(p=>{p.versions=[{v:p.ver,at:'2026-10-01',note:p.ver>1?'Fixed answer key typos':'First release',file:p.slug+'.'+p.type.toLowerCase()}];p.file={name:p.slug+'.'+p.type.toLowerCase(),size:Math.round(p.pages*180e3),hash:null};p.created='2026-09-01';p.updated='2026-10-01';p.tags=[];p.cover=null});
+  s.orders.forEach(o=>{o.log=[{at:o.at,ev:'Order placed'}];if(o.slip)o.log.push({at:o.at,ev:'Slip uploaded · owner emailed'});if(o.status==='PAID')o.log.push({at:o.at,ev:'Approved by Shaina Ali · downloads unlocked'});if(o.status==='AWAITING_VERIFICATION')o.tokens={approve:tok(),reject:tok(),used:false}});
+  s.audit=[{at:nowISO(),who:'System',action:'Store created',detail:'Seed data loaded'}];
+  s.outbox=[];s.seq=124;s.session=null;s.segments=[{id:'all',name:'All customers with email consent',rule:'consent'},{id:'nobuy',name:'Signed up, never purchased',rule:'nobuy'},{id:'pts',name:'Has 200+ points to spend',rule:'pts200'},{id:'top',name:'Tag: Top buyer',rule:'tag:Top buyer'}];
+  s.orders.filter(o=>o.status==='AWAITING_VERIFICATION').forEach(o=>mail(s,s.users[0].email,'ownerApproval',{order:o.no,amount:mvr(o.total),name:uById(s,o.uid).name},{orderNo:o.no}));
+  return s}
+function uById(s,id){return s.users.find(u=>u.id===id)}
+function load(){try{const j=localStorage.getItem(KEY);S=j?JSON.parse(j):fresh()}catch(e){S=fresh()}S.queue=[]}
+let saveT;function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{const c=Object.assign({},S,{queue:[]});localStorage.setItem(KEY,JSON.stringify(c))}catch(e){console.warn('save failed',e)}},150)}
+function audit(action,detail){S.audit.unshift({at:nowISO(),who:me()?me().name:'System',action,detail:detail||''});if(S.audit.length>500)S.audit.length=500;save()}
+const P=id=>S.products.find(p=>p.id===id);const U=id=>S.users.find(u=>u.id===id);
+const me=()=>S.session?U(S.session):null;
+const owner=()=>S.users.find(u=>u.role==='ADMIN');
+const catName=id=>(S.categories.find(c=>c.id===id)||{}).name||id||'—';
+const catIc=id=>(S.categories.find(c=>c.id===id)||{}).ic||'📄';
+const owns=(uid,pid)=>S.ent.some(e=>e.uid===uid&&e.pid===pid);
+const activeCampaign=()=>S.campaigns.find(c=>c.active&&Date.now()>=c.start&&Date.now()<=c.end);
+const customers=()=>S.users.filter(u=>u.role==='CUSTOMER');
+function fill(t,v){return String(t).replace(/\{(\w+)\}/g,(m,k)=>v[k]!=null?v[k]:m)}
+function mail(s,to,tpl,vars,extra){const T=s.templates[tpl];const v=Object.assign({store:s.settings.store,owner:(s.users[0]||{}).name},vars||{});
+  s.outbox.unshift(Object.assign({id:tok(),to,tpl,subject:fill(T.subject,v),body:fill(T.body,v),at:new Date().toLocaleString('en-GB')},extra||{}))}
+function addPts(uid,pts,type,status='available'){const u=U(uid);if(!u)return;S.ledger.unshift({id:tok(),uid,type,pts,status,at:today(),release:status==='pending'?Date.now()+S.settings.holdDays*864e5:null});
+  if(status==='available')u.points+=pts;else if(status==='pending')u.pending+=pts}
+
+/* ---------- Canvas art (covers, synthetic previews, slips) ---------- */
+function shade(h,a){let n=parseInt(String(h).slice(1),16),r=Math.max(0,Math.min(255,(n>>16)+a)),g=Math.max(0,Math.min(255,(n>>8&255)+a)),b=Math.max(0,Math.min(255,(n&255)+a));return `rgb(${r},${g},${b})`}
+function wrapText(x,t,X,Y,w,lh,max=9){const ws=String(t).split(' ');let l='',n=0;for(const wd of ws){const tt=l+wd+' ';if(x.measureText(tt).width>w&&l){x.fillText(l,X,Y);Y+=lh;l=wd+' ';if(++n>=max)return Y}else l=tt}x.fillText(l,X,Y);return Y+lh}
+const artCache={};
+function genCover(p){const k='c'+p.id+p.color+p.title+p.grade+p.type;if(artCache[k])return artCache[k];
+  const c=document.createElement('canvas');c.width=640;c.height=512;const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,640,512);g.addColorStop(0,p.color);g.addColorStop(1,shade(p.color,-35));x.fillStyle=g;x.fillRect(0,0,640,512);
+  x.globalAlpha=.12;x.fillStyle='#fff';for(let i=0;i<9;i++){x.beginPath();x.arc(60+i*80,(i%2?80:440),40+i*6,0,7);x.fill()}x.globalAlpha=1;
+  x.save();x.translate(400,70);x.rotate(.06);x.fillStyle='#fff';x.shadowColor='rgba(0,0,0,.3)';x.shadowBlur=24;x.fillRect(0,0,200,260);x.shadowBlur=0;
+  x.fillStyle=p.color;x.fillRect(0,0,200,38);x.fillStyle='#d6dae2';for(let i=0;i<9;i++)x.fillRect(18,58+i*21,i%3?150:110,7);x.restore();
+  x.font='110px serif';x.fillText(p.ic||'📄',44,180);
+  x.fillStyle='rgba(255,255,255,.9)';x.font='700 22px "Plus Jakarta Sans",sans-serif';x.fillText((p.grade+' · '+p.type).toUpperCase(),46,252);
+  x.fillStyle='#fff';x.font='800 36px "Plus Jakarta Sans",sans-serif';wrapText(x,p.title,46,302,340,42,4);
+  return artCache[k]=c.toDataURL('image/jpeg',.85)}
+function coverOf(p){return (p.cover&&IMG['cv:'+p.id])||genCover(p)}
+function watermark(x,W,H){x.save();x.globalAlpha=.16;x.fillStyle='#0b1220';x.font='800 26px "Plus Jakarta Sans",sans-serif';x.translate(W/2,H/2);x.rotate(-Math.PI/6);
+  for(let yy=-H;yy<H;yy+=110)for(let xx=-W;xx<W;xx+=470)x.fillText(S.settings.watermark,xx+((yy/110)%2?200:0),yy);x.restore();
+  x.save();x.globalAlpha=.75;x.fillStyle='#0b1220';x.fillRect(0,H-30,W,30);x.fillStyle='#fff';x.font='600 13px monospace';x.fillText('Preview only · '+S.settings.store+' · viewer code stamped per customer at view time',14,H-11);x.restore()}
+function synthPage(p,n){const slide=p.type==='PPTX';const W=slide?1200:900,H=slide?675:1165;const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,W,H);
+  if(slide){const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,p.color);g.addColorStop(1,shade(p.color,-40));x.fillStyle=g;x.fillRect(0,0,W,H);x.fillStyle='#fff';
+    if(n===1){x.font='130px serif';x.fillText(p.ic||'📄',70,230);x.font='800 56px "Plus Jakarta Sans",sans-serif';wrapText(x,p.title,70,350,1000,64,3)}
+    else{x.font='800 48px "Plus Jakarta Sans",sans-serif';x.fillText(['','','Learning objectives','Key vocabulary','Explore','Activity time'][Math.min(n,5)],70,110);x.fillStyle='rgba(255,255,255,.95)';x.fillRect(70,150,620,420);x.fillStyle='#cfd5df';for(let i=0;i<5;i++)x.fillRect(110,192+i*72,380+(i%2)*120,16);x.font='200px serif';x.fillText(p.ic||'📄',780,450)}}
+  else{x.fillStyle=p.color;x.fillRect(0,0,W,110);x.fillStyle='#fff';x.font='800 30px "Plus Jakarta Sans",sans-serif';wrapText(x,p.title,50,55,700,34,2);
+    x.font='600 18px "Plus Jakarta Sans",sans-serif';x.fillText(p.grade+' · Page '+n+' of '+p.pages,50,96);
+    x.fillStyle='#14213D';x.font='600 20px "Plus Jakarta Sans",sans-serif';x.fillText('Name: ____________________    Class: ______    Date: ________',50,160);
+    for(let q=0;q<6;q++){const y=250+q*140;x.fillStyle=p.color;x.beginPath();x.arc(68,y,18,0,7);x.fill();x.fillStyle='#9aa3b2';x.fillRect(100,y-10,520+(q%3)*90,12);x.strokeStyle='#d5dae3';x.lineWidth=2;for(let l=0;l<3;l++){x.beginPath();x.moveTo(100,y+40+l*28);x.lineTo(820,y+40+l*28);x.stroke()}}}
+  return c}
+function previewsOf(p){const n=Math.min(p.pv||S.settings.previewPages,p.pages||1);const out=[];
+  for(let i=0;i<n;i++){const k='pv:'+p.id+':'+i;if(p.custom){if(IMG[k])out.push(IMG[k])}else{const ck='syn'+p.id+i+S.settings.watermark+p.title;if(!artCache[ck]){const c=synthPage(p,i+1);watermark(c.getContext('2d'),c.width,c.height);artCache[ck]=c.toDataURL('image/jpeg',.75)}out.push(artCache[ck])}}
+  return out}
+function slipImage(o){const k='slip'+o.no+(o.slip?o.slip.amount:'');if(artCache[k])return artCache[k];const c=document.createElement('canvas');c.width=520;c.height=700;const x=c.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,520,700);x.fillStyle='#1f4e9c';x.fillRect(0,0,520,90);x.fillStyle='#fff';x.font='800 26px sans-serif';x.fillText('Transfer Successful ✓',30,55);
+  x.fillStyle='#16A34A';x.beginPath();x.arc(260,170,46,0,7);x.fill();x.fillStyle='#fff';x.font='800 50px sans-serif';x.fillText('✓',240,188);
+  x.fillStyle='#111';x.font='800 34px sans-serif';x.textAlign='center';x.fillText(mvr((o.slip||{}).amount||o.total),260,270);x.textAlign='left';
+  const rows=[['From',(o.slip||{}).sender||'CUSTOMER'],['To','LESSONLAGOON PVT LTD'],['Account','7730000012456'],['Remarks',(o.slip||{}).ref||o.no],['Date',(o.slip||{}).date||today()],['Ref no.','BLAZ'+(1e8+o.no.slice(-3)*7919)]];
+  rows.forEach((r,i)=>{x.fillStyle='#6b7280';x.font='16px sans-serif';x.fillText(r[0],30,340+i*52);x.fillStyle='#111';x.font='700 18px sans-serif';x.fillText(r[1],190,340+i*52);x.fillStyle='#eee';x.fillRect(30,356+i*52,460,1)});
+  return artCache[k]=c.toDataURL('image/jpeg',.85)}
+
+/* ---------- Upload pipeline (browser-side; server does the same in production) ---------- */
+const libs={};
+function loadScript(url,glob){return libs[url]||(libs[url]=new Promise((res,rej)=>{if(glob&&window[glob])return res(window[glob]);const s=document.createElement('script');s.src=url;s.onload=()=>res(window[glob]);s.onerror=()=>{delete libs[url];rej(new Error('Could not load '+url))};document.head.appendChild(s)}))}
+const PDFJS='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/';
+function pdfjs(){return libs.pdf||(libs.pdf=import(PDFJS+'pdf.min.mjs').then(l=>{l.GlobalWorkerOptions.workerSrc=PDFJS+'pdf.worker.min.mjs';return l}).catch(e=>{delete libs.pdf;throw new Error('Could not load the PDF reader (are you offline?) – a placeholder preview was used')}))}
+const jszip=()=>loadScript('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js','JSZip').catch(()=>{throw new Error('Could not load the Office reader (are you offline?) – a placeholder preview was used')});
+const ALLOWED=['pdf','docx','pptx','doc','ppt'];
+function guessMeta(name){const base=name.replace(/\.[^.]+$/,'');let t=base.replace(/[_]+/g,' ').replace(/-+/g,' ').replace(/\s+/g,' ').trim();
+  t=t.replace(/\b(v|ver|version)\s?\d+(\.\d+)?\b/ig,'').replace(/\b(final|draft|copy)\b/ig,'').trim();
+  t=t.split(' ').map(w=>w.length>3||/^[a-z]/.test(w)===false?w.charAt(0).toUpperCase()+w.slice(1):w).join(' ');
+  t=t.replace(/\b(?:grade|gr|g)\s?(\d{1,2})\b/ig,'Grade $1').replace(/\bkg\b/ig,'KG');t=t.charAt(0).toUpperCase()+t.slice(1);
+  let grade='';const m=base.match(/(?:^|[^a-z])(?:grade|gr|g)[\s_-]?(\d{1,2})(?![0-9])/i);if(m)grade='Grade '+(+m[1]);else if(/(?:^|[^a-z])(kg|kindergarten|lkg|ukg)(?![a-z])/i.test(base))grade='KG';
+  const L=base.toLowerCase();const map=[['maths',/math|fraction|algebra|addition|subtract|multipl|times|geometry|number/],['english',/english|phonics|reading|grammar|spelling|writing|comprehension/],['dhivehi',/dhivehi|thaana|akuru|divehi/],['science',/science|reef|biology|physics|chemistry|plant|ocean|energy/],['islam',/islam|quran|prophet|ramadan|prayer|seerah/],['social',/social|history|geography|climate|island|map|civic/]];
+  let cat='';for(const[k,r]of map)if(r.test(L)&&S.categories.some(c=>c.id===k)){cat=k;break}
+  return{title:t||base,grade,cat}}
+async function sha256(buf){try{const h=await crypto.subtle.digest('SHA-256',buf);return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('')}catch(e){return 'nohash-'+buf.byteLength}}
+function toImg(c,q=.8){let u=c.toDataURL('image/webp',q);if(!u.startsWith('data:image/webp'))u=c.toDataURL('image/jpeg',q);return u}
+function fitWidth(src,W){if(src.width<=W)return src;const c=document.createElement('canvas');c.width=W;c.height=Math.round(src.height*W/src.width);c.getContext('2d').drawImage(src,0,0,c.width,c.height);return c}
+async function renderPDF(buf,n){const lib=await pdfjs();const doc=await lib.getDocument({data:buf}).promise;const total=doc.numPages;const out=[];
+  for(let i=1;i<=Math.min(n,total);i++){const pg=await doc.getPage(i);const v0=pg.getViewport({scale:1});const vp=pg.getViewport({scale:Math.min(2,900/v0.width)});
+    const c=document.createElement('canvas');c.width=Math.round(vp.width);c.height=Math.round(vp.height);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:x,canvas:c,viewport:vp}).promise;out.push(c)}
+  return{total,canvases:out}}
+function newPage(W,H){const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);return[c,x]}
+async function renderDOCX(buf,n){const JSZip=await jszip();const z=await JSZip.loadAsync(buf);const f=z.file('word/document.xml');if(!f)throw new Error('Not a valid Word file');
+  const d=new DOMParser().parseFromString(await f.async('string'),'application/xml');const NS='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+  const paras=[...d.getElementsByTagNameNS(NS,'p')].map(p=>{const st=p.getElementsByTagNameNS(NS,'pStyle')[0];const style=st?(st.getAttributeNS(NS,'val')||st.getAttribute('w:val')||''):'';
+    const t=[...p.getElementsByTagNameNS(NS,'t')].map(x=>x.textContent).join('');const li=p.getElementsByTagNameNS(NS,'numPr').length>0;return{t,h:/heading|title/i.test(style)?(/title|1/.test(style)?1:2):0,li}});
+  let declared=null;try{const a=z.file('docProps/app.xml');if(a){const m=(await a.async('string')).match(/<Pages>(\d+)<\/Pages>/);if(m)declared=+m[1]}}catch(e){}
+  const W=900,H=1165,M=70;const out=[];let [c,x]=newPage(W,H);let y=M+10,pages=1;const keep=()=>out.length<n;
+  const put=(txt,font,lh,indent)=>{x.font=font;const words=txt.split(/\s+/);let line='';for(const w of words){const t=line?line+' '+w:w;if(x.measureText(t).width>W-2*M-indent&&line){if(keep())x.fillText(line,M+indent,y);y+=lh;line=w;if(y>H-M){if(keep())out.push(c);[c,x]=newPage(W,H);x.font=font;x.fillStyle='#14213D';y=M+10;pages++}}else line=t}
+    if(line){if(keep())x.fillText(line,M+indent,y);y+=lh;if(y>H-M){if(keep())out.push(c);[c,x]=newPage(W,H);y=M+10;pages++}}};
+  for(const p of paras){x.fillStyle=p.h?'#0E8C7F':'#14213D';if(!p.t.trim()){y+=14;continue}
+    if(p.h===1)put(p.t,'800 30px "Plus Jakarta Sans",sans-serif',40,0);else if(p.h)put(p.t,'800 22px "Plus Jakarta Sans",sans-serif',32,0);else put((p.li?'•  ':'')+p.t,'400 17px "Plus Jakarta Sans",sans-serif',26,p.li?18:0);y+=8}
+  if(keep()&&out.length<pages)out.push(c);
+  return{total:Math.max(declared||0,pages),canvases:out.slice(0,n)}}
+async function renderPPTX(buf,n,title){const JSZip=await jszip();const z=await JSZip.loadAsync(buf);const num=f=>+f.match(/slide(\d+)\.xml$/)[1];
+  const files=Object.keys(z.files).filter(f=>/^ppt\/slides\/slide\d+\.xml$/.test(f)).sort((a,b)=>num(a)-num(b));if(!files.length)throw new Error('No slides found');
+  const A='http://schemas.openxmlformats.org/drawingml/2006/main';const out=[];const cols=['#0E8C7F','#0284C7','#7C3AED','#EA580C'];
+  for(let i=0;i<Math.min(n,files.length);i++){const d=new DOMParser().parseFromString(await z.file(files[i]).async('string'),'application/xml');
+    const paras=[...d.getElementsByTagNameNS(A,'p')].map(p=>[...p.getElementsByTagNameNS(A,'t')].map(t=>t.textContent).join('')).filter(t=>t.trim());
+    const[c,x]=newPage(1200,675);const col=cols[i%4];
+    if(i===0){const g=x.createLinearGradient(0,0,1200,675);g.addColorStop(0,col);g.addColorStop(1,shade(col,-45));x.fillStyle=g;x.fillRect(0,0,1200,675);x.fillStyle='#fff';x.font='800 54px "Plus Jakarta Sans",sans-serif';const yy=wrapText(x,paras[0]||title,80,260,1040,64,3);x.font='500 26px "Plus Jakarta Sans",sans-serif';x.globalAlpha=.9;if(paras[1])wrapText(x,paras[1],80,yy+20,1040,34,2);x.globalAlpha=1}
+    else{x.fillStyle=col;x.fillRect(0,0,1200,10);x.fillStyle='#14213D';x.font='800 40px "Plus Jakarta Sans",sans-serif';wrapText(x,paras[0]||('Slide '+(i+1)),70,90,1060,48,2);x.font='400 24px "Plus Jakarta Sans",sans-serif';let yy=180;
+      for(const t of paras.slice(1,9)){x.fillStyle=col;x.beginPath();x.arc(84,yy-8,6,0,7);x.fill();x.fillStyle='#334155';yy=wrapText(x,t,104,yy,1000,32,2)+8;if(yy>620)break}
+      x.fillStyle='#94A3B8';x.font='600 14px sans-serif';x.fillText('Slide '+(i+1)+' of '+files.length,1060,650)}
+    out.push(c)}
+  return{total:files.length,canvases:out}}
+function placeholder(type,name,i,total){const slide=type==='PPTX';const[c,x]=newPage(slide?1200:900,slide?675:1165);x.fillStyle='#F1F5F9';x.fillRect(0,0,c.width,c.height);
+  x.fillStyle='#14213D';x.font='800 34px sans-serif';wrapText(x,name,60,120,c.width-120,42,3);x.font='500 20px sans-serif';x.fillStyle='#5B6475';
+  wrapText(x,(slide?'Slide ':'Page ')+(i+1)+(total?' of '+total:'')+' · Preview will be rendered on the server (LibreOffice) for legacy .doc/.ppt files or when offline.',60,280,c.width-120,30,4);return c}
+function makeCover(page,color){const[c,x]=newPage(640,512);const g=x.createLinearGradient(0,0,640,512);g.addColorStop(0,color);g.addColorStop(1,shade(color,-40));x.fillStyle=g;x.fillRect(0,0,640,512);
+  const r=Math.min(560/page.width,440/page.height);const w=page.width*r,h=page.height*r;x.save();x.translate((640-w)/2,(512-h)/2+6);x.rotate(-.02);x.shadowColor='rgba(0,0,0,.35)';x.shadowBlur=26;x.fillStyle='#fff';x.fillRect(0,0,w,h);x.shadowBlur=0;x.drawImage(page,0,0,w,h);x.restore();return c.toDataURL('image/jpeg',.85)}
+function stamp(src){return new Promise(res=>{const im=new Image();im.onload=()=>{const[c,x]=newPage(im.width,im.height);x.drawImage(im,0,0);watermark(x,c.width,c.height);res(toImg(c,.78))};im.onerror=()=>res(src);im.src=src})}
+const PALETTE=['#0E8C7F','#0284C7','#7C3AED','#DB2777','#EA580C','#15803D','#DC2626','#0F766E','#F59E0B','#14213D'];
+/* processes one File into {type,pages,raw[],wm[],cover,hash} with live step updates */
+async function processFile(file,nPrev,onStep){const ext=file.name.split('.').pop().toLowerCase();const type=ext.startsWith('ppt')?'PPTX':ext.startsWith('doc')?'DOCX':'PDF';
+  const steps=['Checking file type & size','Duplicate check (SHA-256)',type==='PDF'?'Reading PDF':'Reading '+type+' (converted to PDF on server)','Rendering preview pages','Burning watermark into preview images','Creating cover image'];
+  const st=(i,err)=>onStep&&onStep(steps,i,err);
+  st(0);if(!ALLOWED.includes(ext))throw new Error('File type .'+ext+' is not allowed. Use PDF, Word or PowerPoint.');
+  if(file.size>S.settings.maxUploadMB*1048576)throw new Error('File is larger than '+S.settings.maxUploadMB+' MB.');
+  if(file.size<200)throw new Error('File looks empty.');
+  st(1);const buf=await file.arrayBuffer();const hash=await sha256(buf);
+  st(2);let r=null,note='';
+  try{if(type==='PDF')r=await renderPDF(buf.slice(0),nPrev);else if(ext==='docx')r=await renderDOCX(buf,nPrev);else if(ext==='pptx')r=await renderPPTX(buf,nPrev,file.name)}catch(e){note=e.message}
+  st(3);if(!r||!r.canvases.length){r={total:r&&r.total||0,canvases:Array.from({length:nPrev},(_,i)=>placeholder(type,file.name,i,0))};note=note||'Legacy format';}
+  const raw=r.canvases.map(c=>toImg(fitWidth(c,900),.85));
+  st(4);const wm=[];for(const u of raw)wm.push(await stamp(u));
+  st(5);const color=PALETTE[Math.floor(Math.random()*PALETTE.length)];const cover=makeCover(r.canvases[0],color);
+  st(6);return{type,pages:r.total||0,raw,wm,cover,hash,color,note,size:file.size,name:file.name}}
+</script>
+<script>
+/* ================= SHELL ================= */
+const NAV=[['Overview',[['dash','📊','Dashboard']]],
+ ['Catalogue',[['upload','⬆️','Upload resources'],['resources','📦','Resources'],['categories','🏷️','Subjects & grades']]],
+ ['Sales',[['approvals','✅','Approvals'],['orders','🧾','Orders'],['customers','👥','Customers']]],
+ ['Marketing',[['campaigns','📣','Campaigns & coupons'],['points','🪙','Points & referrals'],['reviews','⭐','Reviews'],['landing','🎨','Landing page'],['emails','📧','Emails']]],
+ ['System',[['settings','⚙️','Settings'],['audit','📜','Audit log'],['backup','💾','Backup & data']]]];
+const pendingN=()=>S.orders.filter(o=>o.status==='AWAITING_VERIFICATION').length;
+const reviewN=()=>S.reviews.filter(r=>r.status==='pending').length;
+function signInView(){return `<div class="signin"><div class="card"><div class="logo" style="justify-content:center"><i>🌊</i>${esc(S.settings.store)} <small>ADMIN</small></div>
+  <h2 style="margin:18px 0 6px">Owner sign-in</h2><p class="mut sm">Only Google accounts on the admin allowlist can open the store backend.</p>
+  <div class="mt" style="border:1px solid #dadce0;border-radius:14px;overflow:hidden;text-align:left">
+   ${S.settings.admins.map(e=>`<div class="flex" style="padding:12px 16px;border-bottom:1px solid #eee;cursor:pointer" data-a="signin" data-v="${esc(e)}"><div class="av" style="background:#14213D">${initials(owner().name)}</div><div><b class="sm">${esc(e===owner().email?owner().name:e)}</b><div class="sm mut">${esc(e)}</div></div></div>`).join('')}
+   <div class="flex" style="padding:12px 16px;cursor:pointer" data-a="signinOther"><div class="av" style="background:#94A3B8">＋</div><div><b class="sm">Use another account</b><div class="sm mut">Shows what happens to non-admins</div></div></div></div>
+  <p class="sm mut mt">🔐 Admin sessions expire after 12 hours. Sensitive changes (bank details, admin list) ask you to confirm again.</p></div></div>`}
+function shell(tab){const u=me();const pend=pendingN();
+  return `<header class="top"><div class="nav"><a class="logo" href="#/dash"><i>🌊</i>${esc(S.settings.store)} <small>ADMIN</small></a>
+   <div class="gs"><input id="gsq" placeholder="Search resources, customers, orders…  ( / )" autocomplete="off"><div id="gsr"></div></div>
+   <div class="navr"><button class="btn acc" data-a="pick" title="Upload resources (U)">⬆️<span class="lbl"> Upload resources</span></button>
+    <a class="icbtn" href="#/approvals" title="Pending approvals">🔔${pend?`<span class="n">${pend}</span>`:''}</a>
+    <a class="icbtn hm" href="#/emails" title="Owner inbox">📧</a>
+    <div class="av" style="background:${u.color}" title="${esc(u.name)} · sign out" data-a="signout">${initials(u.name)}</div></div></div></header>
+  <div class="adm"><nav class="side"><a class="up" data-a="pick" href="javascript:void 0">⬆️ Upload resources</a>${NAV.map(([g,items])=>`<small>${g}</small>`+items.map(t=>`<a href="#/${t[0]}" class="${tab===t[0]?'on':''}">${t[1]} ${t[2]}${t[0]==='approvals'&&pend?`<span class="n">${pend}</span>`:''}${t[0]==='reviews'&&reviewN()?`<span class="n">${reviewN()}</span>`:''}${t[0]==='upload'&&S.queue.filter(q=>q.state!=='done').length?`<span class="n">${S.queue.filter(q=>q.state!=='done').length}</span>`:''}</a>`).join('')).join('')}
+   <small>Shortcuts</small><a href="javascript:void 0" data-a="storefront">🌐 View storefront</a></nav>
+   <div class="main" id="main">${(V[tab]||V.dash)()}</div></div>`}
+function route(){const tab=(location.hash.split('/')[1]||'dash').split('?')[0];
+  if(!me()){$('#root').innerHTML=signInView();return}
+  $('#root').innerHTML=shell(tab);window.scrollTo(0,0);afterRender(tab)}
+function rerender(){const tab=(location.hash.split('/')[1]||'dash');const m=$('#main');if(!m)return route();const y=window.scrollY;$('#root').innerHTML=shell(tab);window.scrollTo(0,y);afterRender(tab)}
+function afterRender(tab){const g=$('#gsq');if(g){g.oninput=()=>gsearch(g.value);g.onblur=()=>setTimeout(()=>{const r=$('#gsr');if(r)r.innerHTML=''},200)}
+  const d=$('#dz');if(d){['dragover','dragenter'].forEach(e=>d.addEventListener(e,ev=>{ev.preventDefault();d.classList.add('hv')}));['dragleave','drop'].forEach(e=>d.addEventListener(e,()=>d.classList.remove('hv')))}
+  document.querySelectorAll('[data-cd]').forEach(el=>{const t=+el.dataset.cd-Date.now();el.textContent=t>0?fmtDur(t):'ended'})}
+function fmtDur(ms){const d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.floor(ms%36e5/6e4);return (d?d+'d ':'')+h+'h '+m+'m'}
+function gsearch(q){const r=$('#gsr');q=q.trim().toLowerCase();if(!q){r.innerHTML='';return}
+  const ps=S.products.filter(p=>(p.title+' '+p.grade+' '+catName(p.cat)).toLowerCase().includes(q)).slice(0,5);
+  const cs=customers().filter(u=>(u.name+' '+u.email+' '+u.code).toLowerCase().includes(q)).slice(0,5);
+  const os=S.orders.filter(o=>(o.no+' '+U(o.uid).name).toLowerCase().includes(q)).slice(0,5);
+  r.innerHTML=`<div class="gsr">${ps.length?'<small class="h">Resources</small>'+ps.map(p=>`<a data-a="editP" data-id="${p.id}"><img src="${coverOf(p)}" style="width:40px;height:32px;border-radius:6px;object-fit:cover"><span>${esc(p.title)}<div class="sm mut">${p.status} · ${esc(p.grade)}</div></span></a>`).join(''):''}
+   ${cs.length?'<small class="h">Customers</small>'+cs.map(u=>`<a data-a="cust" data-id="${u.id}"><div class="av" style="background:${u.color};width:30px;height:30px;font-size:11px">${initials(u.name)}</div><span>${esc(u.name)}<div class="sm mut">${esc(u.email)}</div></span></a>`).join(''):''}
+   ${os.length?'<small class="h">Orders</small>'+os.map(o=>`<a data-a="order" data-id="${o.no}">🧾 <span>${o.no}<div class="sm mut">${esc(U(o.uid).name)} · ${statusBadge(o.status)}</div></span></a>`).join(''):''}
+   ${!ps.length&&!cs.length&&!os.length?'<div class="mut sm" style="padding:10px">No matches.</div>':''}</div>`}
+const STATUS={PAID:['b-paid','Paid'],COMPLETED_FREE:['b-paid','Free · completed'],AWAITING_VERIFICATION:['b-wait','Awaiting verification'],AWAITING_TRANSFER:['b-wait','Awaiting transfer'],PAYMENT_REJECTED:['b-rej','Slip rejected'],REFUNDED:['b-grey','Refunded'],EXPIRED:['b-grey','Expired']};
+const statusBadge=s=>`<span class="badge ${(STATUS[s]||['b-grey'])[0]}">${(STATUS[s]||[0,s])[1]}</span>`;
+const pStatus=s=>`<span class="badge ${s==='Published'?'b-paid':s==='Draft'?'b-wait':'b-grey'}">${s}</span>`;
+const sw=(on,a,id,extra='')=>`<button class="sw ${on?'on':''}" data-a="${a}" data-id="${id??''}" ${extra}></button>`;
+const opts=(arr,sel)=>arr.map(o=>Array.isArray(o)?`<option value="${esc(o[0])}" ${o[0]===sel?'selected':''}>${esc(o[1])}</option>`:`<option ${o===sel?'selected':''}>${esc(o)}</option>`).join('');
+const catOpts=sel=>`<option value="">Choose…</option>`+opts(S.categories.map(c=>[c.id,c.ic+' '+c.name]),sel);
+
+/* ================= VIEWS ================= */
+const V={
+dash(){const paid=S.orders.filter(o=>o.status==='PAID');const rev=paid.reduce((a,o)=>a+o.total,0);const mx=Math.max(...S.sales7.map(s=>s[1]));const c=activeCampaign();
+  const outstanding=customers().reduce((a,u)=>a+u.points,0);const drafts=S.products.filter(p=>p.status==='Draft');const noDesc=S.products.filter(p=>p.status==='Published'&&!p.short);
+  const stale=S.orders.filter(o=>o.status==='AWAITING_TRANSFER'&&Date.now()-new Date(o.at)>S.settings.slipExpiryHours*36e5);
+  const todo=[[pendingN(),'✅',`${pendingN()} payment slip(s) waiting for approval`,'#/approvals'],[reviewN(),'⭐',`${reviewN()} review(s) to moderate`,'#/reviews'],[drafts.length,'📝',`${drafts.length} draft resource(s) not yet published`,'#/resources?f=Draft'],[stale.length,'⏰',`${stale.length} unpaid order(s) past the ${S.settings.slipExpiryHours}h transfer window`,'#/orders'],[noDesc.length,'✏️',`${noDesc.length} published resource(s) missing a description`,'#/resources']].filter(t=>t[0]);
+  return `<h1>Good ${new Date().getHours()<12?'morning':new Date().getHours()<17?'afternoon':'evening'}, ${esc(me().name.split(' ')[0])} 👋</h1><div class="subt">Here's what needs you today, and how ${esc(S.settings.store)} is doing.</div>
+  <div class="kpis"><div class="kpi hot"><small>Pending approvals</small><b>${pendingN()}</b><a class="sm" style="color:var(--acc)" href="#/approvals">Review now →</a></div><div class="kpi"><small>Paid revenue</small><b>${mvr(rev)}</b><span class="sm mut">${paid.length} paid orders</span></div><div class="kpi"><small>Customers</small><b>${customers().length}</b><span class="sm mut">+${customers().filter(u=>u.joined>=today().slice(0,8)+'01').length} this month</span></div><div class="kpi"><small>Live resources</small><b>${S.products.filter(p=>p.status==='Published').length}</b><span class="sm mut">${drafts.length} drafts</span></div><div class="kpi"><small>Points outstanding</small><b>${outstanding.toLocaleString()}</b><span class="sm mut">= ${mvr(outstanding*100/S.settings.ptsPerMVRValue)}</span></div></div>
+  <div class="two"><div class="box"><h3>Needs your attention</h3><div class="todo">${todo.length?todo.map(t=>`<a href="${t[3]}"><span style="font-size:20px">${t[1]}</span><b>${t[2]}</b><span class="mut">→</span></a>`).join(''):'<div class="empty" style="padding:20px"><span>🎉</span>All caught up.</div>'}</div></div>
+   <div class="box"><h3>Quick actions</h3><div class="drop" data-a="pick" style="padding:22px"><div class="big">⬆️</div><b>Upload new resources</b><div class="sm mut">Drop PDFs, Word or PowerPoint files anywhere, on any screen</div></div>
+    <div class="flex wr mt"><button class="btn sm ghost" data-a="newCamp">📣 New campaign</button><button class="btn sm ghost" data-a="go" data-h="#/campaigns">🎟️ Add coupon</button><button class="btn sm ghost" data-a="go" data-h="#/landing">🎨 Edit landing page</button><button class="btn sm ghost" data-a="go" data-h="#/customers">👥 Customers</button></div></div></div>
+  <div class="two"><div class="box"><h3>Sales this week (MVR)</h3><div class="bars">${S.sales7.map(s=>`<div style="height:${s[1]/mx*100}%"><em>${s[1].toLocaleString()}</em><span>${s[0]}</span></div>`).join('')}</div><div style="height:16px"></div></div>
+   <div class="box"><h3>Top resources</h3>${[...S.products].sort((a,b)=>b.sales-a.sales).slice(0,5).map(p=>`<div class="ci"><img src="${coverOf(p)}"><div class="t">${esc(p.title)}<div class="sm mut">${p.sales.toLocaleString()} downloads/sales</div></div><b>${p.price?mvr(p.price):'Free'}</b></div>`).join('')}</div></div>
+  ${c?`<div class="box" style="border-left:5px solid ${c.accent}"><b>📣 ${esc(c.name)}</b> is live · ${c.pct}% off · ${c.mult}× points · ends in <b data-cd="${c.end}"></b></div>`:''}`},
+
+upload(){const Q=S.queue;const done=Q.filter(q=>q.state==='done').length,ready=Q.filter(q=>q.state==='ready').length,busy=Q.filter(q=>q.state==='queued'||q.state==='processing').length,bad=Q.filter(q=>q.state==='error').length;
+  return `<div class="ph"><div><h1>Upload resources</h1><div class="subt">Drop files here, or anywhere on any screen. Title, subject, grade, page count, cover and watermarked previews are filled in automatically. You just check the price and publish.</div></div>
+   <div class="flex wr"><button class="btn sm ghost" data-a="csvTpl">⬇️ CSV template</button><button class="btn sm ghost" data-a="csvImport">📥 Fill details from CSV</button></div></div>
+  <div class="drop" id="dz" data-a="pick" ondragover="event.preventDefault()"><div class="big">📂</div><b style="font-size:17px">Drop PDF, Word or PowerPoint files</b><div class="sm mut">or click to choose · many files at once · up to ${S.settings.maxUploadMB} MB each · press <b>U</b> from any screen</div></div>
+  <div class="steps3"><div><b>1 · Drop</b>Files are checked, fingerprinted and duplicates flagged.</div><div><b>2 · Auto-fill</b>Title, grade and subject come from the file name.</div><div><b>3 · Previews</b>First ${S.settings.previewPages} pages rendered and watermarked.</div><div><b>4 · Publish</b>Set the price once for all, or per file.</div></div>
+  ${Q.length?`<div class="box" style="padding:14px 18px"><div class="flex sb wr"><b>${Q.length} file(s) · ${ready} ready · ${busy} processing · ${bad} need attention · ${done} published</b>
+     <div class="flex wr"><button class="btn sm" data-a="publishAll" ${ready?'':'disabled'}>🚀 Publish all ready (${ready})</button><button class="btn sm ghost" data-a="draftAll" ${ready?'':'disabled'}>Save all as drafts</button><button class="btn sm ghost" data-a="clearDone">Clear finished</button></div></div>
+     <div class="pbar mt"><div style="width:${Q.length?Math.round((ready+done+bad)/Q.length*100):0}%"></div></div></div>
+   ${Q.length>1?`<div class="applybar"><b style="align-self:center">Apply to all ▸</b>
+     <div><label>Subject</label><select class="inp" id="ab-cat">${catOpts('')}</select></div><div><label>Grade</label><select class="inp" id="ab-grade"><option value="">—</option>${opts(S.grades)}</select></div>
+     <div><label>Curriculum</label><select class="inp" id="ab-curr"><option value="">—</option>${opts(S.curricula)}</select></div><div><label>Price (MVR)</label><input class="inp" id="ab-price" type="number" min="0" placeholder="e.g. 50" style="width:100px"></div>
+     <div><label>Min price (MVR)</label><input class="inp" id="ab-min" type="number" min="0" placeholder="auto" style="width:100px"></div><div><label>Preview pages</label><input class="inp" id="ab-pv" type="number" min="1" max="10" placeholder="${S.settings.previewPages}" style="width:80px"></div>
+     <button class="btn acc sm" data-a="applyAll">Apply</button></div>`:''}
+   <div id="queue">${Q.map(qCard).join('')}</div>`:`<div class="empty"><span>🗂️</span>No files in the queue yet. Your uploads will appear here while previews are generated.</div>`}
+  <div class="note mt">🛡️ <b>How files are protected:</b> originals go to private storage and are only ever downloaded through short-lived signed links after purchase. Customers only see the watermarked preview images; the watermark is part of the pixels, not an overlay.</div>`},
+
+resources(){const f=window._rf||(window._rf={q:'',st:(location.hash.split('f=')[1]||'All'),cat:'',sel:[]});if(location.hash.includes('f='))f.st=decodeURIComponent(location.hash.split('f=')[1]);
+  const list=S.products.filter(p=>(f.st==='All'||p.status===f.st)&&(!f.cat||p.cat===f.cat)&&(!f.q||(p.title+' '+p.grade+' '+catName(p.cat)).toLowerCase().includes(f.q.toLowerCase())));
+  const n=st=>S.products.filter(p=>st==='All'||p.status===st).length;f.sel=f.sel.filter(id=>P(id));
+  return `<div class="ph"><div><h1>Resources</h1><div class="subt">${S.products.length} resources · edit prices inline · previews and watermarks are generated automatically.</div></div><button class="btn acc" data-a="pick">⬆️ Upload resources</button></div>
+  <div class="flex wr" style="margin-bottom:12px"><input class="inp" style="max-width:300px" placeholder="Search title, grade, subject…" value="${esc(f.q)}" id="rq">
+   ${['All','Published','Draft','Archived'].map(s=>`<span class="chip ${f.st===s?'on':''}" data-a="rst" data-v="${s}">${s} (${n(s)})</span>`).join('')}
+   <select class="inp" style="max-width:200px" id="rcat"><option value="">All subjects</option>${opts(S.categories.map(c=>[c.id,c.name]),f.cat)}</select></div>
+  ${f.sel.length?`<div class="applybar"><b style="align-self:center">${f.sel.length} selected ▸</b><button class="btn sm" data-a="bulk" data-v="Published">Publish</button><button class="btn sm ghost" data-a="bulk" data-v="Draft">Unpublish</button><button class="btn sm ghost" data-a="bulk" data-v="Archived">Archive</button><button class="btn sm ghost" data-a="bulk" data-v="feature">★ Feature</button>
+    <div><label>Subject</label><select class="inp" id="bk-cat">${catOpts('')}</select></div><button class="btn sm ghost" data-a="bulk" data-v="cat">Set subject</button>
+    <div><label>Price (MVR)</label><input class="inp" id="bk-price" type="number" min="0" style="width:90px"></div><button class="btn sm ghost" data-a="bulk" data-v="price">Set price</button>
+    <button class="btn sm ghost" data-a="bulk" data-v="none">✕ Clear</button></div>`:''}
+  <div class="tw"><table class="t"><tr><th><input type="checkbox" data-a="selAll" ${list.length&&list.every(p=>f.sel.includes(p.id))?'checked':''}></th><th></th><th>Resource</th><th>File</th><th>Price (MVR)</th><th>Min 🔒</th><th>Status</th><th>Featured</th><th>Ver.</th><th>Sales</th><th></th></tr>
+  ${list.map(p=>`<tr><td><input type="checkbox" data-a="sel" data-id="${p.id}" ${f.sel.includes(p.id)?'checked':''}></td><td><img src="${coverOf(p)}" style="width:58px;height:46px;object-fit:cover;border-radius:8px;cursor:pointer" data-a="editP" data-id="${p.id}"></td>
+   <td style="min-width:220px"><b style="cursor:pointer" data-a="editP" data-id="${p.id}">${esc(p.title)}</b><div class="sm mut">${esc(p.grade)} · ${catIc(p.cat)} ${esc(catName(p.cat))}${!p.short?' · <span style="color:var(--warn)">no description</span>':''}</div></td>
+   <td class="sm"><span class="badge b-type">${p.type}</span> ${p.pages} ${p.type==='PPTX'?'slides':'pages'}</td>
+   <td><input class="inp s" style="width:84px" type="number" min="0" value="${p.price/100}" data-p="${p.id}" data-k="price"></td><td>${p.price?`<input class="inp s" style="width:74px" type="number" min="0" value="${p.min/100}" data-p="${p.id}" data-k="min">`:'<span class="mut sm">Free</span>'}</td>
+   <td>${pStatus(p.status)}</td><td>${sw(p.featured,'feat',p.id)}</td><td class="sm">v${p.ver}</td><td>${p.sales}</td>
+   <td style="white-space:nowrap"><button class="btn xs" data-a="editP" data-id="${p.id}">Edit</button> <button class="btn xs ghost" data-a="newVer" data-id="${p.id}" title="Upload a new version of the file">⤴ New file</button></td></tr>`).join('')||'<tr><td colspan="11" class="empty">No resources match.</td></tr>'}</table></div>
+  <p class="sm mut mt">🔒 The minimum price is never shown to customers. Campaigns, coupons, welcome offers and points can never push a sale below it.</p>`},
+
+categories(){const cnt=id=>S.products.filter(p=>p.cat===id).length;
+  return `<h1>Subjects & grades</h1><div class="subt">These lists power the upload auto-fill, store filters and the "Shop by subject" section.</div>
+  <div class="two"><div class="box"><h3>Subjects</h3><table class="t"><tr><th>Icon</th><th>Name</th><th>Resources</th><th></th></tr>
+   ${S.categories.map((c,i)=>`<tr><td><input class="inp s" style="width:56px;text-align:center" value="${esc(c.ic)}" data-cat="${i}" data-k="ic"></td><td><input class="inp s" value="${esc(c.name)}" data-cat="${i}" data-k="name"></td><td>${cnt(c.id)}</td><td><button class="btn xs ghost" data-a="delCat" data-id="${i}" ${cnt(c.id)?'disabled title="Move its resources first"':''}>Delete</button></td></tr>`).join('')}</table>
+   <div class="flex mt"><input class="inp" id="ncic" placeholder="🎨" style="max-width:64px;text-align:center"><input class="inp" id="ncname" placeholder="New subject, e.g. Art"><button class="btn sm" data-a="addCat">Add</button></div></div>
+  <div><div class="box"><h3>Grades</h3><div class="flex wr">${S.grades.map((g,i)=>`<span class="chip">${esc(g)} <span data-a="delGrade" data-id="${i}" style="color:var(--bad)">✕</span></span>`).join('')}</div><div class="flex mt"><input class="inp" id="ngrade" placeholder="e.g. Grade 11"><button class="btn sm" data-a="addGrade">Add</button></div></div>
+   <div class="box"><h3>Curricula</h3><div class="flex wr">${S.curricula.map((g,i)=>`<span class="chip">${esc(g)} <span data-a="delCurr" data-id="${i}" style="color:var(--bad)">✕</span></span>`).join('')}</div><div class="flex mt"><input class="inp" id="ncurr" placeholder="e.g. IB PYP"><button class="btn sm" data-a="addCurr">Add</button></div></div></div></div>`},
+
+approvals(){const L=S.orders.filter(o=>o.status==='AWAITING_VERIFICATION');
+  return `<h1>Pending verifications</h1><div class="subt">Check the slip against the expected amount, then approve. You also get each slip by email with Approve / Reject buttons.</div>
+  ${L.length?L.map(o=>{const cu=U(o.uid);const age=Math.max(0,Math.round((Date.now()-new Date(o.at))/36e5));const mismatch=o.slip.amount!==o.total;return `<div class="box"><div class="flex wr" style="align-items:flex-start;gap:20px"><img src="${slipImage(o)}" style="width:140px;border-radius:10px;border:1px solid var(--line);cursor:zoom-in" data-a="zoom" data-src="${slipImage(o)}">
+   <div style="flex:1;min-width:240px"><div class="flex wr"><b style="font-size:18px">${o.no}</b>${statusBadge(o.status)}${age>12?`<span class="badge b-rej">⏰ ${age}h waiting</span>`:`<span class="badge b-grey">${age}h ago</span>`}${o.dup?'<span class="badge b-rej">⚠️ Possible duplicate slip</span>':''}${mismatch?'<span class="badge b-rej">≠ Amount mismatch</span>':''}</div>
+    <div class="mt"><b>${esc(cu.name)}</b> · ${esc(cu.email)}</div><div class="sm mut">${o.items.map(i=>esc(i.title)).join(', ')}</div>
+    <div class="flex mt wr"><div class="kpi" style="padding:8px 14px"><small>Expected</small><b style="font-size:18px">${mvr(o.total)}</b></div><div class="kpi" style="padding:8px 14px;${mismatch?'border-color:var(--bad);background:#FFF5F5':''}"><small>Slip says</small><b style="font-size:18px">${mvr(o.slip.amount)}</b></div><div class="kpi" style="padding:8px 14px"><small>Reference</small><b style="font-size:15px">${esc(o.slip.ref)}</b></div><div class="kpi" style="padding:8px 14px"><small>Sender</small><b style="font-size:15px">${esc(o.slip.sender)}</b></div></div></div>
+   <div class="flex" style="flex-direction:column;align-items:stretch"><button class="btn" data-a="approveM" data-id="${o.no}">✅ Approve</button><button class="btn red" data-a="rejectM" data-id="${o.no}">✕ Reject</button><button class="btn ghost sm" data-a="ownerMail" data-id="${o.no}">📧 View email</button></div></div></div>`}).join(''):`<div class="empty"><span>🎉</span>All caught up. No slips waiting.</div>`}`},
+
+orders(){const f=window._of||(window._of={st:'All',q:''});const sts=['All','AWAITING_VERIFICATION','AWAITING_TRANSFER','PAID','COMPLETED_FREE','PAYMENT_REJECTED','REFUNDED','EXPIRED'];
+  const L=[...S.orders].reverse().filter(o=>(f.st==='All'||o.status===f.st)&&(!f.q||(o.no+U(o.uid).name).toLowerCase().includes(f.q.toLowerCase())));
+  const stale=S.orders.filter(o=>o.status==='AWAITING_TRANSFER'&&Date.now()-new Date(o.at)>S.settings.slipExpiryHours*36e5);
+  return `<div class="ph"><div><h1>Orders</h1><div class="subt">${S.orders.length} orders · every status change is recorded in the order timeline and audit log.</div></div><div class="flex wr"><button class="btn sm ghost" data-a="expire" ${stale.length?'':'disabled'}>⏰ Expire ${stale.length} unpaid past ${S.settings.slipExpiryHours}h</button><button class="btn sm ghost" data-a="ordersCsv">⬇️ Export CSV</button></div></div>
+  <div class="flex wr" style="margin-bottom:12px"><input class="inp" id="oq" style="max-width:260px" placeholder="Order no. or customer" value="${esc(f.q)}">${sts.map(s=>`<span class="chip ${f.st===s?'on':''}" data-a="ost" data-v="${s}">${s==='All'?'All':(STATUS[s]||[0,s])[1]} (${S.orders.filter(o=>s==='All'||o.status===s).length})</span>`).join('')}</div>
+  <div class="tw"><table class="t"><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Points used</th><th>Status</th><th>Placed</th><th></th></tr>
+  ${L.map(o=>`<tr><td><b style="cursor:pointer" data-a="order" data-id="${o.no}">${o.no}</b></td><td>${esc(U(o.uid).name)}</td><td class="sm">${o.items.map(i=>esc(i.title)).join('<br>')}</td><td>${mvr(o.total)}</td><td>${o.pointsUsed||'—'}</td><td>${statusBadge(o.status)}</td><td class="sm">${o.at.replace('T',' ')}</td>
+   <td style="white-space:nowrap">${o.status==='AWAITING_VERIFICATION'?`<button class="btn xs" data-a="approveM" data-id="${o.no}">Review</button>`:''} <button class="btn xs ghost" data-a="order" data-id="${o.no}">Open</button></td></tr>`).join('')||'<tr><td colspan="8" class="empty">No orders.</td></tr>'}</table></div>`},
+
+customers(){const f=window._cf||(window._cf={q:'',seg:''});const L=customers().filter(u=>(!f.q||(u.name+u.email+u.tags.join(' ')+u.code).toLowerCase().includes(f.q.toLowerCase()))&&(!f.seg||inSeg(u,f.seg)));
+  return `<div class="ph"><div><h1>Customers</h1><div class="subt">${customers().length} customers · Google sign-in · every new customer automatically receives the welcome offer and ${S.settings.signupPts} points.</div></div><button class="btn ghost" data-a="custCsv">⬇️ Export CSV</button></div>
+  <div class="flex wr" style="margin-bottom:12px"><input class="inp" id="cq" style="max-width:300px" placeholder="Search name, email, tag or code…" value="${esc(f.q)}"><span class="chip ${!f.seg?'on':''}" data-a="cseg" data-v="">Everyone</span>${S.segments.map(s=>`<span class="chip ${f.seg===s.rule?'on':''}" data-a="cseg" data-v="${esc(s.rule)}">${esc(s.name)} (${customers().filter(u=>inSeg(u,s.rule)).length})</span>`).join('')}</div>
+  <div class="tw"><table class="t"><tr><th>Customer</th><th>Joined</th><th>Source</th><th>Orders</th><th>Spent</th><th>Points</th><th>Email consent</th><th>Welcome offer</th><th>Tags</th></tr>
+  ${L.map(u=>{const os=S.orders.filter(o=>o.uid===u.id);const sp=os.filter(o=>o.status==='PAID').reduce((a,o)=>a+o.total,0);const wa=u.welcome&&u.welcome.status==='active'&&u.welcome.expires>Date.now();
+   return `<tr style="cursor:pointer" data-a="cust" data-id="${u.id}"><td><div class="flex"><div class="av" style="background:${u.color};width:32px;height:32px;font-size:12px">${initials(u.name)}</div><div><b>${esc(u.name)}</b>${u.blocked?' <span class="badge b-rej">blocked</span>':''}<div class="sm mut">${esc(u.email)}</div></div></div></td><td class="sm">${u.joined}</td><td class="sm">${esc(u.source)}</td><td>${os.length}</td><td>${mvr(sp)}</td><td><b>${u.points}</b>${u.pending?`<span class="sm mut"> +${u.pending}</span>`:''}</td><td>${u.consent?'✅':'—'}</td><td>${u.paid?'<span class="badge b-grey">used</span>':wa?'<span class="badge b-off">active</span>':'<span class="badge b-grey">expired</span>'}</td><td>${u.tags.map(t=>`<span class="badge b-blue">${esc(t)}</span>`).join(' ')}</td></tr>`}).join('')||'<tr><td colspan="9" class="empty">No customers match.</td></tr>'}</table></div>`},
+
+campaigns(){return `<div class="ph"><div><h1>Campaigns & coupons</h1><div class="subt">Campaigns switch on and off automatically by date. The banner and countdown appear on the storefront while live.</div></div><div class="flex"><button class="btn ghost" data-a="sendCamp">✉️ Email a group</button><button class="btn acc" data-a="newCamp">＋ New campaign</button></div></div>
+  <div class="tw"><table class="t"><tr><th>Campaign</th><th>Type</th><th>Discount</th><th>Points</th><th>Applies to</th><th>Dates</th><th>Status</th><th></th></tr>${S.campaigns.map(c=>{const live=c.active&&Date.now()>=c.start&&Date.now()<=c.end;const ended=Date.now()>c.end;return `<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${c.accent}"></span> <b>${esc(c.name)}</b><div class="sm mut">${esc(c.banner)}</div></td><td>${esc(c.type)}</td><td>${c.pct}%</td><td>${c.mult}×</td><td class="sm">${c.scope==='all'?'Everything':esc(catName(c.scope))}</td><td class="sm">${new Date(c.start).toLocaleDateString('en-GB')} → ${new Date(c.end).toLocaleDateString('en-GB')}</td>
+   <td><span class="badge ${live?'b-paid':ended?'b-grey':c.active?'b-blue':'b-wait'}">${live?'Live':ended?'Ended':c.active?'Scheduled':'Paused'}</span>${live?`<div class="sm mut">ends in <span data-cd="${c.end}"></span></div>`:''}</td>
+   <td style="white-space:nowrap"><button class="btn xs ghost" data-a="editCamp" data-id="${c.id}">Edit</button> <button class="btn xs ghost" data-a="togCamp" data-id="${c.id}">${c.active?'Pause':'Activate'}</button> <button class="btn xs ghost" data-a="dupCamp" data-id="${c.id}">Duplicate</button></td></tr>`}).join('')}</table></div>
+  <div class="ph mt"><h2 style="margin:10px 0">Coupons</h2></div>
+  <div class="tw"><table class="t"><tr><th>Code</th><th>Discount</th><th>Used</th><th>Expires</th><th>Active</th><th></th></tr>${S.coupons.map((c,i)=>`<tr><td><b class="mono">${esc(c.code)}</b></td><td>${c.pct}%</td><td>${c.used} / ${c.limit}<div class="pbar" style="width:110px;margin-top:4px"><div style="width:${Math.min(100,c.used/c.limit*100)}%"></div></div></td><td>${c.expires}</td><td>${sw(c.active,'togCoupon',i)}</td><td><button class="btn xs ghost" data-a="delCoupon" data-id="${i}">Delete</button></td></tr>`).join('')}</table></div>
+  <div class="box mt"><h3>New coupon</h3><div class="four"><div><label class="f">Code</label><input class="inp" id="ncode" placeholder="RAMADAN15" style="text-transform:uppercase"></div><div><label class="f">% off</label><input class="inp" id="npct" type="number" min="1" max="90" value="10"></div><div><label class="f">Usage limit</label><input class="inp" id="nlim" type="number" min="1" value="100"></div><div><label class="f">Expires</label><input class="inp" id="nexp" type="date" value="${new Date(Date.now()+30*864e5).toISOString().slice(0,10)}"></div></div><button class="btn sm mt" data-a="addCoupon">Add coupon</button> <span class="sm mut">Coupons stack after campaign or welcome discounts, never below the minimum price.</span></div>`},
+
+points(){const s=S.settings;const f=(k,l,h)=>`<div><label class="f">${l}</label><input class="inp" type="number" min="0" data-bind="settings.${k}" data-type="num" value="${k.split('.').reduce((o,x)=>o[x],s)}"><div class="help">${h||''}</div></div>`;
+  const lf=window._lf||'';const L=S.ledger.filter(l=>!lf||l.uid===lf).slice(0,60);
+  const lb=customers().map(u=>({u,n:S.users.filter(x=>x.refBy===u.id).length})).filter(x=>x.n).sort((a,b)=>b.n-a.n);
+  return `<h1>Points & referrals</h1><div class="subt">Rules apply to new activity as soon as you change them. Purchase points wait ${s.holdDays} days before they can be spent (refund safety).</div>
+  <div class="two"><div class="box"><h3>🪙 Earning</h3><div class="two">${f('signupPts','Sign-up bonus')}${f('ptsPerMVR','Points per MVR 1 paid')}${f('sharePts','Per new friend via share link','Only when the friend signs up')}${f('shareFirstOrderPct','% of friend\'s first order')}${f('shareMonthlyCap','Monthly share cap (points)')}${f('reviewPts','Approved review')}${f('refReferrer','Referral code: referrer gets')}${f('refFriend','Referral code: new friend gets')}${f('holdDays','Hold days before available')}</div></div>
+   <div class="box"><h3>💸 Spending</h3><div class="two">${f('ptsPerMVRValue','Points = MVR 1')}${f('maxPointsPct','Max % of each item payable with points','Buyer always pays the rest')}</div>
+    <div class="note mt"><b>Example:</b> MVR 100 item → up to MVR ${s.maxPointsPct} (${s.maxPointsPct*s.ptsPerMVRValue} points) with points; the customer pays at least MVR ${100-s.maxPointsPct}. The minimum price still applies.</div>
+    <h3 class="mt">🎁 Welcome offer for every new customer</h3><div class="tog"><span>Enabled</span>${sw(s.welcome.enabled,'wtog')}</div><div class="two">${f('welcome.pct','Discount %')}${f('welcome.days','Valid for (days)')}</div></div></div>
+  <div class="two"><div class="box"><div class="flex sb"><h3 class="mt0">Points ledger</h3><select class="inp" style="max-width:220px" id="lf"><option value="">All customers</option>${opts(customers().map(u=>[u.id,u.name]),lf)}</select></div>
+    <div class="tw"><table class="t"><tr><th>Date</th><th>Customer</th><th>Activity</th><th>Status</th><th class="r">Points</th></tr>${L.map(l=>`<tr><td class="sm">${l.at}</td><td class="sm">${esc((U(l.uid)||{}).name)}</td><td class="sm">${esc(l.type)}</td><td><span class="badge ${l.status==='available'?'b-paid':l.status==='pending'||l.status==='held'?'b-wait':'b-grey'}">${l.status}</span></td><td class="r" style="font-weight:700;color:${l.pts<0?'var(--bad)':'var(--ok)'}">${l.pts>0?'+':''}${l.pts}</td></tr>`).join('')}</table></div>
+    <div class="flex mt"><button class="btn sm ghost" data-a="release">⏩ Release pending points now</button><span class="sm mut">Normally automatic after ${s.holdDays} days.</span></div></div>
+   <div class="box"><h3>Referral leaderboard</h3>${lb.length?lb.map((x,i)=>`<div class="ci"><b style="width:22px">${i+1}</b><div class="av" style="background:${x.u.color};width:32px;height:32px;font-size:12px">${initials(x.u.name)}</div><div class="t">${esc(x.u.name)}<div class="sm mut mono">${x.u.code}</div></div><b>${x.n} friend${x.n>1?'s':''}</b></div>`).join(''):'<p class="mut">No referrals yet.</p>'}
+    <div class="warnbox mt">🛡️ Fraud guards: points are only given when a real new account signs up or buys, never for clicks; one referral per Google account; monthly share cap of ${s.shareMonthlyCap} points.</div></div></div>`},
+
+reviews(){return `<div class="ph"><div><h1>Reviews</h1><div class="subt">Only customers who own a resource can review it. Approve, hide, or choose which appear on the home page.</div></div><button class="btn ghost" data-a="addTesti">＋ Add testimonial</button></div>
+  <div class="tw"><table class="t"><tr><th>Review</th><th>Resource</th><th>Rating</th><th>Status</th><th>On home page</th><th></th></tr>
+  ${[...S.reviews].sort((a,b)=>(a.status==='pending'?-1:1)-(b.status==='pending'?-1:1)).map(r=>`<tr><td style="max-width:420px"><b>${esc(r.name)}</b> <span class="sm mut">${r.uid?'✓ verified':'testimonial'} · ${r.date}</span><div class="sm">${esc(r.text)}</div></td><td class="sm">${esc((P(r.pid)||{}).title)}</td><td style="color:var(--gold)">${'★'.repeat(r.rating)}</td><td><span class="badge ${r.status==='approved'?'b-paid':r.status==='pending'?'b-wait':'b-grey'}">${r.status}</span></td><td>${sw(r.home,'rhome',r.id)}</td>
+   <td style="white-space:nowrap">${r.status!=='approved'?`<button class="btn xs" data-a="rapp" data-id="${r.id}">Approve${r.uid?' (+'+S.settings.reviewPts+' pts)':''}</button>`:`<button class="btn xs ghost" data-a="rhide" data-id="${r.id}">Hide</button>`} <button class="btn xs ghost" data-a="rdel" data-id="${r.id}">Delete</button></td></tr>`).join('')}</table></div>`},
+
+landing(){const L=S.landing,v=L.variants[L.variant];const names={trust:'Trust strip',welcome:'Welcome offer banner',featured:'Featured resources',campaign:'Campaign block',free:'Free resources',categories:'Shop by subject',all:'All resources grid',reviews:'Customer reviews',how:'How it works',points:'Points promo',faq:'FAQ'};
+  return `<div class="ph"><div><h1>Landing page</h1><div class="subt">Everything on the home page is editable here. Edits are saved as a draft; customers see them after you publish.</div></div><div class="flex">${L.history.length?`<button class="btn ghost sm" data-a="lpHistory">🕘 History (${L.history.length})</button>`:''}<button class="btn" data-a="publishLP">🚀 Publish changes</button></div></div>
+  <div class="two"><div><div class="box"><h3>Hero banner</h3><div class="flex wr">${L.variants.map((_,i)=>`<span class="chip ${L.variant===i?'on':''}" data-a="variant" data-id="${i}">Variant ${String.fromCharCode(65+i)}</span>`).join('')}<button class="btn xs ghost" data-a="addVariant">＋ Add variant</button>${L.variants.length>1?`<button class="btn xs ghost" data-a="delVariant">Delete this</button>`:''}</div>
+    <label class="f">Small label above the headline</label><input class="inp" data-bind="landing.variants.${L.variant}.kicker" value="${esc(v.kicker)}">
+    <label class="f">Headline <span class="mut">(wrap a word in &lt;em&gt;…&lt;/em&gt; to highlight it)</span></label><input class="inp" data-bind="landing.variants.${L.variant}.h1" value="${esc(v.h1)}">
+    <label class="f">Sub-headline</label><textarea class="inp" rows="3" data-bind="landing.variants.${L.variant}.sub">${esc(v.sub)}</textarea>
+    <div class="two"><div><label class="f">Main button</label><input class="inp" data-bind="landing.variants.${L.variant}.cta" value="${esc(v.cta)}"></div><div><label class="f">Second button</label><input class="inp" data-bind="landing.variants.${L.variant}.cta2" value="${esc(v.cta2)}"></div></div>
+    <label class="f">Interactive background</label><div class="flex wr">${[['shapes','✏️ Floating shapes'],['network','🕸️ Particle network'],['gradient','🌈 Gradient mesh']].map(([k,l])=>`<span class="chip ${L.bg===k?'on':''}" data-a="lpbg" data-id="${k}">${l}</span>`).join('')}</div><div class="help">Pauses off-screen and switches off for visitors who prefer reduced motion.</div>
+    <h3 class="mt">Announcement bar</h3><div class="tog"><span>Show when no campaign is live</span>${sw(L.announce.on,'annTog')}</div><input class="inp mt" data-bind="landing.announce.text" value="${esc(L.announce.text)}"></div>
+   <div class="box"><h3>Trust strip & stats</h3>${L.trust.map((t,i)=>`<div class="flex" style="margin-bottom:6px"><input class="inp s" style="width:52px;text-align:center" data-bind="landing.trust.${i}.0" value="${esc(t[0])}"><input class="inp s" data-bind="landing.trust.${i}.1" value="${esc(t[1])}"><input class="inp s" data-bind="landing.trust.${i}.2" value="${esc(t[2])}"></div>`).join('')}
+    <div class="three mt">${L.stats.map((t,i)=>`<div><input class="inp s" data-bind="landing.stats.${i}.0" value="${esc(t[0])}"><input class="inp s" style="margin-top:4px" data-bind="landing.stats.${i}.1" value="${esc(t[1])}"></div>`).join('')}</div></div>
+   <div class="box"><div class="flex sb"><h3 class="mt0">FAQ</h3><button class="btn xs ghost" data-a="addFaq">＋ Add question</button></div>${L.faq.map((q,i)=>`<div style="border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px"><div class="flex"><input class="inp s" data-bind="landing.faq.${i}.0" value="${esc(q[0])}"><button class="btn xs ghost" data-a="delFaq" data-id="${i}">✕</button></div><textarea class="inp s" rows="2" style="margin-top:6px" data-bind="landing.faq.${i}.1">${esc(q[1])}</textarea></div>`).join('')}</div></div>
+  <div><div class="box"><h3>Preview</h3><div class="lp-prev" id="lpprev">${lpPreview()}</div></div>
+   <div class="box"><h3>Sections <span class="sm mut">(order and visibility)</span></h3>${L.sections.map((s,i)=>`<div class="secrow"><span>${names[s.k]}</span><button class="btn xs ghost" data-a="mv" data-i="${i}" data-d="-1" ${i?'':'disabled'}>↑</button><button class="btn xs ghost" data-a="mv" data-i="${i}" data-d="1" ${i<L.sections.length-1?'':'disabled'}>↓</button>${sw(s.on,'sec',i)}</div>`).join('')}</div></div></div>`},
+
+emails(){const k=window._tk||'welcome';const T=S.templates[k];
+  return `<h1>Emails</h1><div class="subt">Edit the messages the store sends. Use {placeholders} and they are filled in automatically. Below is every email sent (simulated outbox).</div>
+  <div class="two"><div class="box"><h3>Templates</h3><div class="flex wr">${Object.entries(S.templates).map(([key,t])=>`<span class="chip ${k===key?'on':''}" data-a="tpl" data-v="${key}">${esc(t.name)}</span>`).join('')}</div>
+    <label class="f">Subject</label><input class="inp" data-bind="templates.${k}.subject" value="${esc(T.subject)}"><label class="f">Body</label><textarea class="inp" rows="9" data-bind="templates.${k}.body">${esc(T.body)}</textarea>
+    <div class="help">Available: {store} {name} {order} {amount} {points} {pct} {days} {earned} {reason} {title} {version} {note} {owner}</div><button class="btn sm ghost mt" data-a="testMail">Send a test to me</button></div>
+   <div class="box"><h3>Delivery</h3><div class="tog"><span>Sender</span><b class="sm">noreply@${esc(S.settings.store.toLowerCase())}.mv</b></div><div class="tog"><span>Owner approval emails go to</span><b class="sm">${esc(owner().email)}</b></div><div class="tog"><span>Provider</span><b class="sm">Transactional email service (set on server)</b></div><p class="sm mut">Marketing emails are only sent to customers who ticked "email me offers".</p></div></div>
+  <h2>Outbox</h2><div class="tw"><table class="t"><tr><th>To</th><th>Subject</th><th>Sent</th><th></th></tr>${S.outbox.slice(0,80).map(e=>`<tr><td class="sm">${esc(e.to)}</td><td><b>${esc(e.subject)}</b></td><td class="sm">${e.at}</td><td><button class="btn xs ghost" data-a="openMail" data-id="${e.id}">Open</button></td></tr>`).join('')||'<tr><td colspan="4" class="empty">No emails yet.</td></tr>'}</table></div>`},
+
+settings(){const s=S.settings,b=s.bank;const fld=(k,l,t='text',h='')=>`<label class="f">${l}</label><input class="inp" type="${t}" data-bind="settings.${k}" ${t==='number'?'data-type="num" min="0"':''} value="${esc(k.split('.').reduce((o,x)=>o[x],s))}">${h?`<div class="help">${h}</div>`:''}`;
+  return `<h1>Settings</h1><div class="subt">Store profile, uploads, payments and sign-in. Changes save automatically.</div>
+  <div class="two"><div><div class="box"><h3>Store profile</h3>${fld('store','Store name')}${fld('tagline','Tagline')}${fld('support','Support email','email')}<label class="f">Licence shown on every resource</label><textarea class="inp" rows="2" data-bind="settings.licence">${esc(s.licence)}</textarea></div>
+   <div class="box"><h3>⬆️ Uploads & previews</h3>${fld('watermark','Watermark text (burned into preview images)')}<div class="two"><div>${fld('previewPages','Default preview pages','number')}</div><div>${fld('maxUploadMB','Max file size (MB)','number')}</div><div>${fld('defaultPrice','Default price for new uploads (MVR)','number','0 = free')}</div><div>${fld('defaultMinPct','Default minimum price (% of price)','number','Floor that discounts can’t cross')}</div></div>
+    <button class="btn sm mt" data-a="restampAll">🔁 Re-stamp all previews with this watermark</button></div></div>
+  <div><div class="box"><h3>🏦 Bank account shown at checkout</h3><div class="tog"><span>Bank</span><b>${esc(b.bank)}</b></div><div class="tog"><span>Account name</span><b>${esc(b.name)}</b></div><div class="tog"><span>Account number</span><b class="mono">${esc(b.number)}</b></div><button class="btn sm ghost mt" data-a="editBank">✏️ Change bank details</button><div class="help">Changing these asks you to confirm and emails every admin.</div>
+    <div class="two">${'<div>'+fld('slipExpiryHours','Transfer window (hours)','number','Unpaid orders expire after this')+'</div><div>'+fld('freeDailyLimit','Free downloads per customer per day','number')+'</div>'}</div>
+    <div class="tog mt"><span>💳 Card payments (BML Connect)</span><span class="badge b-grey">Planned for next release</span></div></div>
+   <div class="box"><h3>🔐 Sign-in & admins</h3><div class="tog"><span>Google (Gmail) sign-in for customers</span>${sw(s.google,'gtog')}</div><label class="f">Admin allowlist (Google accounts)</label>${s.admins.map((e,i)=>`<div class="tog"><span class="mono sm">${esc(e)}</span>${s.admins.length>1?`<button class="btn xs ghost" data-a="delAdmin" data-id="${i}">Remove</button>`:'<span class="sm mut">owner</span>'}</div>`).join('')}<div class="flex mt"><input class="inp" id="nadmin" placeholder="name@gmail.com"><button class="btn sm" data-a="addAdmin">Add admin</button></div></div></div></div>`},
+
+audit(){const q=(window._aq||'').toLowerCase();const L=S.audit.filter(a=>!q||(a.action+a.detail+a.who).toLowerCase().includes(q));
+  return `<h1>Audit log</h1><div class="subt">Every admin action, newest first. Kept for accountability; it can't be edited from here.</div><input class="inp" id="aq" style="max-width:320px;margin-bottom:12px" placeholder="Filter…" value="${esc(window._aq||'')}">
+  <div class="tw"><table class="t"><tr><th>When</th><th>Who</th><th>Action</th><th>Detail</th></tr>${L.slice(0,300).map(a=>`<tr><td class="sm mono">${a.at.replace('T',' ')}</td><td class="sm">${esc(a.who)}</td><td><b>${esc(a.action)}</b></td><td class="sm">${esc(a.detail)}</td></tr>`).join('')}</table></div>`},
+
+backup(){let size=0;try{size=(localStorage.getItem(KEY)||'').length}catch(e){}const imgs=Object.keys(IMG).length;
+  return `<h1>Backup & data</h1><div class="subt">This prototype keeps everything in this browser. Export a backup any time, or load one to restore the store.</div>
+  <div class="three"><div class="box"><h3>💾 Export</h3><p class="sm mut">Downloads all settings, resources, customers, orders, points and preview images as one JSON file.</p><button class="btn" data-a="exportJson">Download backup</button></div>
+   <div class="box"><h3>📥 Import</h3><p class="sm mut">Replaces the current data with a backup file you exported earlier.</p><button class="btn ghost" data-a="importJson">Load backup…</button></div>
+   <div class="box"><h3>↺ Reset demo</h3><p class="sm mut">Clears everything in this browser and reloads the sample store.</p><button class="btn red" data-a="resetAll">Reset</button></div></div>
+  <div class="box"><h3>Storage</h3><div class="tog"><span>Store data</span><b>${(size/1024).toFixed(1)} KB</b></div><div class="tog"><span>Preview & cover images</span><b>${imgs} images</b></div><div class="tog"><span>Original files this session</span><b>${Object.keys(FILES).length}</b></div>
+   <p class="sm mut">In production, originals and previews live in private cloud storage and the database is backed up daily; this panel stays the same.</p></div>`}};
+
+function inSeg(u,rule){if(rule==='consent')return u.consent;if(rule==='nobuy')return !S.orders.some(o=>o.uid===u.id&&(o.status==='PAID'));if(rule==='pts200')return u.points>=200;if(rule.startsWith('tag:'))return u.tags.includes(rule.slice(4));return true}
+function lpPreview(){const L=S.landing,v=L.variants[L.variant];const c=activeCampaign();
+  return `${c?`<div style="background:${c.accent};color:#fff;font-size:12px;text-align:center;padding:5px;border-radius:8px;margin:-10px -10px 14px">🎉 ${esc(c.banner)}</div>`:L.announce.on?`<div style="background:var(--ink);color:#fff;font-size:12px;text-align:center;padding:5px;border-radius:8px;margin:-10px -10px 14px">${esc(L.announce.text)}</div>`:''}
+  <span class="kicker">${esc(v.kicker)}</span><h1>${esc(v.h1).replace(/&lt;(\/?)em&gt;/g,'<$1em>')}</h1><p class="mut sm">${esc(v.sub)}</p><div class="flex"><span class="btn acc sm">${esc(v.cta)} →</span><span class="btn ghost sm">${esc(v.cta2)}</span></div>
+  <div class="flex mt" style="gap:20px">${L.stats.map(s=>`<div><b>${esc(s[0])}</b><div class="sm mut">${esc(s[1])}</div></div>`).join('')}</div>
+  <div class="sm mut mt">Background: ${L.bg} · ${L.sections.filter(s=>s.on).length} sections visible</div>`}
+
+/* ---------- Upload queue card ---------- */
+function qCard(q){const m=q.meta;return `<div class="qcard ${q.state==='error'?'bad':q.state==='done'?'done':''}" id="q-${q.id}"><div class="qprev" id="qp-${q.id}">${qLeft(q)}</div>
+  <div><div class="flex sb wr"><div class="sm mut">📄 <b>${esc(q.name)}</b> · ${fsize(q.size)}</div><div id="qs-${q.id}">${qState(q)}</div></div>
+   <div class="qf mt"><div><label class="f">Title</label><input class="inp" data-q="${q.id}" data-k="title" value="${esc(m.title)}"></div><div><label class="f">Subject</label><select class="inp" data-q="${q.id}" data-k="cat">${catOpts(m.cat)}</select></div><div><label class="f">Grade</label><select class="inp" data-q="${q.id}" data-k="grade"><option value="">Choose…</option>${opts(S.grades,m.grade)}</select></div><div><label class="f">Curriculum</label><select class="inp" data-q="${q.id}" data-k="curr">${opts(S.curricula,m.curr)}</select></div></div>
+   <div class="qf2"><div><label class="f">Short description <a class="sm" style="color:var(--pri);cursor:pointer" data-a="autoDesc" data-id="${q.id}">✨ write for me</a></label><input class="inp" data-q="${q.id}" data-k="short" value="${esc(m.short)}" placeholder="One line that sells it"></div><div><label class="f">Price (MVR)</label><input class="inp" type="number" min="0" data-q="${q.id}" data-k="price" value="${m.price}"></div><div><label class="f">Min price 🔒</label><input class="inp" type="number" min="0" data-q="${q.id}" data-k="min" value="${m.min}"></div><div><label class="f">Preview pages</label><input class="inp" type="number" min="1" max="10" data-q="${q.id}" data-k="pv" value="${m.pv}"></div><div><label class="f">Featured</label>${sw(m.featured,'qfeat',q.id)}</div></div>
+   <div id="qe-${q.id}">${qActions(q)}</div></div></div>`}
+const fsize=b=>b>=1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB';
+function qLeft(q){const r=q.res;if(!r)return `<div class="cv" style="display:grid;place-items:center;font-size:30px">⏳</div><div class="proc">${(q.steps||['Waiting in queue…']).map((s,i)=>`<div class="${i<q.si?'ok':i===q.si?'run':''}">${i<q.si?'✅':i===q.si?'⏳':'○'} ${s}</div>`).join('')}${q.err?`<div class="er">⛔ ${esc(q.err)}</div>`:''}</div>`;
+  return `<img class="cv" src="${q.cover||r.cover}" alt="cover"><div class="pv">${r.wm.map(u=>`<img src="${u}" data-a="zoom" data-src="${u}">`).join('')}</div><div class="sm"><b>${r.type}</b> · ${r.pages||'?'} ${r.type==='PPTX'?'slides':'pages'} detected${r.note?`<div class="help">ℹ️ ${esc(r.note)}</div>`:''}</div><a class="sm" style="color:var(--pri);cursor:pointer" data-a="qCover" data-id="${q.id}">🖼️ Use my own cover image</a>`}
+function qState(q){return q.state==='processing'?'<span class="badge b-blue">Processing…</span>':q.state==='queued'?'<span class="badge b-grey">Queued</span>':q.state==='error'?'<span class="badge b-rej">Needs attention</span>':q.state==='done'?`<span class="badge b-paid">${q.published?'Published':'Saved as draft'} ✓</span>`:'<span class="badge b-paid">Ready</span>'}
+function qProblems(q){const m=q.meta,e=[];if(!m.title.trim())e.push('Add a title');if(!m.cat)e.push('Choose a subject');if(!m.grade)e.push('Choose a grade');if(+m.price<0)e.push('Price can’t be negative');if(+m.price>0&&!(+m.min>0))e.push('Set a minimum price above 0');if(+m.price>0&&+m.min>+m.price)e.push('Minimum price is higher than the price');if(q.dup)e.push('Same file as “'+q.dup+'” — remove it or publish anyway');return e}
+function qActions(q){if(q.state==='done')return `<div class="flex mt"><button class="btn xs ghost" data-a="editP" data-id="${q.pid}">Open resource</button></div>`;
+  if(q.state==='error')return `<div class="warnbox mt">⛔ ${esc(q.err)}</div><div class="flex mt"><button class="btn sm ghost" data-a="qRemove" data-id="${q.id}">Remove</button></div>`;
+  const pr=qProblems(q);const ready=q.state==='ready';const hard=pr.filter(x=>!x.startsWith('Same file'));
+  return `${pr.length&&ready?`<div class="warnbox mt">${pr.map(esc).join(' · ')}</div>`:''}<div class="flex mt wr"><button class="btn sm" data-a="qPublish" data-id="${q.id}" ${ready&&!hard.length?'':'disabled'}>🚀 Publish</button><button class="btn sm ghost" data-a="qDraft" data-id="${q.id}" ${ready&&q.meta.title.trim()?'':'disabled'}>Save draft</button><button class="btn sm ghost" data-a="qRemove" data-id="${q.id}">Remove</button>
+   <span class="sm mut">${+q.meta.price>0?`Max discount ${Math.max(0,Math.round((1-q.meta.min/q.meta.price)*100))}% · customer pays at least ${mvr(Math.max(q.meta.min*100,Math.ceil(q.meta.price*100*(1-S.settings.maxPointsPct/100))))}`:'Free resource · instant download after Google sign-in'}</span></div>`}
+function qRefresh(q){const a=$('#qp-'+q.id),b=$('#qe-'+q.id),c=$('#qs-'+q.id),card=$('#q-'+q.id);if(a)a.innerHTML=qLeft(q);if(b)b.innerHTML=qActions(q);if(c)c.innerHTML=qState(q);if(card)card.className='qcard '+(q.state==='error'?'bad':q.state==='done'?'done':'')}
+</script>
+<script>
+/* ================= MODALS ================= */
+function modal(html,wide){$('#layer').innerHTML=`<div class="ov" data-a="bgclose"><div class="modal ${wide?'wide':''}"><button class="x" data-a="close">✕</button>${html}</div></div>`}
+function closeLayer(){$('#layer').innerHTML=''}
+function confirmBox(title,body,okLabel,onOk,danger){window._ok=onOk;modal(`<h2>${title}</h2><p class="mut">${body}</p><div class="flex mt"><button class="btn ${danger?'red':''}" data-a="okConfirm">${okLabel}</button><button class="btn ghost" data-a="close">Cancel</button></div>`)}
+const curTab=()=>(location.hash.split('/')[1]||'dash').split('?')[0];
+function rerender(){if(!me())return route();const y=window.scrollY;$('#root').innerHTML=shell(curTab());window.scrollTo(0,y);afterRender(curTab())}
+
+/* ---------- Upload queue ---------- */
+let running=false;
+function enqueue(files){files=[...files];if(!files.length)return;if(curTab()!=='upload')location.hash='#/upload';
+  const s=S.settings;let added=0;
+  for(const f of files){const g=guessMeta(f.name);const price=+s.defaultPrice||0;
+    S.queue.push({id:tok().slice(0,8),name:f.name,size:f.size,file:f,state:'queued',si:-1,steps:null,res:null,meta:{title:g.title,cat:g.cat,grade:g.grade,curr:S.curricula[0],short:'',price,min:price?Math.max(1,Math.round(price*(s.defaultMinPct/100))):0,pv:s.previewPages,featured:false}});added++}
+  toast(`📂 ${added} file(s) added · building previews…`);setTimeout(()=>{rerender();runQueue()},30)}
+async function runQueue(){if(running)return;running=true;
+  try{let q;while((q=S.queue.find(x=>x.state==='queued'))){q.state='processing';qRefresh(q);
+    try{const r=await processFile(q.file,Math.max(1,Math.min(10,+q.meta.pv||S.settings.previewPages)),(steps,i)=>{q.steps=steps;q.si=i;qRefresh(q)});
+      q.res=r;q.state='ready';
+      const d=S.products.find(p=>p.file&&p.file.hash===r.hash)||S.queue.find(x=>x!==q&&x.res&&x.res.hash===r.hash);if(d)q.dup=d.title||d.meta.title;
+      if(r.pages&&+q.meta.pv>r.pages)q.meta.pv=r.pages;
+      const pv=document.querySelector(`[data-q="${q.id}"][data-k="pv"]`);if(pv)pv.value=q.meta.pv;
+    }catch(e){q.state='error';q.err=e.message||String(e)}
+    qRefresh(q);updateUploadHeader()}}
+  finally{running=false}}
+function updateUploadHeader(){if(curTab()==='upload'){const y=window.scrollY;const active=document.activeElement;const keep=active&&active.dataset&&active.dataset.q?[active.dataset.q,active.dataset.k,active.selectionStart]:null;rerender();window.scrollTo(0,y);if(keep){const el=document.querySelector(`[data-q="${keep[0]}"][data-k="${keep[1]}"]`);if(el){el.focus();try{el.setSelectionRange(keep[2],keep[2])}catch(e){}}}}}
+function publishQ(q,publish){if(q.state!=='ready')return false;const m=q.meta,r=q.res;if(publish&&qProblems(q).some(x=>!x.startsWith('Same file')))return false;
+  const id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);let slug=slugify(m.title)||id;if(S.products.some(p=>p.slug===slug))slug+='-'+id.slice(-3);
+  const price=Math.round(+m.price*100),min=price?Math.round(+m.min*100):0;const pv=Math.max(1,Math.min(+m.pv||1,r.wm.length));
+  const p={id,slug,title:m.title.trim(),short:m.short.trim(),cat:m.cat,grade:m.grade||'All grades',type:r.type,pages:r.pages||r.wm.length,price,min,featured:!!m.featured,rating:0,rc:0,color:r.color,ic:catIc(m.cat),status:publish?'Published':'Draft',sales:0,curr:m.curr,ver:1,pv,custom:true,cover:true,
+    versions:[{v:1,at:today(),note:'First release',file:r.name}],file:{name:r.name,size:r.size,hash:r.hash},created:today(),updated:today(),tags:[]};
+  r.raw.forEach((u,i)=>DB.put('raw:'+id+':'+i,u));r.wm.forEach((u,i)=>DB.put('pv:'+id+':'+i,u));DB.put('cv:'+id,q.cover||r.cover);FILES[id]=q.file;
+  S.products.unshift(p);q.state='done';q.published=publish;q.pid=id;q.file=null;audit(publish?'Resource published':'Resource saved as draft',p.title+' · '+(price?mvr(price):'Free'));save();return true}
+
+/* ---------- Pricing helpers ---------- */
+function setPrice(p,k,val){const v=Math.round(Math.max(0,+val||0)*100);if(k==='price'){p.price=v;if(!v)p.min=0;else if(!p.min||p.min>v)p.min=Math.max(100,Math.round(v*S.settings.defaultMinPct/100))}else{if(v>p.price){toast('⛔ Minimum price can’t be higher than the price');return false}if(p.price&&v<=0){toast('⛔ Paid resources need a minimum price above 0');return false}p.min=v}
+  p.updated=today();audit('Price changed',p.title+' · price '+mvr(p.price)+' · min '+mvr(p.min));save();return true}
+
+/* ---------- Resource editor ---------- */
+function editP(id){const p=P(id);if(!p)return;const pv=previewsOf(p);const owners=S.ent.filter(e=>e.pid===id).length;closeLayer();
+  modal(`<div class="flex" style="gap:16px;align-items:flex-start"><img src="${coverOf(p)}" style="width:140px;border-radius:12px"><div style="flex:1"><div class="flex wr">${pStatus(p.status)}<span class="badge b-type">${p.type} · ${p.pages} ${p.type==='PPTX'?'slides':'pages'}</span><span class="badge b-grey">v${p.ver}</span><span class="badge b-blue">${owners} owner(s)</span></div><h2 style="margin-top:8px">${esc(p.title)}</h2><div class="sm mut">/${esc(p.slug)} · updated ${p.updated}</div>
+   <div class="flex wr mt">${p.status!=='Published'?`<button class="btn sm" data-a="pStatus" data-id="${id}" data-v="Published">🚀 Publish</button>`:`<button class="btn sm ghost" data-a="pStatus" data-id="${id}" data-v="Draft">Unpublish</button>`}<button class="btn sm ghost" data-a="newVer" data-id="${id}">⤴ Upload new version</button><button class="btn sm ghost" data-a="dupP" data-id="${id}">Duplicate</button><button class="btn sm ghost" data-a="storefront" data-id="${id}">👁️ View in store</button></div></div></div>
+  <div class="two mt"><div><h3>Details</h3><label class="f">Title</label><input class="inp" data-pp="${id}" data-k="title" value="${esc(p.title)}"><label class="f">Short description</label><textarea class="inp" rows="3" data-pp="${id}" data-k="short">${esc(p.short)}</textarea>
+    <div class="three"><div><label class="f">Subject</label><select class="inp" data-pp="${id}" data-k="cat">${catOpts(p.cat)}</select></div><div><label class="f">Grade</label><select class="inp" data-pp="${id}" data-k="grade">${opts(S.grades,p.grade)}</select></div><div><label class="f">Curriculum</label><select class="inp" data-pp="${id}" data-k="curr">${opts(S.curricula,p.curr)}</select></div></div>
+    <label class="f">Search tags (comma separated)</label><input class="inp" data-pp="${id}" data-k="tags" value="${esc((p.tags||[]).join(', '))}" placeholder="worksheet, revision, term 2"></div>
+   <div><h3>Pricing</h3><div class="two"><div><label class="f">Price (MVR, 0 = free)</label><input class="inp" type="number" min="0" data-p="${id}" data-k="price" value="${p.price/100}"></div><div><label class="f">Minimum price 🔒</label><input class="inp" type="number" min="0" data-p="${id}" data-k="min" value="${p.min/100}" ${p.price?'':'disabled'}></div></div>
+    <div class="help">${p.price?`Max possible discount ${Math.round((1-p.min/p.price)*100)}%. Points can cover up to ${S.settings.maxPointsPct}% of the price.`:'Free resources download instantly after Google sign-in.'}</div>
+    <div class="tog mt"><span>★ Featured on home page</span>${sw(p.featured,'feat',id)}</div>
+    <h3 class="mt">Previews <span class="sm mut">(watermarked)</span></h3><div class="thumbs">${pv.map(u=>`<img src="${u}" data-a="zoom" data-src="${u}">`).join('')||'<span class="mut sm">No previews yet.</span>'}</div>
+    <div class="flex mt wr"><label class="sm">Show first</label><input class="inp s" style="width:64px" type="number" min="1" max="10" id="pvn" value="${p.pv}"><label class="sm">pages</label><button class="btn xs" data-a="setPv" data-id="${id}">Update previews</button>${p.custom?`<button class="btn xs ghost" data-a="pCover" data-id="${id}">🖼️ Change cover</button>`:''}</div></div></div>
+  <h3 class="mt">File & versions</h3><div class="tw"><table class="t"><tr><th>Version</th><th>Date</th><th>File</th><th>What changed</th></tr>${[...p.versions].reverse().map(v=>`<tr><td><b>v${v.v}</b>${v.v===p.ver?' <span class="badge b-paid">current</span>':''}</td><td class="sm">${v.at}</td><td class="sm mono">${esc(v.file)}</td><td class="sm">${esc(v.note)}</td></tr>`).join('')}</table></div>
+  <div class="flex mt sb wr"><span class="sm mut">${p.file?esc(p.file.name)+' · '+fsize(p.file.size):''}</span><div class="flex">${p.status!=='Archived'?`<button class="btn sm ghost" data-a="pStatus" data-id="${id}" data-v="Archived">Archive</button>`:''}<button class="btn sm red" data-a="delP" data-id="${id}">Delete</button></div></div>`,true)}
+function newVersion(id,file){const p=P(id);window._nv={id,file};
+  modal(`<h2>⤴ New version of “${esc(p.title)}”</h2><p class="mut sm">Customers who own it get the new file in their Library. Previews are rebuilt automatically.</p>
+   <div class="note">📄 <b>${esc(file.name)}</b> · ${fsize(file.size)}</div><label class="f">What changed? (shown to customers)</label><input class="inp" id="nvnote" placeholder="e.g. Added 6 word problems and fixed answer key">
+   <label class="flex sm mt"><input type="checkbox" id="nvmail" checked> Email the ${S.ent.filter(e=>e.pid===id).length} customer(s) who own it</label><div id="nvproc" class="proc mt"></div>
+   <div class="flex mt"><button class="btn" data-a="doNewVer">Upload version ${p.ver+1}</button><button class="btn ghost" data-a="close">Cancel</button></div>`)}
+async function doNewVersion(){const{id,file}=window._nv;const p=P(id);const note=$('#nvnote').value.trim()||'Updated file';const notify=$('#nvmail').checked;const box=$('#nvproc');
+  try{const r=await processFile(file,p.pv||S.settings.previewPages,(steps,i)=>{box.innerHTML=steps.map((s,k)=>`<div class="${k<i?'ok':k===i?'run':''}">${k<i?'✅':k===i?'⏳':'○'} ${s}</div>`).join('')});
+    for(let i=0;i<10;i++){DB.del('raw:'+id+':'+i);DB.del('pv:'+id+':'+i)}r.raw.forEach((u,i)=>DB.put('raw:'+id+':'+i,u));r.wm.forEach((u,i)=>DB.put('pv:'+id+':'+i,u));
+    if(!p.custom||!IMG['cv:'+id])DB.put('cv:'+id,r.cover);p.custom=true;p.cover=true;p.type=r.type;p.pages=r.pages||p.pages;p.pv=Math.min(p.pv,r.wm.length);p.ver++;p.versions.push({v:p.ver,at:today(),note,file:file.name});p.file={name:file.name,size:file.size,hash:r.hash};p.updated=today();FILES[id]=file;
+    if(notify)S.ent.filter(e=>e.pid===id).forEach(e=>{const u=U(e.uid);mail(S,u.email,'newVersion',{name:u.name,title:p.title,version:p.ver,note})});
+    audit('New version uploaded',p.title+' → v'+p.ver+' · '+note);save();closeLayer();toast(`✅ ${esc(p.title)} is now v${p.ver}${notify?' · owners emailed':''}`);rerender()}
+  catch(e){box.innerHTML=`<div class="er">⛔ ${esc(e.message)}</div>`}}
+async function setPreviewCount(id,n){const p=P(id);n=Math.max(1,Math.min(10,n|0));
+  if(p.custom){const have=Object.keys(IMG).filter(k=>k.startsWith('raw:'+id+':')).length;
+    if(n>have){if(FILES[id]){toast('⏳ Rendering more pages…');const r=await processFile(FILES[id],n);r.raw.forEach((u,i)=>DB.put('raw:'+id+':'+i,u));r.wm.forEach((u,i)=>DB.put('pv:'+id+':'+i,u));n=Math.min(n,r.wm.length)}
+      else{n=have;toast(`ℹ️ Only ${have} page(s) were rendered at upload. Use “Upload new version” to render more.`)}}}
+  p.pv=n;audit('Preview pages changed',p.title+' · '+n+' pages');save();editP(id);rerender()}
+async function restampAll(){let n=0;for(const p of S.products.filter(x=>x.custom)){for(let i=0;i<10;i++){const raw=IMG['raw:'+p.id+':'+i];if(!raw)break;DB.put('pv:'+p.id+':'+i,await stamp(raw));n++}}
+  Object.keys(artCache).filter(k=>k.startsWith('syn')).forEach(k=>delete artCache[k]);audit('Watermark re-applied','“'+S.settings.watermark+'” on '+n+' uploaded preview pages');save();toast(`🔁 Watermark re-applied to all previews (${n} uploaded pages + sample resources)`)}
+
+/* ---------- Orders / approvals ---------- */
+function approveModal(no){const o=S.orders.find(x=>x.no===no);const cu=U(o.uid);const mismatch=o.slip.amount!==o.total;const earn=Math.floor(o.total/100)*S.settings.ptsPerMVR*(o.mult||1);
+  modal(`<span class="badge b-paid">APPROVE PAYMENT</span><h2 class="mt">${o.no} · ${mvr(o.total)}</h2><div class="two"><div><div class="row"><span>Customer</span><b>${esc(cu.name)}</b></div>${o.items.map(i=>`<div class="row sm"><span>${esc(i.title)}</span><span>${mvr(i.final)}</span></div>`).join('')}${o.pointsUsed?`<div class="row sm"><span>Points used</span><span>${o.pointsUsed}</span></div>`:''}<div class="row tot"><span>Expected</span><span>${mvr(o.total)}</span></div><div class="row"><span>Slip amount</span><b style="color:${mismatch?'var(--bad)':'var(--ok)'}">${mvr(o.slip.amount)}</b></div><div class="row"><span>Reference</span><span>${esc(o.slip.ref)}</span></div>
+   ${mismatch?'<div class="warnbox mt">≠ The slip amount does not match. Check your bank statement before approving.</div>':''}${o.dup?'<div class="warnbox mt">⚠️ This slip image looks like one already used on another order.</div>':''}
+   <div class="note mt">Approving will: unlock ${o.items.length} download(s) · add ${earn} pending points · ${!cu.paid&&cu.refBy?'reward the referrer · ':''}email the customer.</div></div><div style="text-align:center"><img src="${slipImage(o)}" style="max-width:100%;max-height:420px;border-radius:10px;border:1px solid var(--line)"></div></div>
+  <div class="flex mt"><button class="btn" style="padding:13px 24px" data-a="doApprove" data-id="${no}">✅ Confirm approval</button><button class="btn red" data-a="rejectM" data-id="${no}">Reject instead</button><button class="btn ghost" data-a="close">Cancel</button></div>`,true)}
+function rejectModal(no){const o=S.orders.find(x=>x.no===no);
+  modal(`<span class="badge b-rej">REJECT SLIP</span><h2 class="mt">${o.no}</h2><label class="f">Reason (sent to the customer)</label><select class="inp" id="rreason"><option>Amount does not match the order total</option><option>Slip is unclear, please upload a clearer photo</option><option>Transfer not received in our account</option><option>Reference does not match the order number</option></select><label class="f">Extra note (optional)</label><input class="inp" id="rnote" placeholder="e.g. We received MVR 110 instead of MVR 119">
+  <p class="sm mut">The order stays open so the customer can upload a new slip. Points used stay on hold.</p><div class="flex"><button class="btn red" data-a="doReject" data-id="${no}">Confirm rejection</button><button class="btn ghost" data-a="close">Cancel</button></div>`)}
+function grant(uid,pid){if(!S.ent.some(e=>e.uid===uid&&e.pid===pid))S.ent.push({uid,pid,at:today()})}
+function approve(no){const o=S.orders.find(x=>x.no===no);if(o.status!=='AWAITING_VERIFICATION')return toast('Already processed');const u=U(o.uid);o.status='PAID';if(o.tokens)o.tokens.used=true;
+  o.items.forEach(i=>{grant(u.id,i.pid);const p=P(i.pid);if(p)p.sales++});
+  if(o.pointsUsed){u.held=Math.max(0,u.held-o.pointsUsed);const h=S.ledger.find(l=>l.type==='Held for '+no);if(h){h.status='spent';h.type='Spent on '+no}}
+  const earn=Math.floor(o.total/100)*S.settings.ptsPerMVR*(o.mult||1);o.earned=earn;if(earn)addPts(u.id,earn,'Purchase '+no+((o.mult||1)>1?` (${o.mult}× campaign)`:''),'pending');
+  if(!u.paid&&u.refBy){const r=U(u.refBy);if(r){addPts(r.id,S.settings.refReferrer,'Referral: '+u.name+' made first purchase','pending');const b=Math.round(o.total/100*S.settings.shareFirstOrderPct/100);if(b)addPts(r.id,b,S.settings.shareFirstOrderPct+'% of friend’s first order','pending')}}
+  if(u.welcome)u.welcome.status='used';u.paid=true;o.log.push({at:nowISO(),ev:'Approved by '+me().name+' · '+o.items.length+' download(s) unlocked · '+earn+' points pending'});
+  mail(S,u.email,'approved',{name:u.name,order:no,earned:earn});audit('Payment approved',no+' · '+mvr(o.total)+' · '+u.name);save();closeLayer();toast(`✅ ${no} approved · downloads unlocked for ${esc(u.name)}`);rerender()}
+function reject(no){const o=S.orders.find(x=>x.no===no);const reason=$('#rreason').value+($('#rnote').value?' — '+$('#rnote').value:'');o.status='PAYMENT_REJECTED';o.reason=reason;if(o.tokens)o.tokens.used=true;o.log.push({at:nowISO(),ev:'Slip rejected: '+reason});
+  const u=U(o.uid);mail(S,u.email,'rejected',{name:u.name,order:no,reason});audit('Payment rejected',no+' · '+reason);save();closeLayer();toast('Slip rejected · customer emailed with the reason');rerender()}
+function orderModal(no){const o=S.orders.find(x=>x.no===no);const u=U(o.uid);
+  modal(`<div class="flex sb wr"><h2>${o.no}</h2>${statusBadge(o.status)}</div><div class="sm mut">${esc(u.name)} · ${esc(u.email)} · ${o.method}</div>
+  <div class="two mt"><div class="box"><h3>Items</h3>${o.items.map(i=>`<div class="row"><span>${esc(i.title)}</span><span>${mvr(i.final)}${i.final<i.list?` <s class="mut sm">${mvr(i.list)}</s>`:''}</span></div>`).join('')}${o.discount?`<div class="row sm"><span>Discounts</span><span>−${mvr(o.discount)}</span></div>`:''}${o.pointsUsed?`<div class="row sm"><span>Points used (${o.pointsUsed})</span><span>−${mvr(o.pointsUsed*100/S.settings.ptsPerMVRValue)}</span></div>`:''}<div class="row tot"><span>Total</span><span>${mvr(o.total)}</span></div>${o.earned?`<div class="sm mut">🪙 ${o.earned} points earned</div>`:''}</div>
+   <div class="box"><h3>Timeline</h3>${o.log.map(l=>`<div class="ci" style="align-items:flex-start"><span>•</span><div class="t" style="font-weight:500">${esc(l.ev)}<div class="sm mut">${l.at.replace('T',' ')}</div></div></div>`).join('')}${o.slip?`<img src="${slipImage(o)}" style="width:110px;border-radius:8px;border:1px solid var(--line);margin-top:8px;cursor:zoom-in" data-a="zoom" data-src="${slipImage(o)}">`:''}</div></div>
+  <div class="flex wr">${o.status==='AWAITING_VERIFICATION'?`<button class="btn" data-a="approveM" data-id="${no}">✅ Approve</button><button class="btn red" data-a="rejectM" data-id="${no}">Reject</button>`:''}
+   ${o.status==='AWAITING_TRANSFER'||o.status==='PAYMENT_REJECTED'?`<button class="btn ghost" data-a="remind" data-id="${no}">📧 Resend payment instructions</button><button class="btn ghost" data-a="markPaid" data-id="${no}">Mark as paid (cash/other)</button>`:''}
+   ${o.status==='PAID'?`<button class="btn ghost" data-a="refundM" data-id="${no}">↩️ Refund</button>`:''}<button class="btn ghost" data-a="cust" data-id="${u.id}">👤 Customer</button></div>`,true)}
+function refund(no){const o=S.orders.find(x=>x.no===no);const u=U(o.uid);const reason=$('#rfr').value||'Refund';
+  o.items.forEach(i=>{S.ent=S.ent.filter(e=>!(e.uid===u.id&&e.pid===i.pid))});
+  if(o.earned){const l=S.ledger.find(x=>x.uid===u.id&&x.type.startsWith('Purchase '+no));if(l){if(l.status==='pending')u.pending-=l.pts;else u.points-=l.pts;l.status='reversed'}}
+  if(o.pointsUsed){addPts(u.id,o.pointsUsed,'Points returned · refund '+no)}
+  o.status='REFUNDED';o.log.push({at:nowISO(),ev:'Refunded by '+me().name+': '+reason+' · access removed'});audit('Order refunded',no+' · '+reason);save();closeLayer();toast('↩️ Refunded · access removed · points adjusted');rerender()}
+
+/* ---------- Customers ---------- */
+function custModal(id){const u=U(id);const os=S.orders.filter(o=>o.uid===id);const lib=S.ent.filter(e=>e.uid===id);
+  modal(`<div class="flex"><div class="av" style="background:${u.color};width:52px;height:52px;font-size:18px">${initials(u.name)}</div><div style="flex:1"><h2 style="margin:0">${esc(u.name)}</h2><div class="mut sm">${esc(u.email)} · Google account · joined ${u.joined} · source: ${esc(u.source)}</div></div><div class="flex"><span class="sm">Blocked</span>${sw(u.blocked,'block',id)}</div></div>
+  <div class="kpis mt" style="grid-template-columns:repeat(5,1fr)"><div class="kpi"><small>Points</small><b>${u.points}</b></div><div class="kpi"><small>Pending</small><b>${u.pending}</b></div><div class="kpi"><small>Held</small><b>${u.held}</b></div><div class="kpi"><small>Orders</small><b>${os.length}</b></div><div class="kpi"><small>Library</small><b>${lib.length}</b></div></div>
+  <div class="two"><div><label class="f">Tags (comma separated)</label><input class="inp" id="ctags" value="${esc(u.tags.join(', '))}"><label class="f">Internal notes</label><textarea class="inp" rows="3" id="cnote">${esc(u.notes)}</textarea><div class="flex mt"><button class="btn sm" data-a="saveCust" data-id="${id}">Save</button><label class="flex sm"><input type="checkbox" id="ccons" ${u.consent?'checked':''} disabled> Marketing consent (customer controls this)</label></div>
+    <p class="sm mt"><b>Referral code:</b> <span class="mono">${u.code}</span> · ${S.users.filter(x=>x.refBy===id).length} referral(s)${u.refBy?' · referred by '+esc(U(u.refBy).name):''}</p></div>
+   <div><label class="f">Adjust points</label><div class="flex"><input class="inp" id="adjp" type="number" placeholder="+/-" style="max-width:100px"><input class="inp" id="adjr" placeholder="Reason (required)"><button class="btn sm" data-a="adj" data-id="${id}">Apply</button></div>
+    <label class="f">Give a resource for free</label><div class="flex"><select class="inp" id="gp">${opts(S.products.filter(p=>!owns(id,p.id)).map(p=>[p.id,p.title]))}</select><button class="btn sm" data-a="grantP" data-id="${id}">Grant</button></div>
+    <label class="f">Library</label><div class="sm">${lib.map(e=>esc((P(e.pid)||{}).title)).join(' · ')||'<span class="mut">Empty</span>'}</div></div></div>
+  <h3 class="mt">Orders</h3>${os.map(o=>`<div class="row"><a style="cursor:pointer;color:var(--pri)" data-a="order" data-id="${o.no}">${o.no}</a><span>${statusBadge(o.status)} ${mvr(o.total)}</span></div>`).join('')||'<p class="mut sm">No orders.</p>'}
+  <h3 class="mt">Points history</h3>${S.ledger.filter(l=>l.uid===id).slice(0,8).map(l=>`<div class="row sm"><span>${l.at} · ${esc(l.type)} <span class="badge b-grey">${l.status}</span></span><b style="color:${l.pts<0?'var(--bad)':'var(--ok)'}">${l.pts>0?'+':''}${l.pts}</b></div>`).join('')}`,true)}
+
+/* ---------- Campaigns ---------- */
+const PRESETS={"Teachers' Day":['#DB2777','Celebrate our teachers – {pct}% off everything + double points',2],'Independence Day':['#DC2626','Independence Day – {pct}% off',1],'Ramadan':['#15803D','Ramadan Mubarak – {pct}% off Islam resources',1],'Back to school':['#0284C7','Back to school – {pct}% off',1],'Flash sale':['#EA580C','24-hour flash sale – {pct}% off',1],'Custom':['#0E8C7F','{pct}% off',1]};
+function campModal(id){const c=id?S.campaigns.find(x=>x.id===id):null;const d=c||{name:'',type:'Back to school',pct:15,scope:'all',mult:1,start:Date.now(),end:Date.now()+7*864e5,accent:'#0284C7',banner:''};const dt=t=>new Date(t-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16);
+  modal(`<h2>${c?'Edit':'New'} campaign</h2><label class="f">Occasion</label><div class="flex wr">${Object.keys(PRESETS).map(k=>`<span class="chip ${d.type===k?'on':''}" data-a="preset" data-v="${esc(k)}">${esc(k)}</span>`).join('')}</div>
+   <div class="two"><div><label class="f">Name</label><input class="inp" id="cn" value="${esc(d.name)}" placeholder="Back to School 2027"></div><div><label class="f">Applies to</label><select class="inp" id="cs"><option value="all">Everything</option>${opts(S.categories.map(x=>[x.id,x.name]),d.scope)}</select></div>
+    <div><label class="f">Discount %</label><input class="inp" id="cp" type="number" min="1" max="90" value="${d.pct}"></div><div><label class="f">Points multiplier</label><select class="inp" id="cm">${opts([['1','1× (normal)'],['2','2× double points'],['3','3× triple points']],String(d.mult))}</select></div>
+    <div><label class="f">Starts</label><input class="inp" id="cst" type="datetime-local" value="${dt(d.start)}"></div><div><label class="f">Ends</label><input class="inp" id="cen" type="datetime-local" value="${dt(d.end)}"></div></div>
+   <label class="f">Banner text</label><input class="inp" id="cb" value="${esc(d.banner)}" placeholder="Shown on the storefront"><label class="f">Colour</label><input type="color" id="ca" value="${d.accent}">
+   <p class="sm mut">Campaign prices never go below each resource's minimum price. If a customer has a better welcome offer, the better one wins.</p><div class="flex"><button class="btn" data-a="saveCamp" data-id="${c?c.id:''}">${c?'Save':'Create campaign'}</button><button class="btn ghost" data-a="close">Cancel</button></div>`)}
+function sendCampModal(){modal(`<h2>✉️ Email a group</h2><label class="f">Send to</label><select class="inp" id="sg">${S.segments.map(s=>`<option value="${esc(s.rule)}">${esc(s.name)} (${customers().filter(u=>inSeg(u,s.rule)&&u.consent&&!u.blocked).length} with consent)</option>`).join('')}</select>
+  <label class="f">Subject</label><input class="inp" id="sgs" value="${esc(activeCampaign()?activeCampaign().banner:'New resources this week')}"><label class="f">Message</label><textarea class="inp" rows="5" id="sgb">Hi {name},\n\nWe've just added new resources for your classroom. ${activeCampaign()?activeCampaign().banner+'.':''}\n\nYou have {points} points to spend.\n\n{store}</textarea>
+  <p class="sm mut">Only customers who opted in to offers receive marketing emails. Each email has an unsubscribe link.</p><div class="flex"><button class="btn" data-a="doSendCamp">Send</button><button class="btn ghost" data-a="close">Cancel</button></div>`)}
+
+/* ---------- CSV ---------- */
+function csvParse(t){const rows=[];let r=[],v='',q=false;for(let i=0;i<t.length;i++){const c=t[i];if(q){if(c==='"'){if(t[i+1]==='"'){v+='"';i++}else q=false}else v+=c}else if(c==='"')q=true;else if(c===','){r.push(v);v=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&t[i+1]==='\n')i++;r.push(v);rows.push(r);r=[];v=''}else v+=c}if(v||r.length){r.push(v);rows.push(r)}return rows.filter(x=>x.some(y=>y.trim()))}
+const csvCell=v=>/[",\n]/.test(String(v))?'"'+String(v).replace(/"/g,'""')+'"':String(v);
+function download(name,text,type='text/csv'){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+function applyCsv(text){const rows=csvParse(text);if(rows.length<2)return toast('CSV looks empty');const h=rows[0].map(x=>x.trim().toLowerCase());const ix=k=>h.indexOf(k);let n=0;
+  for(const r of rows.slice(1)){const fn=(r[ix('filename')]||'').trim().toLowerCase();const q=S.queue.find(x=>x.name.toLowerCase()===fn&&x.state!=='done');if(!q)continue;const m=q.meta;
+    const get=k=>ix(k)>=0?(r[ix(k)]||'').trim():'';if(get('title'))m.title=get('title');if(get('description'))m.short=get('description');
+    const c=get('subject');if(c){const cc=S.categories.find(x=>x.id===c.toLowerCase()||x.name.toLowerCase()===c.toLowerCase());if(cc)m.cat=cc.id}
+    if(get('grade'))m.grade=get('grade');if(get('curriculum'))m.curr=get('curriculum');if(get('price_mvr')!=='')m.price=+get('price_mvr')||0;if(get('min_price_mvr')!=='')m.min=+get('min_price_mvr')||0;if(get('preview_pages'))m.pv=+get('preview_pages');if(get('featured'))m.featured=/^(y|yes|true|1)$/i.test(get('featured'));n++}
+  audit('CSV details applied',n+' file(s) matched');rerender();toast(`📥 Details filled for ${n} file(s)`+(n<rows.length-1?` · ${rows.length-1-n} row(s) had no matching file in the queue`:''))}
+function autoDesc(q){const m=q.meta;const r=q.res;const n=r&&r.pages?r.pages:'';const kind=r&&r.type==='PPTX'?'slide lesson':r&&r.type==='DOCX'?'editable pack':'printable pack';
+  m.short=`${n?n+'-'+(r.type==='PPTX'?'slide':'page')+' ':''}${kind} for ${m.grade||'your class'} ${catName(m.cat)!=='—'?catName(m.cat):''}: ${m.title}. Classroom-ready${m.curr&&m.curr!=='—'?', aligned to the '+m.curr:''}.`.replace(/\s+/g,' ');
+  const el=document.querySelector(`[data-q="${q.id}"][data-k="short"]`);if(el)el.value=m.short}
+
+/* ================= EVENTS ================= */
+function setPath(path,val){const ks=path.split('.');let o=S;for(let i=0;i<ks.length-1;i++)o=o[ks[i]];o[ks[ks.length-1]]=val}
+document.addEventListener('input',e=>{const t=e.target;
+  if(t.dataset.q){const q=S.queue.find(x=>x.id===t.dataset.q);if(!q)return;const k=t.dataset.k;q.meta[k]=['price','min','pv'].includes(k)?(t.value===''?'':+t.value):t.value;
+    if(k==='price'&&+t.value>0&&!(+q.meta.min>0)){q.meta.min=Math.max(1,Math.round(+t.value*S.settings.defaultMinPct/100));const mi=document.querySelector(`[data-q="${q.id}"][data-k="min"]`);if(mi)mi.value=q.meta.min}
+    const b=$('#qe-'+q.id);if(b)b.innerHTML=qActions(q);return}
+  if(t.dataset.bind){let v=t.value;if(t.dataset.type==='num')v=+v||0;setPath(t.dataset.bind,v);save();if(t.dataset.bind.startsWith('landing.')){const p=$('#lpprev');if(p)p.innerHTML=lpPreview()}return}
+  if(t.id==='rq'){window._rf.q=t.value;clearTimeout(window._rqT);window._rqT=setTimeout(()=>{rerender();const el=$('#rq');el.focus();el.setSelectionRange(el.value.length,el.value.length)},250)}
+  if(t.id==='cq'){window._cf.q=t.value;clearTimeout(window._rqT);window._rqT=setTimeout(()=>{rerender();const el=$('#cq');el.focus();el.setSelectionRange(el.value.length,el.value.length)},250)}
+  if(t.id==='oq'){window._of.q=t.value;clearTimeout(window._rqT);window._rqT=setTimeout(()=>{rerender();const el=$('#oq');el.focus();el.setSelectionRange(el.value.length,el.value.length)},250)}
+  if(t.id==='aq'){window._aq=t.value;clearTimeout(window._rqT);window._rqT=setTimeout(()=>{rerender();const el=$('#aq');el.focus();el.setSelectionRange(el.value.length,el.value.length)},250)}});
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.dataset.p){const p=P(t.dataset.p);if(!setPrice(p,t.dataset.k,t.value)){t.value=p[t.dataset.k]/100;return}toast('💾 Saved · '+esc(p.title));if(!$('.modal'))rerender();else editP(p.id);return}
+  if(t.dataset.pp){const p=P(t.dataset.pp);const k=t.dataset.k;if(k==='tags')p.tags=t.value.split(',').map(x=>x.trim()).filter(Boolean);else{if(k==='title'&&!t.value.trim()){t.value=p.title;return toast('Title can’t be empty')}p[k]=t.value;if(k==='cat')p.ic=catIc(t.value)}p.updated=today();audit('Resource edited',p.title+' · '+k);save();toast('💾 Saved');rerender();return}
+  if(t.dataset.cat!=null){const c=S.categories[+t.dataset.cat];c[t.dataset.k]=t.value;audit('Subject edited',c.name);save();return}
+  if(t.id==='rcat'){window._rf.cat=t.value;rerender()}if(t.id==='lf'){window._lf=t.value;rerender()}
+  if(t.id==='fpick'){enqueue(t.files);t.value=''}
+  if(t.id==='fone'&&t.files[0]){const f=t.files[0];t.value='';if(window._oneFor)newVersion(window._oneFor,f)}
+  if(t.id==='fcsv'&&t.files[0]){t.files[0].text().then(applyCsv);t.value=''}
+  if(t.id==='fjson'&&t.files[0]){t.files[0].text().then(importJson);t.value=''}
+  if(t.id==='fimg'&&t.files[0]){const f=t.files[0];t.value='';const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const[c,x]=newPage(640,512);const s=Math.max(640/im.width,512/im.height);x.drawImage(im,(640-im.width*s)/2,(512-im.height*s)/2,im.width*s,im.height*s);const u=c.toDataURL('image/jpeg',.85);
+      const tg=window._imgFor;if(tg.q){const q=S.queue.find(x=>x.id===tg.q);q.cover=u;qRefresh(q)}else{const p=P(tg.p);DB.put('cv:'+p.id,u);p.cover=true;audit('Cover changed',p.title);save();editP(p.id);rerender()}};im.src=r.result};r.readAsDataURL(f)}});
+const A={
+ go:el=>{location.hash=el.dataset.h;closeLayer()},close:()=>closeLayer(),bgclose:(el,e)=>{if(e.target===el)closeLayer()},okConfirm:()=>{const f=window._ok;closeLayer();f&&f()},
+ signin:el=>{S.session=owner().id;audit('Signed in',el.dataset.v);save();route();toast('👋 Welcome back, '+esc(owner().name.split(' ')[0]))},
+ signinOther:()=>modal(`<h2>⛔ Not an admin account</h2><p class="mut">someone@gmail.com is not on the admin allowlist, so the backend stays locked. They can still shop on the storefront as a customer.</p><button class="btn" data-a="close">OK</button>`),
+ signout:()=>confirmBox('Sign out?','You can sign back in with your Google account.','Sign out',()=>{audit('Signed out','');S.session=null;save();route()}),
+ storefront:()=>toast('🌐 Opens the customer storefront (LessonLagoon_MVP_Prototype.html) in production'),
+ pick:()=>$('#fpick').click(),
+ csvTpl:()=>download('lessonlagoon-upload-template.csv','filename,title,subject,grade,curriculum,price_mvr,min_price_mvr,preview_pages,featured,description\n'+(S.queue.length?S.queue.map(q=>[q.name,q.meta.title,catName(q.meta.cat),q.meta.grade,q.meta.curr,q.meta.price,q.meta.min,q.meta.pv,q.meta.featured?'yes':'no',q.meta.short].map(csvCell).join(',')).join('\n'):'grade-4-fractions.pdf,Grade 4 Fractions Pack,Mathematics,Grade 4,National Curriculum,75,15,3,no,24 worksheets with answer keys')+'\n'),
+ csvImport:()=>{if(!S.queue.some(q=>q.state!=='done'))return toast('Add your files first, then fill their details from a CSV');$('#fcsv').click()},
+ applyAll:()=>{const v=k=>$('#ab-'+k).value;let n=0;S.queue.filter(q=>q.state!=='done').forEach(q=>{const m=q.meta;if(v('cat'))m.cat=v('cat');if(v('grade'))m.grade=v('grade');if(v('curr'))m.curr=v('curr');if(v('price')!==''){m.price=+v('price');m.min=v('min')!==''?+v('min'):(m.price?Math.max(1,Math.round(m.price*S.settings.defaultMinPct/100)):0)}else if(v('min')!=='')m.min=+v('min');if(v('pv'))m.pv=Math.min(+v('pv'),q.res&&q.res.pages||10);n++});rerender();toast(`✅ Applied to ${n} file(s)`)},
+ qPublish:el=>{const q=S.queue.find(x=>x.id===el.dataset.id);if(publishQ(q,true)){toast('🚀 Published · '+esc(q.meta.title));rerender()}},
+ qDraft:el=>{const q=S.queue.find(x=>x.id===el.dataset.id);if(publishQ(q,false)){toast('💾 Saved as draft');rerender()}},
+ qRemove:el=>{S.queue=S.queue.filter(x=>x.id!==el.dataset.id);rerender()},
+ qfeat:el=>{const q=S.queue.find(x=>x.id===el.dataset.id);q.meta.featured=!q.meta.featured;el.classList.toggle('on')},
+ qCover:el=>{window._imgFor={q:el.dataset.id};$('#fimg').click()},pCover:el=>{window._imgFor={p:el.dataset.id};$('#fimg').click()},
+ autoDesc:el=>autoDesc(S.queue.find(x=>x.id===el.dataset.id)),
+ publishAll:()=>{let ok=0,skip=0;S.queue.filter(q=>q.state==='ready').forEach(q=>publishQ(q,true)?ok++:skip++);rerender();toast(`🚀 ${ok} published${skip?` · ${skip} need details first`:''}`)},
+ draftAll:()=>{let ok=0;S.queue.filter(q=>q.state==='ready'&&q.meta.title.trim()).forEach(q=>publishQ(q,false)&&ok++);rerender();toast(`💾 ${ok} saved as drafts`)},
+ clearDone:()=>{S.queue=S.queue.filter(q=>q.state!=='done'&&q.state!=='error');rerender()},
+ rst:el=>{window._rf.st=el.dataset.v;if(location.hash.includes('?'))history.replaceState(null,'','#/resources');rerender()},
+ sel:el=>{const f=window._rf;const id=el.dataset.id;f.sel=f.sel.includes(id)?f.sel.filter(x=>x!==id):[...f.sel,id];rerender()},
+ selAll:el=>{const f=window._rf;const ids=[...document.querySelectorAll('[data-a="sel"]')].map(x=>x.dataset.id);f.sel=el.checked?[...new Set([...f.sel,...ids])]:f.sel.filter(x=>!ids.includes(x));rerender()},
+ bulk:el=>{const f=window._rf,v=el.dataset.v;const ps=f.sel.map(P);if(v==='none'){f.sel=[];return rerender()}
+   if(['Published','Draft','Archived'].includes(v)){if(v==='Published'){const bad=ps.filter(p=>!p.cat||!p.title);if(bad.length)return toast('Some selected resources are missing a subject')}ps.forEach(p=>p.status=v)}
+   else if(v==='feature')ps.forEach(p=>p.featured=true);else if(v==='cat'){const c=$('#bk-cat').value;if(!c)return toast('Choose a subject');ps.forEach(p=>{p.cat=c;p.ic=catIc(c)})}
+   else if(v==='price'){const pr=$('#bk-price').value;if(pr==='')return toast('Enter a price');ps.forEach(p=>setPrice(p,'price',pr))}
+   audit('Bulk update',v+' · '+ps.length+' resource(s)');save();toast(`✅ Updated ${ps.length} resource(s)`);f.sel=[];rerender()},
+ feat:el=>{const p=P(el.dataset.id);p.featured=!p.featured;audit(p.featured?'Featured':'Unfeatured',p.title);save();el.classList.toggle('on');if(!$('.modal'))rerender()},
+ editP:el=>{const r=$('#gsr');if(r)r.innerHTML='';editP(el.dataset.id)},
+ pStatus:el=>{const p=P(el.dataset.id);if(el.dataset.v==='Published'&&(!p.cat||!p.title))return toast('Add a subject first');p.status=el.dataset.v;audit('Status changed',p.title+' → '+p.status);save();toast(`${p.status==='Published'?'🚀 Live in the store':'Status: '+p.status}`);editP(p.id);rerender()},
+ dupP:el=>{const p=P(el.dataset.id);const id='p'+Date.now().toString(36);const c=JSON.parse(JSON.stringify(p));Object.assign(c,{id,slug:p.slug+'-copy',title:p.title+' (copy)',status:'Draft',sales:0,rc:0,rating:0,ver:1,versions:[{v:1,at:today(),note:'Duplicated from '+p.title,file:p.file.name}],created:today(),updated:today()});
+   if(p.custom){for(let i=0;i<10;i++){if(IMG['raw:'+p.id+':'+i])DB.put('raw:'+id+':'+i,IMG['raw:'+p.id+':'+i]);if(IMG['pv:'+p.id+':'+i])DB.put('pv:'+id+':'+i,IMG['pv:'+p.id+':'+i])}if(IMG['cv:'+p.id])DB.put('cv:'+id,IMG['cv:'+p.id]);if(FILES[p.id])FILES[id]=FILES[p.id]}
+   S.products.unshift(c);audit('Resource duplicated',p.title);save();editP(id);rerender()},
+ delP:el=>{const p=P(el.dataset.id);const own=S.ent.filter(e=>e.pid===p.id).length;if(own||p.sales)return confirmBox('Archive instead?',`${own} customer(s) own “${esc(p.title)}”. Deleting would break their Library, so it will be archived: hidden from the store, still downloadable by owners.`,'Archive',()=>{p.status='Archived';audit('Archived',p.title);save();rerender()});
+   confirmBox('Delete this resource?','“'+esc(p.title)+'” and its previews will be removed. This can’t be undone.','Delete',()=>{S.products=S.products.filter(x=>x.id!==p.id);for(let i=0;i<10;i++){DB.del('raw:'+p.id+':'+i);DB.del('pv:'+p.id+':'+i)}DB.del('cv:'+p.id);audit('Resource deleted',p.title);save();rerender()},true)},
+ newVer:el=>{window._oneFor=el.dataset.id;$('#fone').click()},doNewVer:()=>doNewVersion(),
+ setPv:el=>setPreviewCount(el.dataset.id,+$('#pvn').value),
+ zoom:el=>modal(`<div style="text-align:center"><img src="${el.dataset.src}" style="max-width:100%;max-height:80vh;border-radius:10px"></div>`,true),
+ addCat:()=>{const n=$('#ncname').value.trim();if(!n)return;const id=slugify(n)||('c'+Date.now());if(S.categories.some(c=>c.id===id))return toast('Already exists');S.categories.push({id,name:n,ic:$('#ncic').value.trim()||'📁'});audit('Subject added',n);save();rerender()},
+ delCat:el=>{const c=S.categories[+el.dataset.id];S.categories.splice(+el.dataset.id,1);audit('Subject deleted',c.name);save();rerender()},
+ addGrade:()=>{const v=$('#ngrade').value.trim();if(v&&!S.grades.includes(v)){S.grades.push(v);audit('Grade added',v);save();rerender()}},delGrade:el=>{S.grades.splice(+el.dataset.id,1);save();rerender()},
+ addCurr:()=>{const v=$('#ncurr').value.trim();if(v&&!S.curricula.includes(v)){S.curricula.push(v);save();rerender()}},delCurr:el=>{S.curricula.splice(+el.dataset.id,1);save();rerender()},
+ approveM:el=>approveModal(el.dataset.id),rejectM:el=>rejectModal(el.dataset.id),doApprove:el=>approve(el.dataset.id),doReject:el=>reject(el.dataset.id),
+ ownerMail:el=>{const e=S.outbox.find(x=>x.orderNo===el.dataset.id);if(e)openMail(e.id,el.dataset.id);else toast('No email found')},
+ openMail:el=>openMail(el.dataset.id),
+ order:el=>{const r=$('#gsr');if(r)r.innerHTML='';orderModal(el.dataset.id)},
+ ost:el=>{window._of.st=el.dataset.v;rerender()},
+ expire:()=>{const L=S.orders.filter(o=>o.status==='AWAITING_TRANSFER'&&Date.now()-new Date(o.at)>S.settings.slipExpiryHours*36e5);L.forEach(o=>{o.status='EXPIRED';o.log.push({at:nowISO(),ev:'Expired: no transfer within '+S.settings.slipExpiryHours+'h'});if(o.pointsUsed)addPts(o.uid,o.pointsUsed,'Points returned · expired '+o.no)});audit('Orders expired',L.map(o=>o.no).join(', '));save();toast(`⏰ ${L.length} order(s) expired · held points returned`);rerender()},
+ remind:el=>{const o=S.orders.find(x=>x.no===el.dataset.id);const u=U(o.uid);S.outbox.unshift({id:tok(),to:u.email,subject:`How to pay for ${o.no} – ${mvr(o.total)}`,body:`Hi ${u.name},\n\nTransfer ${mvr(o.total)} to ${S.settings.bank.bank}, ${S.settings.bank.name}, account ${S.settings.bank.number}, with reference ${o.no}. Then upload your slip on the order page.\n\n${S.settings.store}`,at:new Date().toLocaleString('en-GB')});o.log.push({at:nowISO(),ev:'Payment instructions re-sent'});audit('Reminder sent',o.no);save();toast('📧 Payment instructions sent');orderModal(o.no)},
+ markPaid:el=>confirmBox('Mark as paid?','Use this only if you received the money another way (e.g. cash). Downloads will unlock.','Mark as paid',()=>{const o=S.orders.find(x=>x.no===el.dataset.id);o.slip=o.slip||{amount:o.total,ref:'Manual',sender:'—',date:today()};o.status='AWAITING_VERIFICATION';o.log.push({at:nowISO(),ev:'Marked as paid manually'});approve(o.no)}),
+ refundM:el=>{modal(`<h2>↩️ Refund ${el.dataset.id}</h2><p class="mut sm">Removes the downloads from the customer's Library, reverses points earned, and returns points used. Send the money back by bank transfer separately.</p><label class="f">Reason</label><input class="inp" id="rfr" placeholder="e.g. Bought by mistake"><div class="flex mt"><button class="btn red" data-a="doRefund" data-id="${el.dataset.id}">Confirm refund</button><button class="btn ghost" data-a="close">Cancel</button></div>`)},
+ doRefund:el=>refund(el.dataset.id),
+ ordersCsv:()=>download('orders.csv','order,customer,email,total_mvr,points_used,status,placed\n'+S.orders.map(o=>[o.no,U(o.uid).name,U(o.uid).email,o.total/100,o.pointsUsed||0,o.status,o.at].map(csvCell).join(',')).join('\n')),
+ cust:el=>{const r=$('#gsr');if(r)r.innerHTML='';custModal(el.dataset.id)},cseg:el=>{window._cf.seg=el.dataset.v;rerender()},
+ custCsv:()=>download('customers.csv','name,email,joined,source,points,pending,consent,tags,referral_code\n'+customers().map(u=>[u.name,u.email,u.joined,u.source,u.points,u.pending,u.consent?'yes':'no',u.tags.join('; '),u.code].map(csvCell).join(',')).join('\n')),
+ saveCust:el=>{const u=U(el.dataset.id);u.tags=$('#ctags').value.split(',').map(x=>x.trim()).filter(Boolean);u.notes=$('#cnote').value;audit('Customer updated',u.name);save();toast('💾 Saved');rerender();custModal(u.id)},
+ block:el=>{const u=U(el.dataset.id);u.blocked=!u.blocked;audit(u.blocked?'Customer blocked':'Customer unblocked',u.name);save();rerender();custModal(u.id)},
+ adj:el=>{const u=U(el.dataset.id);const n=parseInt($('#adjp').value,10);const r=$('#adjr').value.trim();if(!n||!r)return toast('Enter points and a reason');if(u.points+n<0)return toast('Balance can’t go below 0');addPts(u.id,n,'Adjusted by admin: '+r);audit('Points adjusted',u.name+' '+(n>0?'+':'')+n+' · '+r);save();toast('🪙 Points updated');rerender();custModal(u.id)},
+ grantP:el=>{const u=U(el.dataset.id);const pid=$('#gp').value;if(!pid)return;grant(u.id,pid);audit('Resource granted',P(pid).title+' → '+u.name);save();toast('🎁 Added to '+esc(u.name)+'’s Library');custModal(u.id)},
+ newCamp:()=>campModal(),editCamp:el=>campModal(el.dataset.id),
+ preset:el=>{const k=el.dataset.v;const p=PRESETS[k];document.querySelectorAll('[data-a="preset"]').forEach(x=>x.classList.toggle('on',x===el));$('#ca').value=p[0];$('#cm').value=String(p[2]);$('#cb').value=p[1].replace('{pct}',$('#cp').value);if(!$('#cn').value)$('#cn').value=k+' '+new Date().getFullYear();window._preset=k},
+ saveCamp:el=>{const name=$('#cn').value.trim(),pct=+$('#cp').value,st=+new Date($('#cst').value),en=+new Date($('#cen').value);if(!name)return toast('Give it a name');if(!(pct>0&&pct<=90))return toast('Discount must be 1–90%');if(!(en>st))return toast('End must be after start');
+   const d={name,pct,scope:$('#cs').value,mult:+$('#cm').value,start:st,end:en,banner:$('#cb').value.trim()||pct+'% off',accent:$('#ca').value};
+   const c=el.dataset.id?S.campaigns.find(x=>x.id===el.dataset.id):null;const ov=S.campaigns.find(x=>x!==c&&x.active&&x.start<en&&x.end>st);
+   if(c)Object.assign(c,d);else S.campaigns.unshift(Object.assign({id:'c'+Date.now(),type:window._preset||'Custom',active:true},d));audit(c?'Campaign edited':'Campaign created',name+' · '+pct+'%');save();closeLayer();toast('📣 Saved'+(ov?` · note: overlaps “${esc(ov.name)}”; the bigger discount applies`:''));rerender()},
+ togCamp:el=>{const c=S.campaigns.find(x=>x.id===el.dataset.id);c.active=!c.active;audit(c.active?'Campaign activated':'Campaign paused',c.name);save();rerender()},
+ dupCamp:el=>{const c=S.campaigns.find(x=>x.id===el.dataset.id);const d=Object.assign({},c,{id:'c'+Date.now(),name:c.name+' (copy)',active:false,ended:false,start:Date.now()+864e5,end:Date.now()+8*864e5});S.campaigns.unshift(d);audit('Campaign duplicated',c.name);save();campModal(d.id);rerender()},
+ sendCamp:()=>sendCampModal(),
+ doSendCamp:()=>{const rule=$('#sg').value;const L=customers().filter(u=>inSeg(u,rule)&&u.consent&&!u.blocked);L.forEach(u=>S.outbox.unshift({id:tok(),to:u.email,subject:$('#sgs').value,body:fill($('#sgb').value,{name:u.name,points:u.points,store:S.settings.store}),at:new Date().toLocaleString('en-GB')}));audit('Marketing email sent',L.length+' recipient(s) · '+$('#sgs').value);save();closeLayer();toast(`✉️ Sent to ${L.length} customer(s)`);rerender()},
+ addCoupon:()=>{const code=$('#ncode').value.trim().toUpperCase().replace(/\s/g,'');const pct=+$('#npct').value;if(!/^[A-Z0-9]{3,20}$/.test(code))return toast('Code: 3–20 letters/numbers');if(S.coupons.some(c=>c.code===code))return toast('That code exists');if(!(pct>0&&pct<=90))return toast('1–90% only');S.coupons.unshift({code,pct,limit:+$('#nlim').value||100,used:0,expires:$('#nexp').value,active:true});audit('Coupon created',code+' · '+pct+'%');save();rerender()},
+ togCoupon:el=>{const c=S.coupons[+el.dataset.id];c.active=!c.active;audit(c.active?'Coupon enabled':'Coupon disabled',c.code);save();el.classList.toggle('on')},
+ delCoupon:el=>{const c=S.coupons[+el.dataset.id];confirmBox('Delete coupon '+esc(c.code)+'?','Customers can no longer use it.','Delete',()=>{S.coupons.splice(S.coupons.indexOf(c),1);audit('Coupon deleted',c.code);save();rerender()},true)},
+ wtog:el=>{S.settings.welcome.enabled=!S.settings.welcome.enabled;audit('Welcome offer '+(S.settings.welcome.enabled?'enabled':'disabled'));save();el.classList.toggle('on')},
+ release:()=>{let n=0;S.ledger.filter(l=>l.status==='pending').forEach(l=>{const u=U(l.uid);u.pending-=l.pts;u.points+=l.pts;l.status='available';n+=l.pts});audit('Pending points released',n+' points');save();toast(`⏩ ${n} points now available to spend`);rerender()},
+ rhome:el=>{const r=S.reviews.find(x=>x.id===el.dataset.id);r.home=!r.home;save();el.classList.toggle('on')},
+ rapp:el=>{const r=S.reviews.find(x=>x.id===el.dataset.id);const first=!r.rewarded;r.status='approved';if(r.uid&&first){addPts(r.uid,S.settings.reviewPts,'Review approved');r.rewarded=true}audit('Review approved',r.name);save();rerender()},
+ rhide:el=>{const r=S.reviews.find(x=>x.id===el.dataset.id);r.status='hidden';r.home=false;audit('Review hidden',r.name);save();rerender()},
+ rdel:el=>confirmBox('Delete review?','This removes it permanently.','Delete',()=>{S.reviews=S.reviews.filter(x=>x.id!==el.dataset.id);save();rerender()},true),
+ addTesti:()=>modal(`<h2>＋ Testimonial</h2><p class="sm mut">For feedback received outside the store (e.g. WhatsApp). It is labelled as a testimonial, not a verified review.</p><label class="f">Name</label><input class="inp" id="tn" placeholder="Hawwa N."><label class="f">Resource</label><select class="inp" id="tp">${opts(S.products.map(p=>[p.id,p.title]))}</select><label class="f">Rating</label><select class="inp" id="tr">${opts(['5','4','3'])}</select><label class="f">Text</label><textarea class="inp" id="tt" rows="3"></textarea><button class="btn mt" data-a="saveTesti">Add</button>`),
+ saveTesti:()=>{const n=$('#tn').value.trim(),t=$('#tt').value.trim();if(!n||!t)return toast('Name and text please');S.reviews.unshift({id:'r'+Date.now(),pid:$('#tp').value,uid:null,name:n+' (testimonial)',rating:+$('#tr').value,text:t,status:'approved',home:true,date:today()});audit('Testimonial added',n);save();closeLayer();rerender()},
+ variant:el=>{S.landing.variant=+el.dataset.id;save();rerender()},addVariant:()=>{S.landing.variants.push(Object.assign({},S.landing.variants[S.landing.variant]));S.landing.variant=S.landing.variants.length-1;save();rerender()},
+ delVariant:()=>{S.landing.variants.splice(S.landing.variant,1);S.landing.variant=0;save();rerender()},
+ lpbg:el=>{S.landing.bg=el.dataset.id;save();rerender()},annTog:el=>{S.landing.announce.on=!S.landing.announce.on;save();el.classList.toggle('on');$('#lpprev').innerHTML=lpPreview()},
+ mv:el=>{const i=+el.dataset.i,d=+el.dataset.d,s=S.landing.sections;[s[i],s[i+d]]=[s[i+d],s[i]];save();rerender()},
+ sec:el=>{const s=S.landing.sections[+el.dataset.id];s.on=!s.on;save();el.classList.toggle('on');$('#lpprev').innerHTML=lpPreview()},
+ addFaq:()=>{S.landing.faq.push(['New question?','Answer']);save();rerender()},delFaq:el=>{S.landing.faq.splice(+el.dataset.id,1);save();rerender()},
+ publishLP:()=>{const L=S.landing;const snap=JSON.parse(JSON.stringify(Object.assign({},L,{history:undefined})));L.history.unshift({at:new Date().toLocaleString('en-GB'),snap});L.history=L.history.slice(0,5);audit('Landing page published','Variant '+String.fromCharCode(65+L.variant));save();toast('🚀 Landing page is live');rerender()},
+ lpHistory:()=>modal(`<h2>🕘 Published versions</h2>${S.landing.history.map((h,i)=>`<div class="row"><span>${h.at} · “${esc(h.snap.variants[h.snap.variant].h1.replace(/<[^>]+>/g,''))}”</span><button class="btn xs ghost" data-a="rollback" data-id="${i}">Restore</button></div>`).join('')}`),
+ rollback:el=>{const h=S.landing.history[+el.dataset.id];const hist=S.landing.history;S.landing=Object.assign(JSON.parse(JSON.stringify(h.snap)),{history:hist});audit('Landing page restored',h.at);save();closeLayer();toast('↺ Restored. Publish to make it live again.');rerender()},
+ tpl:el=>{window._tk=el.dataset.v;rerender()},
+ testMail:()=>{const k=window._tk||'welcome';mail(S,owner().email,k,{name:owner().name,order:'LL-2026-000999',amount:'MVR 75',points:50,pct:S.settings.welcome.pct,days:S.settings.welcome.days,earned:75,reason:'Sample reason',title:'Sample resource',version:2,note:'Sample change'});save();toast('📧 Test sent to '+esc(owner().email));rerender()},
+ restampAll:()=>restampAll(),
+ editBank:()=>{const b=S.settings.bank;modal(`<h2>🏦 Change bank details</h2><div class="warnbox">Customers transfer money to this account. Double-check every digit.</div><label class="f">Bank</label><input class="inp" id="bb" value="${esc(b.bank)}"><label class="f">Account name</label><input class="inp" id="bn" value="${esc(b.name)}"><label class="f">Account number</label><input class="inp" id="bno" value="${esc(b.number)}"><label class="f">Type the account number again</label><input class="inp" id="bno2" autocomplete="off"><div class="flex mt"><button class="btn" data-a="saveBank">🔐 Confirm with Google & save</button><button class="btn ghost" data-a="close">Cancel</button></div>`)},
+ saveBank:()=>{if($('#bno').value.replace(/\s/g,'')!==$('#bno2').value.replace(/\s/g,''))return toast('⛔ Account numbers don’t match');Object.assign(S.settings.bank,{bank:$('#bb').value,name:$('#bn').value,number:$('#bno').value});S.settings.admins.forEach(e=>S.outbox.unshift({id:tok(),to:e,subject:'Security alert: bank details changed',body:'The bank account shown at checkout was changed by '+me().name+'. If this wasn’t you, sign in and change it back immediately.',at:new Date().toLocaleString('en-GB')}));audit('Bank details changed','Account ending '+$('#bno').value.slice(-4));save();closeLayer();toast('🏦 Saved · all admins notified');rerender()},
+ gtog:el=>{toast('Google sign-in is the only login method in this release, so it stays on.')},
+ addAdmin:()=>{const e=$('#nadmin').value.trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e))return toast('Enter a valid Google email');if(S.settings.admins.includes(e))return;confirmBox('Add admin?',esc(e)+' will have full access to the backend.','Add admin',()=>{S.settings.admins.push(e);audit('Admin added',e);save();rerender()})},
+ delAdmin:el=>{const e=S.settings.admins[+el.dataset.id];confirmBox('Remove admin?',esc(e)+' will lose access.','Remove',()=>{S.settings.admins.splice(+el.dataset.id,1);audit('Admin removed',e);save();rerender()},true)},
+ exportJson:()=>{const data={exported:new Date().toISOString(),state:Object.assign({},S,{queue:[],session:null}),images:IMG};download('lessonlagoon-backup-'+today()+'.json',JSON.stringify(data),'application/json');audit('Backup exported','')},
+ importJson:()=>$('#fjson').click(),
+ resetAll:()=>confirmBox('Reset everything?','All changes in this browser are cleared and the sample store is reloaded.','Reset',()=>{localStorage.removeItem(KEY);DB.clear();S=fresh();S.queue=[];S.session=owner().id;FILES={};save();route();toast('↺ Demo reset')},true)};
+function openMail(id,orderNo){const e=S.outbox.find(x=>x.id===id);const o=orderNo?S.orders.find(x=>x.no===orderNo):e.orderNo?S.orders.find(x=>x.no===e.orderNo):null;
+  modal(`<div class="gm"><div class="hd"><h3>${esc(e.subject)}</h3><b>${esc(S.settings.store)}</b> &lt;noreply@${esc(S.settings.store.toLowerCase())}.mv&gt; to ${esc(e.to)} · ${e.at}</div><div class="bd">${esc(e.body).replace('[APPROVE]  [REJECT]','')}${o?`\n<img src="${slipImage(o)}" style="max-width:200px;border:1px solid #ddd;border-radius:6px">\n${o.status==='AWAITING_VERIFICATION'?`<a class="abtn" style="background:#16A34A;cursor:pointer" data-a="approveM" data-id="${o.no}">APPROVE</a><a class="abtn" style="background:#DC2626;cursor:pointer" data-a="rejectM" data-id="${o.no}">REJECT</a>`:'<b>This payment has already been processed.</b>'}`:''}</div></div>`,true)}
+function importJson(t){try{const d=JSON.parse(t);if(!d.state||!d.state.products)throw new Error('Not a LessonLagoon backup');DB.clear();S=d.state;S.queue=[];S.session=owner().id;Object.entries(d.images||{}).forEach(([k,v])=>DB.put(k,v));audit('Backup imported',d.exported||'');save();route();toast('📥 Backup restored')}catch(e){toast('⛔ '+esc(e.message))}}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;if(el.dataset.a==='bgclose'){if(e.target===el)closeLayer();return}const f=A[el.dataset.a];if(!f)return;if(el.tagName==='A'&&el.getAttribute('href')==='javascript:void 0')e.preventDefault();
+  if(el.type==='checkbox'){f(el,e);return}e.preventDefault&&el.tagName!=='INPUT'&&e.preventDefault();f(el,e)});
+/* drop anywhere + keyboard */
+let dragN=0;const hasFiles=e=>e.dataTransfer&&[...e.dataTransfer.types].includes('Files');
+addEventListener('dragenter',e=>{if(!me()||!hasFiles(e))return;dragN++;$('#dropall').classList.add('on')});
+addEventListener('dragleave',e=>{if(!hasFiles(e))return;dragN=Math.max(0,dragN-1);if(!dragN)$('#dropall').classList.remove('on')});
+addEventListener('dragover',e=>{if(hasFiles(e))e.preventDefault()});
+addEventListener('drop',e=>{if(!hasFiles(e))return;e.preventDefault();dragN=0;$('#dropall').classList.remove('on');if(me())enqueue(e.dataTransfer.files)});
+addEventListener('paste',e=>{if(!me())return;const fs=[...(e.clipboardData||{}).files||[]].filter(f=>ALLOWED.includes(f.name.split('.').pop().toLowerCase()));if(fs.length)enqueue(fs)});
+addEventListener('keydown',e=>{if(!me())return;const tag=(e.target.tagName||'').toLowerCase();if(['input','textarea','select'].includes(tag))return;if(e.key==='Escape')closeLayer();if(e.key==='u'||e.key==='U'){e.preventDefault();$('#fpick').click()}if(e.key==='/'){e.preventDefault();const g=$('#gsq');g&&g.focus()}});
+addEventListener('beforeunload',e=>{if(S&&S.queue.some(q=>q.state==='ready'||q.state==='processing'||q.state==='queued')){e.preventDefault();e.returnValue=''}});
+addEventListener('hashchange',()=>{closeLayer();route()});
+setInterval(()=>document.querySelectorAll('[data-cd]').forEach(el=>{const t=+el.dataset.cd-Date.now();el.textContent=t>0?fmtDur(t):'ended'}),30000);
+/* boot */
+(async()=>{load();await DB.open();IMG=Object.assign(await DB.all(),IMG);if(!location.hash)location.hash='#/dash';route()})();
+</script>
+</body>
+</html>
