@@ -4,6 +4,8 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut as firebaseSignOut,
   type Auth,
   type User as FirebaseUser,
@@ -53,7 +55,7 @@ export function getFirebaseAuth(): Auth | null {
 }
 
 /**
- * Sign in using Firebase Google popup (called in browser only)
+ * Sign in using Firebase Google popup with automatic redirect fallback (called in browser only)
  */
 export async function signInWithGoogle(): Promise<FirebaseUser | null> {
   if (typeof window === 'undefined') return null;
@@ -68,8 +70,34 @@ export async function signInWithGoogle(): Promise<FirebaseUser | null> {
     prompt: 'select_account',
   });
 
-  const userCredential = await signInWithPopup(authInstance, provider);
-  return userCredential.user;
+  try {
+    const userCredential = await signInWithPopup(authInstance, provider);
+    return userCredential.user;
+  } catch (err: any) {
+    if (err?.code === 'auth/popup-blocked') {
+      console.info('Google popup was blocked by browser. Falling back to redirect sign-in.');
+      await signInWithRedirect(authInstance, provider);
+      return null;
+    }
+    throw err;
+  }
+}
+
+/**
+ * Check if a user just signed in via redirect (called on client mount)
+ */
+export async function checkRedirectSignIn(): Promise<FirebaseUser | null> {
+  if (typeof window === 'undefined') return null;
+  const authInstance = getFirebaseAuth();
+  if (!authInstance) return null;
+
+  try {
+    const result = await getRedirectResult(authInstance);
+    return result ? result.user : null;
+  } catch (err) {
+    console.warn('Firebase redirect sign-in check:', err);
+    return null;
+  }
 }
 
 /**

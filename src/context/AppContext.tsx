@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSession, signOut as nextAuthSignOut } from 'next-auth/react';
+import { checkRedirectSignIn } from '@/lib/firebase';
 import {
   Product,
   User,
@@ -145,6 +146,48 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       });
     }
   }, [session]);
+
+  // Check if returning from Firebase Google Redirect
+  useEffect(() => {
+    checkRedirectSignIn()
+      .then(async (fbUser) => {
+        if (fbUser && fbUser.email) {
+          const res = await fetch('/api/auth/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: fbUser.email,
+              name: fbUser.displayName,
+              image: fbUser.photoURL,
+            }),
+          });
+          const data = await res.json();
+          if (data.user) {
+            setUser({
+              id: data.user.id,
+              name: data.user.name,
+              email: data.user.email,
+              role: data.user.role,
+              points: data.user.points ?? 50,
+              pending: 0,
+              held: 0,
+              code: data.user.referralCode,
+              joined: new Date().toISOString().slice(0, 10),
+              source: 'Google OAuth Redirect',
+              consent: true,
+              paid: false,
+              welcome: {
+                status: 'active',
+                pct: 20,
+                expires: Date.now() + 7 * 86400000,
+              },
+            });
+            showToast(`Welcome, ${data.user.name || data.user.email}!`, 'success');
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Load saved state from localStorage if available
   useEffect(() => {
