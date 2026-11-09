@@ -51,7 +51,7 @@ describe('Pricing Service (P1-CHK-05, P1-CHK-06, P1-PTS-03, P1-PRN-05)', () => {
     expect(result.subtotal).toBe(10000);
     expect(result.discountTotal).toBe(0);
     expect(result.totalCash).toBe(10000);
-    expect(result.pointsToEarn).toBe(100); // 1 pt per 1 MVR paid in cash
+    expect(result.pointsToEarn).toBe(1000); // 10 pts per 1 MVR paid in cash (1 MVR = 10 points)
   });
 
   it('applies campaign discount correctly', () => {
@@ -75,7 +75,7 @@ describe('Pricing Service (P1-CHK-05, P1-CHK-06, P1-PTS-03, P1-PRN-05)', () => {
     expect(result.subtotal).toBe(10000);
     expect(result.discountTotal).toBe(1500); // 15% of 10000
     expect(result.totalCash).toBe(8500); // MVR 85.00
-    expect(result.pointsToEarn).toBe(85 * 2); // 85 MVR * 2x campaign multiplier = 170 pts
+    expect(result.pointsToEarn).toBe(85 * 10 * 2); // 85 MVR * 10 pts * 2x campaign multiplier = 1700 pts
   });
 
   it('respects minimum price floor and never sells below min price (P1-CAT-04)', () => {

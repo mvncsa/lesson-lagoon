@@ -260,12 +260,12 @@ export function calculateOrderPricing(
   const totalCash = totalDigitalCash + totalPrintCost + deliveryFee;
 
   // 5. Points to earn:
-  // 1 point per MVR 1 paid in cash (digital + print; NOT delivery)
+  // 1 MVR spent = 10 points earned (1 MVR is equal to 10 points)
   // Campaign multiplier applies if active!
   const eligibleCashEarn = totalDigitalCash + totalPrintCost;
   const cashInMVR = Math.floor(eligibleCashEarn / LAARI_PER_MVR);
   const multiplier = options.activeCampaign?.active ? (options.activeCampaign.mult || 1) : 1;
-  const pointsToEarn = cashInMVR * multiplier;
+  const pointsToEarn = cashInMVR * 10 * multiplier;
 
   return {
     items: calculatedItems,

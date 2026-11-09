@@ -28,6 +28,8 @@ import {
   Trash2,
   LogOut,
   Lock,
+  Menu,
+  X,
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -39,6 +41,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [loginError, setLoginError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile drawer on route navigation
+  React.useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   // Secure admin check
   const isAdmin = user && user.role === 'ADMIN';
@@ -235,17 +243,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex flex-col min-h-screen bg-bg">
       {/* Admin Top Bar */}
-      <header className="sticky top-0 z-40 bg-white border-b border-line px-4 sm:px-6 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2 font-black text-ink text-base tracking-tight">
+      <header className="sticky top-0 z-40 bg-white border-b border-line px-3 sm:px-6 h-14 flex items-center justify-between">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Mobile Hamburger Toggle */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 -ml-1 rounded-xl text-ink hover:bg-slate-100 transition flex items-center justify-center cursor-pointer"
+            aria-label={mobileMenuOpen ? 'Close admin navigation' : 'Open admin navigation'}
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5 text-ink" /> : <Menu className="w-5 h-5 text-ink" />}
+          </button>
+
+          <Link href="/" className="flex items-center gap-2 font-black text-ink text-sm sm:text-base tracking-tight">
             <span>🏝️</span>
             <span>LessonLagoon</span>
             <span className="badge b-wait text-[10px] font-extrabold">ADMIN</span>
           </Link>
 
-          <span className="text-slate-300">|</span>
+          <span className="text-slate-300 hidden sm:inline">|</span>
 
-          <Link href="/" className="text-xs text-mut hover:text-pri flex items-center gap-1 font-semibold">
+          <Link href="/" className="text-xs text-mut hover:text-pri hidden sm:flex items-center gap-1 font-semibold">
             <ArrowLeft className="w-3.5 h-3.5" /> View Storefront
           </Link>
         </div>
@@ -278,6 +295,115 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </div>
       </header>
+
+      {/* Mobile Slide-Out Hamburger Menu Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          {/* Backdrop overlay */}
+          <div
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 bg-ink/60 backdrop-blur-xs transition-opacity animate-in fade-in"
+          />
+
+          {/* Drawer content */}
+          <div className="relative w-72 max-w-[85vw] bg-ink text-slate-300 h-full overflow-y-auto p-4 flex flex-col justify-between shadow-2xl z-10 animate-in slide-in-from-left duration-200">
+            <div className="space-y-4">
+              {/* Drawer header */}
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2 font-black text-white text-base">
+                  <span>🏝️</span>
+                  <span>LessonLagoon</span>
+                  <span className="badge b-wait text-[9px]">ADMIN</span>
+                </div>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+                  aria-label="Close menu"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Quick upload button */}
+              <Link
+                href="/admin/upload"
+                onClick={() => setMobileMenuOpen(false)}
+                className="btn acc sm block w-full text-center font-bold text-xs shadow-xs"
+              >
+                ⬆️ Upload Resources (U)
+              </Link>
+
+              {/* Navigation sections */}
+              <div className="space-y-4 text-xs font-medium">
+                {navSections.map((sec) => (
+                  <div key={sec.title} className="space-y-1">
+                    <span className="block px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      {sec.title}
+                    </span>
+                    {sec.items.map((item) => {
+                      const isActive = pathname === item.href;
+                      const Icon = item.icon;
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex items-center justify-between px-3 py-2 rounded-xl transition ${
+                            isActive
+                              ? 'bg-white/20 text-white font-bold'
+                              : 'hover:bg-white/10 hover:text-white'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <Icon className="w-3.5 h-3.5" />
+                            <span>{item.label}</span>
+                          </div>
+                          {item.badge ? (
+                            <span className="badge b-off text-[10px] py-0 px-1.5">
+                              {item.badge}
+                            </span>
+                          ) : null}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom actions in drawer */}
+            <div className="pt-4 border-t border-white/10 space-y-2 text-xs">
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 text-slate-300 hover:text-white font-semibold py-2 px-3 rounded-lg hover:bg-white/10 transition"
+              >
+                <ArrowLeft className="w-4 h-4" /> View Storefront
+              </Link>
+
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setShowClearConfirm(true);
+                }}
+                className="w-full flex items-center gap-2 text-amber-400 hover:text-amber-300 font-semibold py-2 px-3 rounded-lg hover:bg-white/10 transition text-left cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4" /> Clear Test Data
+              </button>
+
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleAdminLogout();
+                }}
+                className="w-full flex items-center gap-2 text-rose-400 hover:text-rose-300 font-semibold py-2 px-3 rounded-lg hover:bg-white/10 transition text-left cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" /> Log Out Admin
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Confirmation Modal: Clear Test Data */}
       {showClearConfirm && (

@@ -13,12 +13,7 @@ export default function AdminPointsAnalyticsPage() {
   const outstandingPoints = totalPointsIssued - totalPointsRedeemed;
   const outstandingLiabilityLaari = (outstandingPoints / 10) * 100; // 10 pts = 1 MVR
 
-  const topReferrers = [
-    { name: 'Mariyam Shifa', code: 'MARIYAM25', referrals: 14, earnedPts: 1400 },
-    { name: 'Aminath Rifa', code: 'RIFA88', referrals: 9, earnedPts: 900 },
-    { name: 'Ahmed Rasheed', code: 'AHMED7K', referrals: 4, earnedPts: 400 },
-    { name: 'Fathimath Zeena', code: 'ZEENA4Q', referrals: 3, earnedPts: 300 },
-  ];
+  const topReferrers: { name: string; code: string; referrals: number; earnedPts: number }[] = [];
 
   return (
     <div className="space-y-8">
@@ -78,21 +73,35 @@ export default function AdminPointsAnalyticsPage() {
             </tr>
           </thead>
           <tbody>
-            {topReferrers.map((ref, idx) => (
-              <tr key={ref.code}>
-                <td className="font-bold text-ink">
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold">
-                      {idx + 1}
-                    </span>
-                    <span>{ref.name}</span>
+            {topReferrers.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="text-center py-10 text-mut">
+                  <div className="max-w-xs mx-auto space-y-1.5">
+                    <span className="text-2xl block">🪙</span>
+                    <b className="text-ink font-bold block text-xs">No active referrals recorded yet</b>
+                    <p className="text-[11px] text-mut">
+                      When teachers share their personal referral link with colleagues, top ambassadors will appear on this leaderboard (+100 pts per verified buyer; 1 MVR = 10 pts).
+                    </p>
                   </div>
                 </td>
-                <td className="font-mono text-slate-700">{ref.code}</td>
-                <td className="font-semibold text-ink">{ref.referrals} teachers</td>
-                <td className="text-right font-extrabold text-ok">+{ref.earnedPts} pts</td>
               </tr>
-            ))}
+            ) : (
+              topReferrers.map((ref, idx) => (
+                <tr key={ref.code}>
+                  <td className="font-bold text-ink">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold">
+                        {idx + 1}
+                      </span>
+                      <span>{ref.name}</span>
+                    </div>
+                  </td>
+                  <td className="font-mono text-slate-700">{ref.code}</td>
+                  <td className="font-semibold text-ink">{ref.referrals} teachers</td>
+                  <td className="text-right font-extrabold text-ok">+{ref.earnedPts} pts</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

@@ -119,53 +119,67 @@ export default function AdminCustomersPage() {
             </tr>
           </thead>
           <tbody>
-            {filteredCustomers.map((c) => (
-              <tr key={c.id}>
-                <td className="font-bold text-ink">
-                  <div className="flex items-center gap-2.5">
-                    <div
-                      className="w-8 h-8 rounded-full text-white font-bold flex items-center justify-center text-xs"
-                      style={{ background: c.color || '#0E8C7F' }}
-                    >
-                      {c.name.charAt(0)}
-                    </div>
-                    <div>
-                      <span className="block">{c.name}</span>
-                      <span className="text-[11px] text-mut font-normal">{c.email}</span>
-                    </div>
+            {filteredCustomers.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="text-center py-12 text-mut">
+                  <div className="max-w-xs mx-auto space-y-2">
+                    <span className="text-3xl block">👥</span>
+                    <b className="text-ink font-bold block text-sm">No customers registered yet</b>
+                    <p className="text-xs text-mut">
+                      When teachers sign in with Gmail or place an order, their profiles and loyalty balances (1 MVR = 10 pts) will appear here.
+                    </p>
                   </div>
                 </td>
-                <td className="font-mono font-bold text-slate-700">{c.code}</td>
-                <td className="font-extrabold text-ink">{c.points} pts</td>
-                <td className="text-mut">{c.joined}</td>
-                <td>
-                  {c.consent ? (
-                    <span className="badge b-free text-[10px]">Consented ✓</span>
-                  ) : (
-                    <span className="badge b-grey text-[10px]">No Consent</span>
-                  )}
-                </td>
-                <td>
-                  {c.tags && c.tags.length > 0 ? (
-                    <div className="flex gap-1 flex-wrap">
-                      {c.tags.map((t) => (
-                        <span key={t} className="badge b-type text-[9px]">{t}</span>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="text-slate-400">—</span>
-                  )}
-                </td>
-                <td className="text-right">
-                  <button
-                    onClick={() => setSelectedUser(c)}
-                    className="btn xs ghost"
-                  >
-                    Manage
-                  </button>
-                </td>
               </tr>
-            ))}
+            ) : (
+              filteredCustomers.map((c) => (
+                <tr key={c.id}>
+                  <td className="font-bold text-ink">
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className="w-8 h-8 rounded-full text-white font-bold flex items-center justify-center text-xs"
+                        style={{ background: c.color || '#0E8C7F' }}
+                      >
+                        {c.name.charAt(0)}
+                      </div>
+                      <div>
+                        <span className="block">{c.name}</span>
+                        <span className="text-[11px] text-mut font-normal">{c.email}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="font-mono font-bold text-slate-700">{c.code}</td>
+                  <td className="font-extrabold text-ink">{c.points} pts</td>
+                  <td className="text-mut">{c.joined}</td>
+                  <td>
+                    {c.consent ? (
+                      <span className="badge b-free text-[10px]">Consented ✓</span>
+                    ) : (
+                      <span className="badge b-grey text-[10px]">No Consent</span>
+                    )}
+                  </td>
+                  <td>
+                    {c.tags && c.tags.length > 0 ? (
+                      <div className="flex gap-1 flex-wrap">
+                        {c.tags.map((t) => (
+                          <span key={t} className="badge b-type text-[9px]">{t}</span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
+                  </td>
+                  <td className="text-right">
+                    <button
+                      onClick={() => setSelectedUser(c)}
+                      className="btn xs ghost"
+                    >
+                      Manage
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

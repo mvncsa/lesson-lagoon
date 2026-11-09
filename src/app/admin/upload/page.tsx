@@ -167,11 +167,12 @@ export default function UploadPage() {
       {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight">
-            Upload Teaching Resources
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-ink tracking-tight flex items-center gap-2">
+            <span>Upload Teaching Resources</span>
+            <span className="badge b-free text-[10px] font-bold">Admin Only</span>
           </h1>
           <p className="text-xs text-mut mt-0.5">
-            Bulk file upload · Title, Grade & Subject detection · Watermarked thumbnails (Deterministic, No AI)
+            Add new worksheets, slide decks, and exam packs to sell online across the Maldives.
           </p>
         </div>
 
@@ -180,6 +181,45 @@ export default function UploadPage() {
             Publish All Ready ({queue.length})
           </button>
         )}
+      </div>
+
+      {/* 3-Step Guided Instruction Bar */}
+      <div className="bg-white rounded-3xl p-5 border border-line shadow-xs grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-xl bg-teal-50 text-pri font-black flex items-center justify-center text-sm flex-none">
+            1
+          </div>
+          <div>
+            <b className="text-ink font-bold block">1. Drop Your Master File</b>
+            <p className="text-mut text-[11px] leading-tight mt-0.5">
+              Upload PDF, DOCX, or PPTX (max 10MB). LessonLagoon extracts page count & builds watermarked previews.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-xl bg-teal-50 text-pri font-black flex items-center justify-center text-sm flex-none">
+            2
+          </div>
+          <div>
+            <b className="text-ink font-bold block">2. Review Title, Grade & Price</b>
+            <p className="text-mut text-[11px] leading-tight mt-0.5">
+              Check auto-detected grade and curriculum. Set digital price in MVR (or MVR 0 for Free sample).
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 rounded-xl bg-teal-50 text-pri font-black flex items-center justify-center text-sm flex-none">
+            3
+          </div>
+          <div>
+            <b className="text-ink font-bold block">3. Publish to Storefront</b>
+            <p className="text-mut text-[11px] leading-tight mt-0.5">
+              Hit "Publish Resource" to immediately sell it online to teachers across the Maldives.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Real Drop Zone with File Browser (P1-UPL-01) */}

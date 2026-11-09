@@ -96,7 +96,7 @@ const AppContext = createContext<AppContextType | null>(null);
 const STORAGE_KEY = 'lessonlagoon_state_v1';
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => INITIAL_USERS.find((u) => u.id === 'u1') || INITIAL_USERS[0] || null); // Mariyam Shifa by default
+  const [user, setUser] = useState<User | null>(null); // Clean guest state by default; no dummy customer
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [categories] = useState<Category[]>(INITIAL_CATEGORIES);
   const [campaigns] = useState<Campaign[]>(INITIAL_CAMPAIGNS);
@@ -183,33 +183,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   ) || null;
 
   const signIn = (email: string, marketingConsent = false) => {
-    let existing = INITIAL_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (!existing) {
-      existing = {
-        id: 'u_' + Math.random().toString(36).slice(2, 7),
-        name: email.split('@')[0].replace('.', ' '),
-        email,
-        role: 'CUSTOMER',
-        points: 50, // Sign up bonus (P1-AUTH-05)
-        pending: 0,
-        held: 0,
-        code: email.slice(0, 5).toUpperCase() + Math.floor(Math.random() * 90 + 10),
-        joined: new Date().toISOString().slice(0, 10),
-        source: 'Google sign-in',
-        consent: marketingConsent,
-        paid: false,
-        welcome: {
-          status: 'active',
-          pct: 20,
-          expires: Date.now() + 7 * 86400000,
-        },
-      };
-      showToast('🎉 Welcome to LessonLagoon! +50 sign-up points added.');
-    } else {
-      showToast(`Welcome back, ${existing.name}!`);
-    }
-    setUser(existing);
+    const cleanEmail = email.trim().toLowerCase();
+    const isAdminEmail = cleanEmail.includes('owner@lessonlagoon.mv') || cleanEmail.includes('mvncsa@gmail.com');
+    const newUser: User = {
+      id: 'u_' + Math.random().toString(36).slice(2, 7),
+      name: cleanEmail.split('@')[0].replace('.', ' '),
+      email: cleanEmail,
+      role: isAdminEmail ? 'ADMIN' : 'CUSTOMER',
+      points: 50, // 50 sign-up bonus points (1 MVR = 10 pts)
+      pending: 0,
+      held: 0,
+      code: cleanEmail.slice(0, 5).toUpperCase() + Math.floor(Math.random() * 90 + 10),
+      joined: new Date().toISOString().slice(0, 10),
+      source: 'Gmail / Direct',
+      consent: marketingConsent,
+      paid: false,
+      welcome: {
+        status: 'active',
+        pct: 20,
+        expires: Date.now() + 7 * 86400000,
+      },
+    };
+    setUser(newUser);
     setIsSignInModalOpen(false);
+    showToast(`🎉 Signed in as ${newUser.email}! +50 welcome points added.`, 'success');
   };
 
   const signOut = () => {
@@ -223,10 +220,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const switchUserRole = (role: 'guest' | 'customer' | 'admin') => {
     if (role === 'guest') {
       setUser(null);
-      showToast('Signed out');
-    } else if (role === 'customer') {
-      setUser(INITIAL_USERS.find((u) => u.id === 'u1') || INITIAL_USERS[0] || null); // Mariyam Shifa
-      showToast('Switched to Customer: Mariyam Shifa');
+      showToast('Signed out (Guest mode)');
+    } else if (role === 'admin') {
+      setUser({
+        id: 'admin_owner',
+        name: 'Store Administrator',
+        email: 'owner@lessonlagoon.mv',
+        role: 'ADMIN',
+        points: 0,
+        pending: 0,
+        held: 0,
+        code: 'ADMIN',
+        joined: new Date().toISOString().slice(0, 10),
+        source: 'Admin Portal',
+        consent: true,
+        paid: true,
+      });
+      showToast('Switched to Administrator');
     }
   };
 

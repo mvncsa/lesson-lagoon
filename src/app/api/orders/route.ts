@@ -55,10 +55,27 @@ export async function POST(request: Request) {
       deliveryDetails,
     } = body;
 
+    let targetUserId = userId;
+    if (!targetUserId) {
+      const defaultUser = await prisma.user.findFirst();
+      if (defaultUser) {
+        targetUserId = defaultUser.id;
+      } else {
+        const guest = await prisma.user.create({
+          data: {
+            email: 'customer@lessonlagoon.mv',
+            name: 'Guest Customer',
+            role: 'CUSTOMER',
+          },
+        });
+        targetUserId = guest.id;
+      }
+    }
+
     const order = await prisma.order.create({
       data: {
         no,
-        userId: userId || 'u1',
+        userId: targetUserId,
         subtotal: BigInt(subtotal || 0),
         discount: BigInt(discount || 0),
         pointsUsed: pointsUsed || 0,

@@ -11,6 +11,7 @@ export function SignInModal() {
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [inputEmail, setInputEmail] = useState('');
 
   if (!isSignInModalOpen) return null;
 
@@ -43,7 +44,7 @@ export function SignInModal() {
             name: data.user.name,
             email: data.user.email,
             role: data.user.role,
-            points: data.user.points,
+            points: data.user.points ?? 50,
             pending: 0,
             held: 0,
             code: data.user.referralCode,
@@ -63,9 +64,9 @@ export function SignInModal() {
         }
       }
     } catch (fbErr: any) {
-      console.warn('Firebase Google Auth encountered:', fbErr);
+      console.warn('Firebase Google Auth notice:', fbErr);
       if (fbErr?.code === 'auth/popup-closed-by-user') {
-        // User closed the popup, no need to error
+        // User closed popup
       } else {
         // Fallback to NextAuth Google OAuth redirect if needed
         try {
@@ -73,7 +74,7 @@ export function SignInModal() {
             callbackUrl: window.location.href,
           });
         } catch (err) {
-          showToast('Could not complete Google sign-in. Please try again.', 'error');
+          showToast('Could not complete Google sign-in. You may also enter your Gmail address below.', 'info');
         }
       }
     } finally {
@@ -81,12 +82,57 @@ export function SignInModal() {
     }
   };
 
-  const handleSimulate = (email: string) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!termsAgreed) {
       alert('Please agree to the Terms of Service to proceed.');
       return;
     }
-    signIn(email, marketingConsent);
+    if (!inputEmail.trim()) return;
+
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/auth/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: inputEmail.trim(),
+          name: inputEmail.split('@')[0].replace('.', ' '),
+          marketingConsent,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.user) {
+        setUser({
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          role: data.user.role,
+          points: data.user.points ?? 50,
+          pending: 0,
+          held: 0,
+          code: data.user.referralCode,
+          joined: new Date().toISOString().slice(0, 10),
+          source: 'Gmail / Direct',
+          consent: marketingConsent,
+          paid: false,
+          welcome: {
+            status: 'active',
+            pct: 20,
+            expires: Date.now() + 7 * 86400000,
+          },
+        });
+        showToast(`🎉 Welcome to LessonLagoon, ${data.user.name || data.user.email}!`, 'success');
+        setIsSignInModalOpen(false);
+        return;
+      }
+    } catch (err) {
+      // Local fallback in case server offline
+      signIn(inputEmail.trim(), marketingConsent);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -139,50 +185,39 @@ export function SignInModal() {
           </button>
         </div>
 
-        {/* Divider for local dev quick-test */}
+        {/* Divider for direct Gmail entry */}
         <div className="relative mb-5 text-center">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-slate-200"></div>
           </div>
           <span className="relative bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Or quick-test persona (offline dev)
+            Or sign in with Gmail / Email
           </span>
         </div>
 
-        {/* Quick test accounts */}
-        <div className="space-y-2 mb-5">
+        {/* Real Direct Gmail / Email Login */}
+        <form onSubmit={handleEmailSubmit} className="space-y-3 mb-5">
+          <div>
+            <label className="text-[11px] font-bold text-slate-600 block mb-1">
+              Your Gmail or Email Address
+            </label>
+            <input
+              type="email"
+              required
+              value={inputEmail}
+              onChange={(e) => setInputEmail(e.target.value)}
+              placeholder="e.g. teacher@gmail.com"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-pri focus:border-pri outline-none transition font-medium"
+            />
+          </div>
           <button
-            onClick={() => handleSimulate('mariyam.shifa@gmail.com')}
-            className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-pri hover:bg-teal-50/40 text-left transition group"
+            type="submit"
+            disabled={isLoading || !inputEmail.trim()}
+            className="w-full py-2.5 px-4 rounded-xl bg-ink hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition active:scale-[0.98] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
           >
-            <div className="w-8 h-8 rounded-full bg-acc text-white font-bold flex items-center justify-center text-xs flex-none">
-              M
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-ink group-hover:text-pri">Mariyam Shifa (Customer)</p>
-              <p className="text-[11px] text-mut truncate">mariyam.shifa@gmail.com</p>
-            </div>
-            <span className="text-xs font-semibold text-pri opacity-0 group-hover:opacity-100 transition">
-              Select →
-            </span>
+            <span>{isLoading ? 'Verifying...' : 'Sign In with Gmail / Email →'}</span>
           </button>
-
-          <button
-            onClick={() => handleSimulate('ahmed.rasheed.mv@gmail.com')}
-            className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-pri hover:bg-teal-50/40 text-left transition group"
-          >
-            <div className="w-8 h-8 rounded-full bg-sky-600 text-white font-bold flex items-center justify-center text-xs flex-none">
-              A
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-ink group-hover:text-pri">Ahmed Rasheed (Customer)</p>
-              <p className="text-[11px] text-mut truncate">ahmed.rasheed.mv@gmail.com</p>
-            </div>
-            <span className="text-xs font-semibold text-pri opacity-0 group-hover:opacity-100 transition">
-              Select →
-            </span>
-          </button>
-        </div>
+        </form>
 
         {/* Consents & Agreements (P1-AUTH-04) */}
         <div className="space-y-2.5 pt-3 border-t border-line text-xs text-mut">
