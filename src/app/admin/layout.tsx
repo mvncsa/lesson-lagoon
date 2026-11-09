@@ -29,7 +29,35 @@ import {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { orders, reviews, resourceRequests } = useApp();
+  const { user, orders, reviews, resourceRequests, switchUserRole } = useApp();
+
+  // P1-AUTH-07: Admin access requires allowlist / role = ADMIN
+  if (!user || user.role !== 'ADMIN') {
+    return (
+      <div className="min-h-screen bg-bg flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-line shadow-xl text-center">
+          <div className="w-16 h-16 rounded-3xl bg-amber-100 text-amber-700 flex items-center justify-center text-3xl mx-auto mb-4">
+            🔒
+          </div>
+          <h1 className="text-xl font-black text-ink mb-2">Not an admin account</h1>
+          <p className="text-xs text-mut leading-relaxed mb-6">
+            The account ({user?.email || 'Guest'}) does not have administrator access. LessonLagoon admin requires your Google account to be on the verified allowlist.
+          </p>
+          <div className="space-y-2.5">
+            <button
+              onClick={() => switchUserRole('admin')}
+              className="btn acc w-full text-xs font-bold"
+            >
+              Sign In as Shaina Ali (Owner Admin)
+            </button>
+            <Link href="/" className="btn sm w-full block text-xs">
+              Return to Storefront
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const pendingApprovalsCount = orders.filter((o) => o.status === 'AWAITING_VERIFICATION').length;
   const pendingPrintCount = orders.filter((o) => o.deliveryDetails && o.status === 'PAID').length;

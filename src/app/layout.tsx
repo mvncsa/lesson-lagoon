@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { AppProvider } from '@/context/AppContext';
+import { Providers } from '@/components/Providers';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { CartDrawer } from '@/components/CartDrawer';
@@ -29,14 +29,14 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col bg-bg text-ink antialiased selection:bg-pri selection:text-white">
-        <AppProvider>
+        <Providers>
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
           <CartDrawer />
           <SignInModal />
           <ToastContainer />
-        </AppProvider>
+        </Providers>
       </body>
     </html>
   );

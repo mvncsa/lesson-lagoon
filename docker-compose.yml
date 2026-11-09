@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lessonlagoon_app
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://lessonlagoon:lessonlagoon_secret@postgres:5432/lessonlagoon?schema=public
+      - NEXTAUTH_SECRET=lessonlagoon_prod_super_secret_key_2026
+      - NEXTAUTH_URL=http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: lessonlagoon_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lessonlagoon
+      POSTGRES_PASSWORD: lessonlagoon_secret
+      POSTGRES_DB: lessonlagoon
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U lessonlagoon']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: lessonlagoon_mailpit
+    restart: unless-stopped
+    ports:
+      - '1025:1025' # SMTP
+      - '8025:8025' # Web UI
+
+volumes:
+  pgdata:

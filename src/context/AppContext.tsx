@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useSession, signOut as nextAuthSignOut } from 'next-auth/react';
 import {
   Product,
   User,
@@ -108,6 +109,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
+  const { data: session } = useSession();
+
+  // Sync Google NextAuth Session with AppContext
+  useEffect(() => {
+    if (session?.user?.email) {
+      const email = session.user.email;
+      const name = session.user.name || email.split('@')[0];
+      const role = (session.user as any).role || (email.toLowerCase().includes('owner') ? 'ADMIN' : 'CUSTOMER');
+      const points = (session.user as any).points ?? 50;
+      const code = (session.user as any).referralCode || (email.slice(0, 5).toUpperCase() + '25');
+
+      setUser({
+        id: session.user.id || 'u_' + Math.random().toString(36).slice(2, 7),
+        name,
+        email,
+        role: role as 'CUSTOMER' | 'ADMIN',
+        points,
+        pending: 0,
+        held: 0,
+        code,
+        joined: new Date().toISOString().slice(0, 10),
+        source: 'Google OAuth',
+        consent: true,
+        paid: false,
+        welcome: {
+          status: 'active',
+          pct: 20,
+          expires: Date.now() + 7 * 86400000,
+        },
+      });
+    }
+  }, [session]);
+
   // Load saved state from localStorage if available
   useEffect(() => {
     try {
@@ -175,6 +209,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = () => {
+    try {
+      nextAuthSignOut({ redirect: false });
+    } catch {}
     setUser(null);
     showToast('Signed out successfully.');
   };
