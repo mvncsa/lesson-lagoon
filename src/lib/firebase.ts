@@ -29,3 +29,4 @@ if (typeof window !== 'undefined') {
       // Gracefully handle environments where analytics is blocked or unsupported
     });
 }
+
