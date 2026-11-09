@@ -109,3 +109,4 @@ describe('Progressive Profile Rewards (Section 15.8)', () => {
     expect(result.isCompleted).toBe(true);
   });
 });
+
