@@ -1,0 +1,582 @@
+// LessonLagoon Phase 1 - Prisma Schema (PostgreSQL 16)
+// Section 17 Data Model
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Users, Roles & Auth (Auth.js v5 Google Provider)
+// ---------------------------------------------------------------------------
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+model User {
+  id                String       @id @default(cuid())
+  name              String?
+  email             String       @unique
+  emailVerified     DateTime?
+  image             String?
+  role              Role         @default(CUSTOMER)
+  points            Int          @default(50)  // 50 pts sign-up bonus
+  pendingPoints     Int          @default(0)
+  heldPoints        Int          @default(0)
+  referralCode      String       @unique
+  referredById      String?
+  referredBy        User?        @relation("UserReferrals", fields: [referredById], references: [id])
+  referrals         User[]       @relation("UserReferrals")
+
+  // Birthday fields (Section 15.6, P1-BDY-01) - day & month only
+  birthDay          Int?         // 1-31
+  birthMonth        Int?         // 1-12
+  birthdaySetAt     DateTime?
+  birthdayChangedAt DateTime?
+
+  // Progressive profile values (Section 15.8)
+  profileValues     UserProfileValue[]
+
+  marketingConsent  Boolean      @default(false)
+  isBlocked         Boolean      @default(false)
+
+  orders            Order[]
+  entitlements      Entitlement[]
+  reviews           Review[]
+  pointsLedger      PointsLedger[]
+  shareLinks        ShareLink[]
+
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  accounts          Account[]
+  sessions          Session[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ---------------------------------------------------------------------------
+// Catalogue, Taxonomies & Files
+// ---------------------------------------------------------------------------
+
+enum ResourceType {
+  PDF
+  DOCX
+  PPTX
+  EPUB
+  TUTORIAL
+  BUNDLE
+}
+
+enum ProductStatus {
+  Draft
+  Published
+  Archived
+}
+
+model Category {
+  id        String    @id
+  name      String
+  icon      String
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Grade {
+  id        String    @id
+  name      String
+  sort      Int       @default(0)
+
+  @@map("grades")
+}
+
+model Curriculum {
+  id        String    @id
+  name      String
+
+  @@map("curricula")
+}
+
+model Product {
+  id                String          @id @default(cuid())
+  slug              String          @unique
+  title             String
+  shortDesc         String          @db.Text
+  longDesc          String?         @db.Text
+  categoryId        String
+  category          Category        @relation(fields: [categoryId], references: [id])
+  grade             String
+  type              ResourceType    @default(PDF)
+  pages             Int             @default(1)
+  
+  // Money in laari (MVR * 100), BigInt for precision (Section 0)
+  price             BigInt          @default(0)
+  minPrice          BigInt          @default(0)
+  
+  featured          Boolean         @default(false)
+  ratingAvg         Float           @default(5.0)
+  ratingCount       Int             @default(0)
+  salesCount        Int             @default(0)
+  curriculum        String          @default("National Curriculum")
+  color             String          @default("#0E8C7F")
+  icon              String          @default("📄")
+  status            ProductStatus   @default(Draft)
+  version           Int             @default(1)
+  previewPagesCount Int             @default(3)
+
+  printOptions      ProductPrintOption?
+  versions          ProductVersion[]
+  files             ProductFile[]
+  entitlements      Entitlement[]
+  reviews           Review[]
+  orderItems        OrderItem[]
+  similarities      ProductSimilarity[] @relation("ProductSimilarities")
+  relatedTo         ProductSimilarity[] @relation("RelatedProducts")
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@map("products")
+}
+
+model ProductVersion {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  version   Int
+  note      String?
+  fileName  String
+  createdAt DateTime @default(now())
+
+  @@map("product_versions")
+}
+
+model ProductFile {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  fileName  String
+  fileSize  Int
+  fileHash  String?
+  s3Key     String
+  createdAt DateTime @default(now())
+
+  @@map("product_files")
+}
+
+// ---------------------------------------------------------------------------
+// Printed Delivery (Section 10)
+// ---------------------------------------------------------------------------
+
+model ProductPrintOption {
+  id              String   @id @default(cuid())
+  productId       String   @unique
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  enabled         Boolean  @default(false)
+  pricingMode     String   @default("auto") // "fixed" or "auto"
+  fixedPrice      BigInt?
+  allowColour     Boolean  @default(true)
+  allowBw         Boolean  @default(true)
+  bindings        Json     @default("[\"stapled\"]")
+  papers          Json     @default("[\"standard\"]")
+  maxQty          Int      @default(30)
+  productionDays  Int      @default(2)
+
+  @@map("product_print_options")
+}
+
+model PrintRate {
+  key    String @id
+  amount BigInt
+
+  @@map("print_rates")
+}
+
+model DeliveryZone {
+  id       String  @id
+  name     String
+  fee      BigInt
+  etaText  String
+  active   Boolean @default(true)
+  sort     Int     @default(0)
+  freeOver BigInt?
+
+  @@map("delivery_zones")
+}
+
+// ---------------------------------------------------------------------------
+// Orders, Bank Transfer, Approvals (Section 9 & 11)
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  AWAITING_TRANSFER
+  AWAITING_VERIFICATION
+  PAID
+  COMPLETED_FREE
+  PAYMENT_REJECTED
+  CANCELLED
+  EXPIRED
+  REFUNDED
+}
+
+model Order {
+  id              String          @id @default(cuid())
+  no              String          @unique // e.g. "LL-2026-000118"
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  
+  subtotal        BigInt          @default(0)
+  discount        BigInt          @default(0)
+  pointsUsed      Int             @default(0)
+  pointsDiscount  BigInt          @default(0)
+  printTotal      BigInt          @default(0)
+  deliveryFee     BigInt          @default(0)
+  total           BigInt          @default(0)
+
+  status          OrderStatus     @default(AWAITING_TRANSFER)
+  method          String          @default("Bank transfer")
+  earnedPoints    Int             @default(0)
+
+  items           OrderItem[]
+  slip            PaymentSlip?
+  delivery        OrderDelivery?
+  tokens          ApprovalToken?
+  events          OrderEvent[]
+
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String          @id @default(cuid())
+  orderId    String
+  order      Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId  String
+  product    Product         @relation(fields: [productId], references: [id])
+  title      String
+  listPrice  BigInt
+  finalPrice BigInt
+  format     String          @default("digital") // "digital" | "print"
+
+  printItem  OrderPrintItem?
+
+  @@map("order_items")
+}
+
+model OrderPrintItem {
+  id          String    @id @default(cuid())
+  orderItemId String    @unique
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  colour      String    @default("colour")
+  binding     String    @default("stapled")
+  paper       String    @default("standard")
+  qty         Int       @default(1)
+  unitPrice   BigInt
+  lineTotal   BigInt
+
+  @@map("order_print_items")
+}
+
+enum PrintFulfilmentStatus {
+  PRINT_QUEUED
+  PRINTING
+  READY_FOR_PICKUP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+model OrderDelivery {
+  id           String                @id @default(cuid())
+  orderId      String                @unique
+  order        Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  zoneId       String
+  fee          BigInt
+  recipient    String
+  phone        String
+  island       String
+  address      String
+  notes        String?
+  isPickup     Boolean               @default(false)
+  status       PrintFulfilmentStatus @default(PRINT_QUEUED)
+  trackingNote String?
+
+  @@map("order_deliveries")
+}
+
+model PaymentSlip {
+  id              String   @id @default(cuid())
+  orderId         String   @unique
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount          BigInt
+  refNumber       String?
+  senderName      String?
+  transferDate    DateTime?
+  fileUrl         String?
+  fileHash        String?
+  duplicateFlag   Boolean  @default(false)
+  mismatchFlag    Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  @@map("payment_slips")
+}
+
+model ApprovalToken {
+  id         String    @id @default(cuid())
+  orderId    String    @unique
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tokenHash  String    @unique
+  action     String    @default("approve")
+  expiresAt  DateTime
+  usedAt     DateTime?
+
+  @@map("approval_tokens")
+}
+
+model OrderEvent {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  event     String
+  createdAt DateTime @default(now())
+
+  @@map("order_events")
+}
+
+model Entitlement {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@map("entitlements")
+}
+
+// ---------------------------------------------------------------------------
+// Reviews (Section 15.7)
+// ---------------------------------------------------------------------------
+
+enum ReviewStatus {
+  pending
+  approved
+  hidden
+  reported
+}
+
+model Review {
+  id           String       @id @default(cuid())
+  productId    String
+  product      Product      @relation(fields: [productId], references: [id])
+  userId       String?
+  user         User?        @relation(fields: [userId], references: [id])
+  name         String
+  rating       Int          // 1-5, 0 for testimonials
+  title        String?
+  text         String       @db.Text
+  status       ReviewStatus @default(pending)
+  home         Boolean      @default(false)
+  verifiedType String       @default("paid") // "paid" | "free" | "testimonial"
+  helpfulCount Int          @default(0)
+  ownerReply   String?      @db.Text
+  repliedAt    DateTime?
+  tags         Json?
+
+  createdAt    DateTime     @default(now())
+
+  @@map("reviews")
+}
+
+// ---------------------------------------------------------------------------
+// Loyalty Points, Referrals & Shares (Section 15.3, 15.4, 15.5)
+// ---------------------------------------------------------------------------
+
+enum PointsStatus {
+  available
+  pending
+  held
+  spent
+  expired
+  reversed
+}
+
+model PointsLedger {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         String
+  points       Int
+  balanceAfter Int
+  status       PointsStatus @default(available)
+  source       String?
+  releaseAt    DateTime?
+  expiresAt    DateTime?
+  createdAt    DateTime     @default(now())
+
+  @@map("points_ledger")
+}
+
+model ShareLink {
+  id        String   @id @default(cuid())
+  sharerId  String
+  sharer    User     @relation(fields: [sharerId], references: [id])
+  productId String?
+  code      String   @unique
+  channel   String?
+  createdAt DateTime @default(now())
+
+  @@map("share_links")
+}
+
+model UserProfileValue {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fieldKey    String
+  value       Json
+  rewarded    Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, fieldKey])
+  @@map("user_profile_values")
+}
+
+// ---------------------------------------------------------------------------
+// Campaigns, Coupons & Recommender (Section 15.1, 15.2, 15.9)
+// ---------------------------------------------------------------------------
+
+model Campaign {
+  id               String   @id @default(cuid())
+  name             String
+  type             String
+  discountPct      Int
+  scope            String   @default("all")
+  pointsMultiplier Int      @default(1)
+  active           Boolean  @default(true)
+  startAt          DateTime
+  endAt            DateTime
+  accentColor      String   @default("#DB2777")
+  bannerText       String
+
+  @@map("campaigns")
+}
+
+model Coupon {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  discountPct  Int?
+  fixedMvr     Int?
+  usageLimit   Int      @default(100)
+  usageCount   Int      @default(0)
+  expiresAt    DateTime
+  active       Boolean  @default(true)
+  applyToPrint Boolean  @default(false)
+
+  @@map("coupons")
+}
+
+model ProductSimilarity {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation("ProductSimilarities", fields: [productId], references: [id])
+  relatedId  String
+  related    Product  @relation("RelatedProducts", fields: [relatedId], references: [id])
+  score      Float
+  support    Int
+  updatedAt  DateTime @updatedAt
+
+  @@unique([productId, relatedId])
+  @@map("product_similarities")
+}
+
+// ---------------------------------------------------------------------------
+// Requests, Newsletter, Settings & Audit Log
+// ---------------------------------------------------------------------------
+
+model ResourceRequest {
+  id               String   @id @default(cuid())
+  email            String
+  text             String   @db.Text
+  subjectId        String?
+  grade            String?
+  type             String?
+  notify           Boolean  @default(true)
+  marketingConsent Boolean  @default(false)
+  status           String   @default("New")
+  count            Int      @default(1)
+  linkedProductId  String?
+  note             String?
+  createdAt        DateTime @default(now())
+
+  @@map("resource_requests")
+}
+
+model PricingSetting {
+  key          String   @id
+  value        Json
+  defaultValue Json
+  updatedAt    DateTime @updatedAt
+  updatedBy    String?
+
+  @@map("pricing_settings")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  operator  String
+  action    String
+  detail    String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
