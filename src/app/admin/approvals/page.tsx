@@ -112,7 +112,16 @@ export default function ApprovalsQueuePage() {
                     <span className="font-bold text-mut uppercase tracking-wider block">
                       Transfer Slip Info
                     </span>
-                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-1.5">
+                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2">
+                      {o.slip?.url && (
+                        <div className="p-1.5 bg-white rounded-xl border border-line">
+                          <img
+                            src={o.slip.url}
+                            alt="Slip Screenshot"
+                            className="max-h-36 mx-auto rounded-lg object-contain shadow-2xs"
+                          />
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <span className="text-mut">Sender Name:</span>
                         <b className="text-ink">{o.slip?.sender || 'Unknown'}</b>

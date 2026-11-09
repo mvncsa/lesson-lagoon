@@ -3,7 +3,12 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Product } from '@/lib/types';
-import { UploadCloud, CheckCircle2, Sparkles, FileText, Check, AlertCircle } from 'lucide-react';
+import {
+  parseResourceFilename,
+  generateClientThumbnail,
+  validateUploadFileSize,
+} from '@/lib/fileDetection';
+import { UploadCloud, CheckCircle2, FileText, Check, AlertCircle, Image as ImageIcon } from 'lucide-react';
 
 interface QueueItem {
   id: string;
@@ -17,6 +22,8 @@ interface QueueItem {
   min: number;
   status: 'processing' | 'ready' | 'published';
   step: string;
+  thumbnailUrl?: string;
+  fileSize?: string;
 }
 
 export default function UploadPage() {
@@ -35,6 +42,7 @@ export default function UploadPage() {
       min: 1600,
       status: 'ready',
       step: '✓ Converted & watermarked',
+      fileSize: '4.2 MB',
     },
     {
       id: 'q2',
@@ -48,6 +56,7 @@ export default function UploadPage() {
       min: 1100,
       status: 'ready',
       step: '✓ Watermarked WebP previews ready',
+      fileSize: '1.8 MB',
     },
   ]);
 
@@ -87,7 +96,7 @@ export default function UploadPage() {
       rating: 5.0,
       rc: 0,
       color: '#0E8C7F',
-      ic: '📄',
+      ic: q.type === 'PPTX' ? '📊' : q.type === 'DOCX' ? '📝' : '📄',
       status: 'Published',
       sales: 0,
       curr: 'National Curriculum',
@@ -101,22 +110,56 @@ export default function UploadPage() {
     showToast(`🎉 ${newProducts.length} resources published directly to catalogue!`);
   };
 
-  const handleSimulateDrop = () => {
+  const addQueueItem = (
+    fileName: string,
+    fileSizeStr: string,
+    thumbUrl?: string
+  ) => {
+    // Pure deterministic metadata extraction (no AI)
+    const detected = parseResourceFilename(fileName);
+    const defaultPrice = detected.detectedType === 'PPTX' ? 7500 : 5000;
+
     const newQ: QueueItem = {
-      id: 'q_' + Math.random().toString(36).slice(2, 6),
-      name: 'Grade-6-Fractions-Decimals-Worksheet.pdf',
-      title: 'Grade 6 Fractions to Decimals Practice Workbook',
-      cat: 'maths',
-      grade: 'Grade 6',
-      type: 'PDF',
-      pages: 16,
-      price: 6000,
-      min: 1200,
+      id: 'q_' + Math.random().toString(36).slice(2, 7),
+      name: fileName,
+      title: detected.detectedTitle,
+      cat: detected.detectedSubject,
+      grade: detected.detectedGrade,
+      type: detected.detectedType,
+      pages: detected.estimatedPages,
+      price: defaultPrice,
+      min: Math.round(defaultPrice * 0.2),
       status: 'ready',
-      step: '✓ Watermarked WebP previews ready',
+      step: '✓ Watermark preview generated',
+      thumbnailUrl: thumbUrl,
+      fileSize: fileSizeStr,
     };
+
     setQueue((prev) => [newQ, ...prev]);
-    showToast('File analyzed: Auto-detected Grade 6 Maths PDF');
+  };
+
+  const handleFilesChosen = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    for (const file of Array.from(files)) {
+      const validation = validateUploadFileSize(file.size, 50);
+      if (!validation.valid) {
+        showToast(validation.error || 'File too large', 'error');
+        continue;
+      }
+
+      let thumbUrl: string | undefined = undefined;
+      if (file.type.startsWith('image/')) {
+        try {
+          thumbUrl = await generateClientThumbnail(file);
+        } catch {}
+      }
+
+      addQueueItem(file.name, validation.formattedSize, thumbUrl);
+    }
+
+    showToast(`Analyzed and added ${files.length} file(s) with title & grade detection.`);
   };
 
   return (
@@ -128,7 +171,7 @@ export default function UploadPage() {
             Upload Teaching Resources
           </h1>
           <p className="text-xs text-mut mt-0.5">
-            Bulk drag-and-drop · Automatic title & grade detection · Watermark preview generation
+            Bulk file upload · Title, Grade & Subject detection · Watermarked thumbnails (Deterministic, No AI)
           </p>
         </div>
 
@@ -139,22 +182,27 @@ export default function UploadPage() {
         )}
       </div>
 
-      {/* Drop Zone (P1-UPL-01) */}
-      <div
-        onClick={handleSimulateDrop}
-        className="bg-white border-2 border-dashed border-[#B8C2D3] hover:border-pri hover:bg-teal-50/20 rounded-3xl p-10 text-center cursor-pointer transition shadow-xs space-y-2"
-      >
+      {/* Real Drop Zone with File Browser (P1-UPL-01) */}
+      <label className="relative bg-white border-2 border-dashed border-[#B8C2D3] hover:border-pri hover:bg-teal-50/20 rounded-3xl p-10 text-center cursor-pointer transition shadow-xs space-y-2 block">
+        <input
+          type="file"
+          multiple
+          accept=".pdf,.docx,.pptx,image/*"
+          onChange={handleFilesChosen}
+          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+        />
         <UploadCloud className="w-12 h-12 text-pri mx-auto" />
         <h3 className="font-extrabold text-lg text-ink">
           Drop lesson files anywhere or tap to browse
         </h3>
         <p className="text-xs text-mut max-w-sm mx-auto">
-          Supports PDF, Word (.docx), and PowerPoint (.pptx). Upload multiple files simultaneously.
+          Supports PDF, Word (.docx), PowerPoint (.pptx), and images up to 50MB. Auto-detects curriculum level and metadata.
         </p>
-        <span className="badge b-grey text-[10px] mt-2">
-          Pre-signed secure private storage
-        </span>
-      </div>
+        <div className="flex items-center justify-center gap-2 pt-1">
+          <span className="badge b-grey text-[10px]">Deterministic rule-based</span>
+          <span className="badge b-free text-[10px]">Zero AI dependency</span>
+        </div>
+      </label>
 
       {/* "Apply to All" Bar (P1-UPL-05) */}
       {queue.length > 0 && (
@@ -171,7 +219,9 @@ export default function UploadPage() {
               className="inp text-xs py-1 text-ink w-32"
             >
               {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
               ))}
             </select>
           </div>
@@ -183,8 +233,20 @@ export default function UploadPage() {
               onChange={(e) => setApplyGrade(e.target.value)}
               className="inp text-xs py-1 text-ink w-28"
             >
-              {['KG', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8'].map((g) => (
-                <option key={g} value={g}>{g}</option>
+              {[
+                'KG',
+                'Grade 1',
+                'Grade 2',
+                'Grade 3',
+                'Grade 4',
+                'Grade 5',
+                'Grade 6',
+                'Grade 7',
+                'Grade 8',
+              ].map((g) => (
+                <option key={g} value={g}>
+                  {g}
+                </option>
               ))}
             </select>
           </div>
@@ -215,12 +277,33 @@ export default function UploadPage() {
             key={item.id}
             className="bg-white border border-line rounded-3xl p-6 shadow-xs flex flex-col md:flex-row gap-6 items-start"
           >
-            {/* Thumbnail Preview Mock */}
-            <div className="w-full md:w-48 aspect-[4/3] bg-slate-100 rounded-2xl flex flex-col items-center justify-center p-3 border border-line text-center flex-none">
-              <span className="text-3xl mb-1">📄</span>
-              <span className="text-xs font-bold text-ink">{item.type}</span>
-              <span className="text-[10px] text-mut">{item.pages} pages</span>
-              <span className="text-[10px] text-ok font-semibold mt-1">{item.step}</span>
+            {/* Thumbnail Preview Card with Watermark Overlay */}
+            <div className="w-full md:w-48 aspect-[4/3] bg-slate-100 rounded-2xl flex flex-col items-center justify-center p-3 border border-line text-center flex-none relative overflow-hidden group">
+              {item.thumbnailUrl ? (
+                <img
+                  src={item.thumbnailUrl}
+                  alt={item.title}
+                  className="w-full h-full object-cover rounded-xl"
+                />
+              ) : (
+                <>
+                  <div className="w-10 h-10 rounded-xl bg-teal-100 text-pri flex items-center justify-center text-xl mb-1.5">
+                    {item.type === 'PPTX' ? '📊' : item.type === 'DOCX' ? '📝' : '📄'}
+                  </div>
+                  <span className="text-xs font-bold text-ink">{item.type}</span>
+                  <span className="text-[10px] text-mut">{item.pages} pages</span>
+                  {item.fileSize && (
+                    <span className="text-[10px] text-slate-400 font-mono">{item.fileSize}</span>
+                  )}
+                </>
+              )}
+              {/* Watermark badge overlay */}
+              <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-xs text-[9px] font-bold text-white px-1.5 py-0.5 rounded-md">
+                PREVIEW
+              </div>
+              <span className="text-[10px] text-ok font-semibold mt-1 block">
+                {item.step}
+              </span>
             </div>
 
             {/* Editable Fields */}
@@ -232,9 +315,11 @@ export default function UploadPage() {
                   value={item.title}
                   onChange={(e) => {
                     const val = e.target.value;
-                    setQueue((q) => q.map((i) => (i.id === item.id ? { ...i, title: val } : i)));
+                    setQueue((q) =>
+                      q.map((i) => (i.id === item.id ? { ...i, title: val } : i))
+                    );
                   }}
-                  className="inp text-xs"
+                  className="inp text-xs font-medium"
                 />
               </div>
 
@@ -245,12 +330,16 @@ export default function UploadPage() {
                     value={item.cat}
                     onChange={(e) => {
                       const val = e.target.value;
-                      setQueue((q) => q.map((i) => (i.id === item.id ? { ...i, cat: val } : i)));
+                      setQueue((q) =>
+                        q.map((i) => (i.id === item.id ? { ...i, cat: val } : i))
+                      );
                     }}
                     className="inp text-xs py-1.5"
                   >
                     {categories.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -261,12 +350,28 @@ export default function UploadPage() {
                     value={item.grade}
                     onChange={(e) => {
                       const val = e.target.value;
-                      setQueue((q) => q.map((i) => (i.id === item.id ? { ...i, grade: val } : i)));
+                      setQueue((q) =>
+                        q.map((i) => (i.id === item.id ? { ...i, grade: val } : i))
+                      );
                     }}
                     className="inp text-xs py-1.5"
                   >
-                    {['KG', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10'].map((g) => (
-                      <option key={g} value={g}>{g}</option>
+                    {[
+                      'KG',
+                      'Grade 1',
+                      'Grade 2',
+                      'Grade 3',
+                      'Grade 4',
+                      'Grade 5',
+                      'Grade 6',
+                      'Grade 7',
+                      'Grade 8',
+                      'Grade 9',
+                      'Grade 10',
+                    ].map((g) => (
+                      <option key={g} value={g}>
+                        {g}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -278,7 +383,9 @@ export default function UploadPage() {
                     value={item.price / 100}
                     onChange={(e) => {
                       const laari = (parseFloat(e.target.value) || 0) * 100;
-                      setQueue((q) => q.map((i) => (i.id === item.id ? { ...i, price: laari } : i)));
+                      setQueue((q) =>
+                        q.map((i) => (i.id === item.id ? { ...i, price: laari } : i))
+                      );
                     }}
                     className="inp text-xs py-1.5"
                   />
@@ -291,7 +398,9 @@ export default function UploadPage() {
                     value={item.min / 100}
                     onChange={(e) => {
                       const laari = (parseFloat(e.target.value) || 0) * 100;
-                      setQueue((q) => q.map((i) => (i.id === item.id ? { ...i, min: laari } : i)));
+                      setQueue((q) =>
+                        q.map((i) => (i.id === item.id ? { ...i, min: laari } : i))
+                      );
                     }}
                     className="inp text-xs py-1.5"
                   />
@@ -299,11 +408,13 @@ export default function UploadPage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-2 flex items-center justify-between">
-                <span className="text-[11px] text-mut truncate">File: {item.name}</span>
+              <div className="pt-2 flex items-center justify-between border-t border-line/60">
+                <span className="text-[11px] text-mut truncate">
+                  File: <code className="bg-slate-100 px-1 py-0.5 rounded">{item.name}</code>
+                </span>
                 <button
                   onClick={() => setQueue((q) => q.filter((i) => i.id !== item.id))}
-                  className="btn xs ghost text-bad"
+                  className="btn xs ghost text-bad hover:bg-rose-50"
                 >
                   Remove
                 </button>
@@ -315,4 +426,3 @@ export default function UploadPage() {
     </div>
   );
 }
-

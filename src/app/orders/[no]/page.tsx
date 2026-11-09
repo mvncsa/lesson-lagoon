@@ -29,6 +29,8 @@ export default function OrderPage() {
   const [transferRef, setTransferRef] = useState(orderNo || '');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [slipFile, setSlipFile] = useState<File | null>(null);
+  const [slipPreview, setSlipPreview] = useState<string | null>(null);
 
   if (!order) {
     return (
@@ -47,6 +49,26 @@ export default function OrderPage() {
     setTimeout(() => setCopiedKey(null), 2000);
   };
 
+  const handleSlipFileChosen = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('File size exceeds 10MB limit.', 'error');
+        return;
+      }
+      setSlipFile(file);
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          setSlipPreview(ev.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setSlipPreview(null);
+      }
+    }
+  };
+
   const handleSlipSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsUploading(true);
@@ -56,8 +78,10 @@ export default function OrderPage() {
         ref: transferRef,
         sender: senderName || 'Teacher Customer',
         date: new Date().toISOString().slice(0, 10),
+        url: slipPreview || undefined,
       });
       setIsUploading(false);
+      showToast('Slip uploaded! Our team has been notified.', 'success');
     }, 600);
   };
 
@@ -249,10 +273,19 @@ export default function OrderPage() {
             </p>
 
             {order.slip ? (
-              <div className="p-4 bg-teal-50 border border-teal-200 rounded-2xl text-xs space-y-2">
+              <div className="p-4 bg-teal-50 border border-teal-200 rounded-2xl text-xs space-y-3">
                 <div className="flex items-center gap-2 text-pri font-bold">
-                  <CheckCircle className="w-4 h-4" /> Slip Attached
+                  <CheckCircle className="w-4 h-4" /> Slip Attached & In Review
                 </div>
+                {order.slip.url && (
+                  <div className="p-2 bg-white rounded-xl border border-line">
+                    <img
+                      src={order.slip.url}
+                      alt="Uploaded BML Slip"
+                      className="max-h-48 mx-auto rounded-lg object-contain shadow-xs"
+                    />
+                  </div>
+                )}
                 <p className="text-slate-600">
                   Transferred MVR {(order.slip.amount / 100).toFixed(2)} on {order.slip.date} by {order.slip.sender}.
                 </p>
@@ -284,17 +317,44 @@ export default function OrderPage() {
                   />
                 </div>
 
-                {/* Simulated file drop */}
-                <div className="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center bg-slate-50 hover:bg-slate-100 transition cursor-pointer">
-                  <Upload className="w-6 h-6 text-mut mx-auto mb-2" />
-                  <span className="font-bold text-ink block">Tap to select slip image</span>
-                  <span className="text-[11px] text-mut">Camera screenshot or PDF</span>
-                </div>
+                {/* Real file drop with instant thumbnail preview */}
+                <label className="border-2 border-dashed border-slate-300 hover:border-pri rounded-2xl p-5 text-center bg-slate-50 hover:bg-teal-50/20 transition cursor-pointer block relative">
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={handleSlipFileChosen}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  />
+                  {slipPreview ? (
+                    <div className="space-y-2">
+                      <img
+                        src={slipPreview}
+                        alt="Transfer Slip Preview"
+                        className="max-h-40 mx-auto rounded-xl shadow-xs border border-line object-contain"
+                      />
+                      <span className="text-xs font-semibold text-pri block">
+                        ✓ {slipFile?.name} (Click to change file)
+                      </span>
+                    </div>
+                  ) : slipFile ? (
+                    <div className="space-y-1">
+                      <CheckCircle className="w-6 h-6 text-pri mx-auto" />
+                      <span className="font-bold text-ink block">{slipFile.name}</span>
+                      <span className="text-[11px] text-mut">Click to change file</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <Upload className="w-6 h-6 text-mut mx-auto mb-1" />
+                      <span className="font-bold text-ink block">Tap to select slip screenshot</span>
+                      <span className="text-[11px] text-mut">Camera screenshot or PDF (up to 10MB)</span>
+                    </div>
+                  )}
+                </label>
 
                 <button
                   type="submit"
                   disabled={isUploading}
-                  className="btn block w-full py-3 text-sm font-bold shadow-md"
+                  className="btn block w-full py-3 text-sm font-bold shadow-md cursor-pointer disabled:opacity-50"
                 >
                   {isUploading ? 'Uploading slip...' : 'Submit Transfer Slip'}
                 </button>

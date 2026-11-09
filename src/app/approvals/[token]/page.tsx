@@ -115,8 +115,17 @@ export default function EmailApprovalPage() {
 
             {/* Slip Information */}
             {order.slip && (
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                <h4 className="font-bold text-ink">Slip Meta</h4>
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                <h4 className="font-bold text-ink">Slip Meta & Receipt Preview</h4>
+                {order.slip.url && (
+                  <div className="p-2 bg-white rounded-xl border border-line">
+                    <img
+                      src={order.slip.url}
+                      alt="Transfer Receipt Preview"
+                      className="max-h-56 mx-auto rounded-lg object-contain shadow-xs"
+                    />
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-2 text-slate-600">
                   <div>Sender: {order.slip.sender}</div>
                   <div>Slip Date: {order.slip.date}</div>
