@@ -1,12 +1,11 @@
-// LessonLagoon Phase 1 - Prisma Schema (PostgreSQL 16)
-// Section 17 Data Model
+// LessonLagoon Phase 1 - Prisma Schema (SQLite for local/test, easily switchable to PostgreSQL)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -14,19 +13,14 @@ datasource db {
 // Users, Roles & Auth (Auth.js v5 Google Provider)
 // ---------------------------------------------------------------------------
 
-enum Role {
-  CUSTOMER
-  ADMIN
-}
-
 model User {
   id                String       @id @default(cuid())
   name              String?
   email             String       @unique
   emailVerified     DateTime?
   image             String?
-  role              Role         @default(CUSTOMER)
-  points            Int          @default(50)  // 50 pts sign-up bonus
+  role              String       @default("CUSTOMER") // "CUSTOMER" | "ADMIN"
+  points            Int          @default(50)         // 50 pts sign-up bonus
   pendingPoints     Int          @default(0)
   heldPoints        Int          @default(0)
   referralCode      String       @unique
@@ -67,12 +61,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?  @db.Text
-  access_token      String?  @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?  @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -104,21 +98,6 @@ model VerificationToken {
 // Catalogue, Taxonomies & Files
 // ---------------------------------------------------------------------------
 
-enum ResourceType {
-  PDF
-  DOCX
-  PPTX
-  EPUB
-  TUTORIAL
-  BUNDLE
-}
-
-enum ProductStatus {
-  Draft
-  Published
-  Archived
-}
-
 model Category {
   id        String    @id
   name      String
@@ -147,12 +126,12 @@ model Product {
   id                String          @id @default(cuid())
   slug              String          @unique
   title             String
-  shortDesc         String          @db.Text
-  longDesc          String?         @db.Text
+  shortDesc         String
+  longDesc          String?
   categoryId        String
   category          Category        @relation(fields: [categoryId], references: [id])
   grade             String
-  type              ResourceType    @default(PDF)
+  type              String          @default("PDF") // PDF, DOCX, PPTX, EPUB, TUTORIAL
   pages             Int             @default(1)
   
   // Money in laari (MVR * 100), BigInt for precision (Section 0)
@@ -166,7 +145,7 @@ model Product {
   curriculum        String          @default("National Curriculum")
   color             String          @default("#0E8C7F")
   icon              String          @default("📄")
-  status            ProductStatus   @default(Draft)
+  status            String          @default("Draft") // Draft, Published, Archived
   version           Int             @default(1)
   previewPagesCount Int             @default(3)
 
@@ -223,8 +202,8 @@ model ProductPrintOption {
   fixedPrice      BigInt?
   allowColour     Boolean  @default(true)
   allowBw         Boolean  @default(true)
-  bindings        Json     @default("[\"stapled\"]")
-  papers          Json     @default("[\"standard\"]")
+  bindings        String   @default("[\"stapled\"]")
+  papers          String   @default("[\"standard\"]")
   maxQty          Int      @default(30)
   productionDays  Int      @default(2)
 
@@ -254,17 +233,6 @@ model DeliveryZone {
 // Orders, Bank Transfer, Approvals (Section 9 & 11)
 // ---------------------------------------------------------------------------
 
-enum OrderStatus {
-  AWAITING_TRANSFER
-  AWAITING_VERIFICATION
-  PAID
-  COMPLETED_FREE
-  PAYMENT_REJECTED
-  CANCELLED
-  EXPIRED
-  REFUNDED
-}
-
 model Order {
   id              String          @id @default(cuid())
   no              String          @unique // e.g. "LL-2026-000118"
@@ -279,7 +247,7 @@ model Order {
   deliveryFee     BigInt          @default(0)
   total           BigInt          @default(0)
 
-  status          OrderStatus     @default(AWAITING_TRANSFER)
+  status          String          @default("AWAITING_TRANSFER")
   method          String          @default("Bank transfer")
   earnedPoints    Int             @default(0)
 
@@ -325,15 +293,6 @@ model OrderPrintItem {
   @@map("order_print_items")
 }
 
-enum PrintFulfilmentStatus {
-  PRINT_QUEUED
-  PRINTING
-  READY_FOR_PICKUP
-  OUT_FOR_DELIVERY
-  DELIVERED
-  CANCELLED
-}
-
 model OrderDelivery {
   id           String                @id @default(cuid())
   orderId      String                @unique
@@ -346,7 +305,7 @@ model OrderDelivery {
   address      String
   notes        String?
   isPickup     Boolean               @default(false)
-  status       PrintFulfilmentStatus @default(PRINT_QUEUED)
+  status       String                @default("PRINT_QUEUED")
   trackingNote String?
 
   @@map("order_deliveries")
@@ -407,13 +366,6 @@ model Entitlement {
 // Reviews (Section 15.7)
 // ---------------------------------------------------------------------------
 
-enum ReviewStatus {
-  pending
-  approved
-  hidden
-  reported
-}
-
 model Review {
   id           String       @id @default(cuid())
   productId    String
@@ -423,14 +375,14 @@ model Review {
   name         String
   rating       Int          // 1-5, 0 for testimonials
   title        String?
-  text         String       @db.Text
-  status       ReviewStatus @default(pending)
+  text         String
+  status       String       @default("pending") // pending, approved, hidden, reported
   home         Boolean      @default(false)
-  verifiedType String       @default("paid") // "paid" | "free" | "testimonial"
+  verifiedType String       @default("paid")    // "paid" | "free" | "testimonial"
   helpfulCount Int          @default(0)
-  ownerReply   String?      @db.Text
+  ownerReply   String?
   repliedAt    DateTime?
-  tags         Json?
+  tags         String?
 
   createdAt    DateTime     @default(now())
 
@@ -441,15 +393,6 @@ model Review {
 // Loyalty Points, Referrals & Shares (Section 15.3, 15.4, 15.5)
 // ---------------------------------------------------------------------------
 
-enum PointsStatus {
-  available
-  pending
-  held
-  spent
-  expired
-  reversed
-}
-
 model PointsLedger {
   id           String       @id @default(cuid())
   userId       String
@@ -457,7 +400,7 @@ model PointsLedger {
   type         String
   points       Int
   balanceAfter Int
-  status       PointsStatus @default(available)
+  status       String       @default("available") // available, pending, held, spent, expired, reversed
   source       String?
   releaseAt    DateTime?
   expiresAt    DateTime?
@@ -483,7 +426,7 @@ model UserProfileValue {
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   fieldKey    String
-  value       Json
+  value       String
   rewarded    Boolean  @default(true)
   updatedAt   DateTime @updatedAt
 
@@ -546,7 +489,7 @@ model ProductSimilarity {
 model ResourceRequest {
   id               String   @id @default(cuid())
   email            String
-  text             String   @db.Text
+  text             String
   subjectId        String?
   grade            String?
   type             String?
@@ -563,8 +506,8 @@ model ResourceRequest {
 
 model PricingSetting {
   key          String   @id
-  value        Json
-  defaultValue Json
+  value        String
+  defaultValue String
   updatedAt    DateTime @updatedAt
   updatedBy    String?
 
@@ -575,9 +518,8 @@ model AuditLog {
   id        String   @id @default(cuid())
   operator  String
   action    String
-  detail    String?  @db.Text
+  detail    String?
   createdAt DateTime @default(now())
 
   @@map("audit_logs")
 }
-
