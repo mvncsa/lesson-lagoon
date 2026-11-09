@@ -14,6 +14,7 @@ import {
   ResourceRequest,
   Newsletter,
   PricingSettings,
+  DeliveryDetails,
 } from '@/lib/types';
 import {
   INITIAL_PRODUCTS,
@@ -61,6 +62,7 @@ interface AppContextType {
   createOrder: (order: Order) => void;
   uploadOrderSlip: (orderNo: string, slip: Order['slip']) => void;
   updateOrderStatus: (orderNo: string, status: Order['status'], note?: string) => void;
+  updatePrintStatus: (orderNo: string, printStatus: NonNullable<DeliveryDetails['status']>, note?: string) => void;
 
   reviews: Review[];
   addReview: (review: Omit<Review, 'id' | 'date'>) => void;
@@ -326,6 +328,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast(`Order ${orderNo} status updated to ${status}`);
   };
 
+  const updatePrintStatus = (
+    orderNo: string,
+    printStatus: NonNullable<DeliveryDetails['status']>,
+    note?: string
+  ) => {
+    setOrders((prev) =>
+      prev.map((o) => {
+        if (o.no === orderNo && o.deliveryDetails) {
+          const updatedLog = [
+            ...(o.log || []),
+            {
+              at: new Date().toISOString().slice(0, 16),
+              ev: note || `Print fulfillment updated to ${printStatus}`,
+            },
+          ];
+          return {
+            ...o,
+            deliveryDetails: {
+              ...o.deliveryDetails,
+              status: printStatus,
+            },
+            log: updatedLog,
+          };
+        }
+        return o;
+      })
+    );
+    showToast(`Order ${orderNo} print status: ${printStatus}`, 'success');
+  };
+
   const addReview = (reviewData: Omit<Review, 'id' | 'date'>) => {
     const id = 'r_' + Math.random().toString(36).slice(2, 8);
     const newReview: Review = {
@@ -412,6 +444,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         createOrder,
         uploadOrderSlip,
         updateOrderStatus,
+        updatePrintStatus,
         reviews,
         addReview,
         voteReviewHelpful,
