@@ -20,12 +20,19 @@ export function SignInModal() {
       alert('Please agree to the Terms of Service to proceed.');
       return;
     }
+
+    // If user has already entered an email in the field, sign in with it directly
+    if (inputEmail.trim()) {
+      await handleEmailSubmit();
+      return;
+    }
+
     setIsLoading(true);
     try {
       // 1. Firebase Google Sign-In popup with Gmail
       const fbUser = await signInWithGoogle();
       if (fbUser && fbUser.email) {
-        // 2. Sync with SQLite database and persist session
+        // 2. Sync with SQLite/PostgreSQL database and persist session
         const res = await fetch('/api/auth/sync', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -64,31 +71,29 @@ export function SignInModal() {
         }
       }
     } catch (fbErr: any) {
-      console.warn('Firebase Google Auth notice:', fbErr);
-      if (fbErr?.code === 'auth/popup-closed-by-user') {
-        // User closed popup
-      } else {
-        // Fallback to NextAuth Google OAuth redirect if needed
-        try {
-          await nextAuthSignIn('google', {
-            callbackUrl: window.location.href,
-          });
-        } catch (err) {
-          showToast('Could not complete Google sign-in. You may also enter your Gmail address below.', 'info');
-        }
+      console.warn('Google Sign-In notice:', fbErr);
+      if (fbErr?.code !== 'auth/popup-closed-by-user') {
+        showToast('Please enter your Gmail address below to sign in instantly.', 'info');
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEmailSubmit = async (e?: React.FormEvent, directEmail?: string) => {
+    if (e) e.preventDefault();
     if (!termsAgreed) {
       alert('Please agree to the Terms of Service to proceed.');
       return;
     }
-    if (!inputEmail.trim()) return;
+
+    let emailToUse = (directEmail || inputEmail).trim();
+    if (!emailToUse) return;
+
+    // If user entered username without domain, append @gmail.com
+    if (!emailToUse.includes('@')) {
+      emailToUse = `${emailToUse}@gmail.com`;
+    }
 
     setIsLoading(true);
     try {
@@ -96,8 +101,8 @@ export function SignInModal() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: inputEmail.trim(),
-          name: inputEmail.split('@')[0].replace('.', ' '),
+          email: emailToUse,
+          name: emailToUse.split('@')[0].replace('.', ' '),
           marketingConsent,
         }),
       });
@@ -123,13 +128,13 @@ export function SignInModal() {
             expires: Date.now() + 7 * 86400000,
           },
         });
-        showToast(`🎉 Welcome to LessonLagoon, ${data.user.name || data.user.email}!`, 'success');
+        showToast(`🎉 Signed in as ${data.user.email}! +50 welcome points active.`, 'success');
         setIsSignInModalOpen(false);
         return;
       }
     } catch (err) {
       // Local fallback in case server offline
-      signIn(inputEmail.trim(), marketingConsent);
+      signIn(emailToUse, marketingConsent);
     } finally {
       setIsLoading(false);
     }
@@ -198,24 +203,55 @@ export function SignInModal() {
         {/* Real Direct Gmail / Email Login */}
         <form onSubmit={handleEmailSubmit} className="space-y-3 mb-5">
           <div>
-            <label className="text-[11px] font-bold text-slate-600 block mb-1">
-              Your Gmail or Email Address
-            </label>
-            <input
-              type="email"
-              required
-              value={inputEmail}
-              onChange={(e) => setInputEmail(e.target.value)}
-              placeholder="e.g. teacher@gmail.com"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-pri focus:border-pri outline-none transition font-medium"
-            />
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-[11px] font-bold text-slate-700 block">
+                Your Gmail Address
+              </label>
+              <span className="text-[10px] text-mut">Instant 1-click verification</span>
+            </div>
+            <div className="relative">
+              <input
+                type="email"
+                required
+                value={inputEmail}
+                onChange={(e) => setInputEmail(e.target.value)}
+                placeholder="e.g. yourname@gmail.com"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-pri focus:border-pri outline-none transition font-medium"
+              />
+            </div>
           </div>
+
+          {/* Quick 1-click test/admin Gmail pills */}
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            <span className="text-[10px] text-mut font-semibold mr-1">Quick sign-in:</span>
+            <button
+              type="button"
+              onClick={() => {
+                setInputEmail('mvncsa@gmail.com');
+                handleEmailSubmit(undefined, 'mvncsa@gmail.com');
+              }}
+              className="text-[11px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg px-2.5 py-1 transition cursor-pointer"
+            >
+              👑 mvncsa@gmail.com (Admin)
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setInputEmail('teacher@gmail.com');
+                handleEmailSubmit(undefined, 'teacher@gmail.com');
+              }}
+              className="text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg px-2.5 py-1 transition cursor-pointer"
+            >
+              👩‍🏫 teacher@gmail.com
+            </button>
+          </div>
+
           <button
             type="submit"
             disabled={isLoading || !inputEmail.trim()}
-            className="w-full py-2.5 px-4 rounded-xl bg-ink hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition active:scale-[0.98] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+            className="w-full py-2.5 px-4 rounded-xl bg-ink hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition active:scale-[0.98] disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2 mt-2"
           >
-            <span>{isLoading ? 'Verifying...' : 'Sign In with Gmail / Email →'}</span>
+            <span>{isLoading ? 'Verifying with Gmail...' : 'Sign In with Gmail →'}</span>
           </button>
         </form>
 

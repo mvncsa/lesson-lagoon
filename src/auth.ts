@@ -3,17 +3,34 @@ import Google from 'next-auth/providers/google';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from '@/lib/prisma';
 
+const googleClientId = process.env.AUTH_GOOGLE_ID || process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.AUTH_GOOGLE_SECRET || process.env.GOOGLE_CLIENT_SECRET;
+
+const authProviders = [];
+if (googleClientId && googleClientSecret) {
+  authProviders.push(
+    Google({
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
+    })
+  );
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
+  secret:
+    process.env.AUTH_SECRET ||
+    process.env.NEXTAUTH_SECRET ||
+    'lessonlagoon-auth-secret-key-32chars-min-2026',
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: 'database',
   },
-  providers: [
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    }),
-  ],
+  pages: {
+    signIn: '/',
+    error: '/',
+  },
+  providers: authProviders,
   callbacks: {
     async session({ session, user }) {
       if (session.user) {
