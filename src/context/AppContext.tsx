@@ -221,7 +221,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       .then((data) => {
         if (data.success && Array.isArray(data.products) && data.products.length > 0) {
           setProducts((prev) => {
-            // Merge with local offline items so new drafts are retained
             const dbIds = new Set(data.products.map((p: Product) => p.id));
             const localOnly = prev.filter((p) => !dbIds.has(p.id));
             const combined = [...data.products, ...localOnly];
@@ -235,7 +234,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       .catch((err) => {
         console.warn('Could not fetch products from SQLite:', err);
       });
+
+    // Fetch live orders from SQLite
+    fetch('/api/orders')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.orders) && data.orders.length > 0) {
+          setOrders(data.orders);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch live resource requests from SQLite
+    fetch('/api/requests')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.requests) && data.requests.length > 0) {
+          setResourceRequests(data.requests);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch live pricing settings from SQLite
+    fetch('/api/settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.settings && Object.keys(data.settings).length > 0) {
+          setPricingSettings((prev) => ({ ...prev, ...data.settings }));
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  // Sync user entitlements from database when logged in
+  useEffect(() => {
+    if (!user) return;
+    fetch(`/api/library?userId=${encodeURIComponent(user.id)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.entitlements)) {
+          setEntitlements(data.entitlements);
+        }
+      })
+      .catch(() => {});
+  }, [user]);
 
   // Sync to localStorage
   useEffect(() => {
@@ -372,7 +414,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     clearCart();
 
     if (order.status === 'COMPLETED_FREE') {
-      // Free items give immediate entitlement
       const newEntitlements = order.items.map((it) => ({
         uid: order.uid,
         pid: it.pid,
@@ -383,6 +424,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } else {
       showToast(`Order ${order.no} created. Please transfer to complete.`);
     }
+
+    // Persist order to SQLite / PostgreSQL database
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        no: order.no,
+        userId: order.uid,
+        subtotal: order.subtotal,
+        discount: order.discount,
+        pointsUsed: order.pointsUsed,
+        pointsDiscount: order.pointsDiscount,
+        printTotal: order.printTotal,
+        deliveryFee: order.deliveryFee,
+        total: order.total,
+        status: order.status,
+        method: order.method,
+        earnedPoints: order.earned,
+        items: order.items,
+        deliveryDetails: order.deliveryDetails,
+      }),
+    }).catch((err) => {
+      console.warn('Could not sync order to database:', err);
+    });
   };
 
   const uploadOrderSlip = (orderNo: string, slip: Order['slip']) => {
@@ -404,6 +469,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })
     );
     showToast('Receipt slip uploaded! Awaiting owner approval.');
+
+    // Persist slip to database
+    fetch('/api/orders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'upload_slip',
+        orderNo,
+        amount: slip?.amount,
+        refNumber: slip?.ref,
+        senderName: slip?.sender,
+        fileUrl: slip?.url,
+      }),
+    }).catch((err) => {
+      console.warn('Could not sync payment slip to database:', err);
+    });
   };
 
   const updateOrderStatus = (orderNo: string, status: Order['status'], note?: string) => {
@@ -416,7 +497,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           ];
           
           if (status === 'PAID') {
-            // Unlock entitlements
             const newEnt = o.items.map((it) => ({
               uid: o.uid,
               pid: it.pid,
@@ -431,6 +511,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })
     );
     showToast(`Order ${orderNo} status updated to ${status}`);
+
+    // Persist order status change, approvals, entitlements and loyalty points
+    const action = status === 'PAID' ? 'approve' : status === 'PAYMENT_REJECTED' ? 'reject' : 'status';
+    fetch('/api/orders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action,
+        orderNo,
+        status,
+        note,
+        reason: note,
+      }),
+    }).catch((err) => {
+      console.warn('Could not sync order status to database:', err);
+    });
   };
 
   const updatePrintStatus = (
@@ -461,6 +557,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       })
     );
     showToast(`Order ${orderNo} print status: ${printStatus}`, 'success');
+
+    // Persist print status to database
+    fetch('/api/orders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'update_print',
+        orderNo,
+        printStatus,
+        trackingNote: note,
+      }),
+    }).catch((err) => {
+      console.warn('Could not sync print status to database:', err);
+    });
   };
 
   const addReview = (reviewData: Omit<Review, 'id' | 'date'>) => {
@@ -469,10 +579,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ...reviewData,
       id,
       date: new Date().toISOString().slice(0, 10),
-      status: 'pending', // Sent to moderation queue
+      status: 'pending',
     };
     setReviews((prev) => [newReview, ...prev]);
     showToast('Thank you! Review submitted for verification (+20 points on approval).');
+
+    // Persist review to database
+    fetch('/api/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId: reviewData.pid,
+        userId: reviewData.uid,
+        userName: reviewData.name,
+        rating: reviewData.rating,
+        text: reviewData.text,
+        photos: reviewData.photos,
+      }),
+    }).catch((err) => {
+      console.warn('Could not save review to database:', err);
+    });
   };
 
   const voteReviewHelpful = (reviewId: string) => {
@@ -482,6 +608,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       )
     );
     showToast('Marked as helpful! 👍');
+
+    fetch('/api/reviews', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'vote_helpful', reviewId }),
+    }).catch((err) => {
+      console.warn('Could not vote review in database:', err);
+    });
   };
 
   const replyToReview = (reviewId: string, reply: string) => {
@@ -493,6 +627,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       )
     );
     showToast('Reply published successfully.');
+
+    fetch('/api/reviews', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reply', reviewId, reply }),
+    }).catch((err) => {
+      console.warn('Could not save reply to database:', err);
+    });
   };
 
   const moderateReview = (reviewId: string, status: Review['status']) => {
@@ -500,6 +642,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       prev.map((r) => (r.id === reviewId ? { ...r, status } : r))
     );
     showToast(`Review updated to ${status}`);
+
+    fetch('/api/reviews', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'moderate', reviewId, status }),
+    }).catch((err) => {
+      console.warn('Could not update review status in database:', err);
+    });
   };
 
   const submitResourceRequest = (req: Omit<ResourceRequest, 'id' | 'createdAt' | 'count'>) => {
@@ -512,11 +662,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     setResourceRequests((prev) => [newReq, ...prev]);
     showToast("🎉 Request submitted! We'll notify you when ready.");
+
+    fetch('/api/requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req),
+    }).catch((err) => {
+      console.warn('Could not save resource request to database:', err);
+    });
   };
 
   const updatePricingSettings = (updates: Partial<PricingSettings>) => {
     setPricingSettings((prev) => ({ ...prev, ...updates }));
     showToast('Pricing & rules updated successfully.');
+
+    fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ settings: updates }),
+    }).catch((err) => {
+      console.warn('Could not save settings to database:', err);
+    });
   };
 
   const addProduct = async (product: Product) => {

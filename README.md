@@ -50,6 +50,50 @@ Test suites include:
 
 ---
 
+## 🗄️ Database Architecture & Seamless PostgreSQL Migration
+
+LessonLagoon uses **Prisma ORM** for 100% of its database interactions across all models:
+- **Products & Taxonomies** (`Product`, `Category`, `Grade`, `Curriculum`, `ProductPrintOption`)
+- **Orders & Approvals** (`Order`, `OrderItem`, `OrderPrintItem`, `OrderDelivery`, `PaymentSlip`, `OrderEvent`)
+- **Customers & Auth** (`User`, `Account`, `Session`, `Entitlement`, `UserProfileValue`)
+- **Loyalty & Referrals** (`PointsLedger`, `ShareLink`, strictly adhering to `1 MVR = 10 points`)
+- **Marketing & Storefront** (`Campaign`, `Coupon`, `Review`, `ResourceRequest`, `PricingSetting`)
+
+All queries strictly use standard Prisma ORM methods (no raw SQL or SQLite-specific syntax), making switching to PostgreSQL seamless:
+
+### How to Switch from SQLite to PostgreSQL
+
+1. **Update `.env`**:
+   ```env
+   # Replace local SQLite file URL:
+   # DATABASE_URL="file:./dev.db"
+   
+   # With your PostgreSQL connection string:
+   DATABASE_URL="postgresql://postgres:password@localhost:5432/lessonlagoon?schema=public"
+   ```
+
+2. **Update `prisma/schema.prisma`**:
+   Change `provider = "sqlite"` to `provider = "postgresql"`:
+   ```prisma
+   datasource db {
+     provider = "postgresql"
+     url      = env("DATABASE_URL")
+   }
+   ```
+
+3. **Deploy Schema & Seed**:
+   ```bash
+   # Push schema to PostgreSQL database
+   npx prisma db push
+   
+   # Seed default taxonomies and initial catalogue
+   npm run db:seed
+   ```
+
+That's it! All application features, API routes, and admin tools will immediately operate on your PostgreSQL database without any code changes.
+
+---
+
 ## 🛠️ Local Development & Build
 
 ```bash

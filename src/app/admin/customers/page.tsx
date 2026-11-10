@@ -14,12 +14,33 @@ export default function AdminCustomersPage() {
   const [search, setSearch] = useState('');
   const [selectedSegment, setSelectedSegment] = useState('all');
 
-  const [usersList, setUsersList] = useState<User[]>(INITIAL_USERS);
+  const [usersList, setUsersList] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   // Points adjustment state (P1-LST-06)
   const [adjustPoints, setAdjustPoints] = useState(50);
   const [adjustReason, setAdjustReason] = useState('Community promotion bonus');
+
+  // Load live customers from database
+  const loadCustomers = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch('/api/customers');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.customers)) {
+        setUsersList(data.customers);
+      }
+    } catch (err) {
+      console.warn('Could not fetch customers from database:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    loadCustomers();
+  }, []);
 
   const customers = usersList.filter((u) => u.role === 'CUSTOMER');
 
@@ -29,18 +50,59 @@ export default function AdminCustomersPage() {
     if (selectedSegment === 'pts200' && c.points < 200) return false;
     if (search) {
       const q = search.toLowerCase();
-      return c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.code.toLowerCase().includes(q);
+      return (
+        c.name.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        c.code.toLowerCase().includes(q)
+      );
     }
     return true;
   });
 
-  const handleApplyPoints = (e: React.FormEvent) => {
+  const handleApplyPoints = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedUser) return;
     const updated = { ...selectedUser, points: selectedUser.points + adjustPoints };
     setUsersList((prev) => prev.map((u) => (u.id === selectedUser.id ? updated : u)));
     setSelectedUser(updated);
     showToast(`Adjusted ${adjustPoints} points for ${selectedUser.name}. Reason: ${adjustReason}`);
+
+    try {
+      await fetch('/api/customers', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'adjust_points',
+          userId: selectedUser.id,
+          pointsDelta: adjustPoints,
+          reason: adjustReason,
+        }),
+      });
+    } catch (err) {
+      console.warn('Failed to persist points adjustment:', err);
+    }
+  };
+
+  const handleToggleBlock = async (targetUser: User) => {
+    const newBlocked = !targetUser.blocked;
+    setUsersList((prev) =>
+      prev.map((u) => (u.id === targetUser.id ? { ...u, blocked: newBlocked } : u))
+    );
+    showToast(`User ${targetUser.name} ${newBlocked ? 'suspended' : 'reactivated'}`);
+
+    try {
+      await fetch('/api/customers', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle_block',
+          userId: targetUser.id,
+          isBlocked: newBlocked,
+        }),
+      });
+    } catch (err) {
+      console.warn('Failed to update user block state:', err);
+    }
   };
 
   return (

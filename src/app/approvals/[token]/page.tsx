@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import { formatMVR } from '@/lib/pricing';
+import { Order } from '@/lib/types';
 import { ShieldCheck, CheckCircle2, AlertTriangle, XCircle, ArrowLeft } from 'lucide-react';
 
 export default function EmailApprovalPage() {
@@ -13,13 +14,39 @@ export default function EmailApprovalPage() {
 
   const { orders, updateOrderStatus, user, showToast } = useApp();
 
+  const [dbOrders, setDbOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    setLoading(true);
+    fetch('/api/orders?status=AWAITING_VERIFICATION')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.orders)) {
+          setDbOrders(data.orders);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const allOrders = [...orders, ...dbOrders];
+
   // Find order associated with this approval token
-  const order = orders.find(
+  const order = allOrders.find(
     (o) => o.tokens?.approve === token || o.tokens?.reject === token || o.no === 'LL-2026-000121'
-  ) || orders.find((o) => o.status === 'AWAITING_VERIFICATION');
+  ) || allOrders.find((o) => o.status === 'AWAITING_VERIFICATION');
 
   const [decision, setDecision] = useState<'approved' | 'rejected' | null>(null);
   const [rejectReason, setRejectReason] = useState('Amount transferred does not match expected total');
+
+  if (loading && !order) {
+    return (
+      <div className="wrap py-24 text-center space-y-4">
+        <p className="text-sm font-semibold text-mut">Loading verification slip...</p>
+      </div>
+    );
+  }
 
   if (!order) {
     return (

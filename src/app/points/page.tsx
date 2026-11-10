@@ -52,11 +52,11 @@ export default function PointsPage() {
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
-  const handleSaveProfileItem = (itemKey: string, value: string) => {
+  const handleSaveProfileItem = async (itemKey: string, value: string) => {
     if (!user) return;
     setUser({
       ...user,
-      points: user.points + 10, // P1-PRF-01 reward
+      points: user.points + 10,
       profileValues: {
         ...(user.profileValues || {}),
         [itemKey]: value,
@@ -65,10 +65,26 @@ export default function PointsPage() {
     if (itemKey === 'role') setSavedRole(true);
     if (itemKey === 'island') setSavedIsland(true);
     showToast(`✅ Saved ${itemKey} · +10 points added to your balance!`, 'success');
+
+    try {
+      await fetch('/api/customers', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_profile',
+          userId: user.id,
+          fieldKey: itemKey,
+          fieldValue: value,
+        }),
+      });
+    } catch (err) {
+      console.warn('Could not persist profile value to database:', err);
+    }
   };
 
-  const handleSaveBirthday = (e: React.FormEvent) => {
+  const handleSaveBirthday = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
     setUser({
       ...user,
       points: user.points + (bdaySaved ? 0 : 10),
@@ -77,6 +93,21 @@ export default function PointsPage() {
     });
     setBdaySaved(true);
     showToast('🎂 Birthday saved! Your annual gift is ready in your window (+10 points).', 'success');
+
+    try {
+      await fetch('/api/customers', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_profile',
+          userId: user.id,
+          birthDay: bDay,
+          birthMonth: bMonth,
+        }),
+      });
+    } catch (err) {
+      console.warn('Could not persist birthday to database:', err);
+    }
   };
 
   return (

@@ -9,14 +9,28 @@ export default function AdminRequestsPage() {
 
   const [requests, setRequests] = useState(resourceRequests);
 
-  const handleStatusChange = (id: string, status: any) => {
+  React.useEffect(() => {
+    setRequests(resourceRequests);
+  }, [resourceRequests]);
+
+  const handleStatusChange = async (id: string, status: any) => {
     setRequests((prev) =>
       prev.map((r) => (r.id === id ? { ...r, status } : r))
     );
     showToast(`Request marked as ${status}`);
+
+    try {
+      await fetch('/api/requests', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      });
+    } catch (err) {
+      console.warn('Failed to update request status in database:', err);
+    }
   };
 
-  const handleLinkResource = (requestId: string, productId: string) => {
+  const handleLinkResource = async (requestId: string, productId: string) => {
     setRequests((prev) =>
       prev.map((r) =>
         r.id === requestId
@@ -25,6 +39,16 @@ export default function AdminRequestsPage() {
       )
     );
     showToast('Resource linked! Automated email notice sent to requesters.');
+
+    try {
+      await fetch('/api/requests', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: requestId, linkedProductId: productId, status: 'Published' }),
+      });
+    } catch (err) {
+      console.warn('Failed to link resource in database:', err);
+    }
   };
 
   return (

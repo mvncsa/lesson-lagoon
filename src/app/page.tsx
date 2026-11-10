@@ -568,7 +568,7 @@ export default function HomePage() {
                 <span className="text-xs text-slate-200">On first Google sign-up</span>
               </div>
               <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4">
-                <b className="text-amber-400 text-xl block">1 pt / MVR</b>
+                <b className="text-amber-400 text-xl block">10 pts / MVR</b>
                 <span className="text-xs text-slate-200">On all paid orders</span>
               </div>
               <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4">

@@ -136,6 +136,46 @@ export async function PATCH(req: Request) {
         where: { id: reviewId },
         data: { status },
       });
+
+      // If approved, update product rating statistics and reward reviewer
+      if (status === 'approved') {
+        const approvedReviews = await prisma.review.findMany({
+          where: { productId: updated.productId, status: 'approved' },
+          select: { rating: true },
+        });
+
+        const count = approvedReviews.length;
+        const sum = approvedReviews.reduce((acc, r) => acc + r.rating, 0);
+        const avg = count > 0 ? Number((sum / count).toFixed(1)) : 5.0;
+
+        await prisma.product.update({
+          where: { id: updated.productId },
+          data: { ratingAvg: avg, ratingCount: count },
+        }).catch(() => {});
+
+        // Award +20 points to verified reviewer if user exists
+        if (updated.userId) {
+          const reviewer = await prisma.user.findUnique({ where: { id: updated.userId } });
+          if (reviewer) {
+            const newBal = reviewer.points + 20;
+            await prisma.user.update({
+              where: { id: updated.userId },
+              data: { points: newBal },
+            });
+            await prisma.pointsLedger.create({
+              data: {
+                userId: updated.userId,
+                points: 20,
+                balanceAfter: newBal,
+                type: 'REVIEW_BONUS',
+                status: 'available',
+                source: 'Approved resource review bonus',
+              },
+            });
+          }
+        }
+      }
+
       return NextResponse.json({ success: true, status: updated.status });
     }
 

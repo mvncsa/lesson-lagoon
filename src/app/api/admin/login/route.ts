@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
   try {
@@ -22,6 +23,22 @@ export async function POST(req: Request) {
       );
     }
 
+    const adminEmail = 'owner@lessonlagoon.mv';
+
+    // Upsert admin user in database
+    const dbAdmin = await prisma.user.upsert({
+      where: { email: adminEmail },
+      create: {
+        name: 'LessonLagoon Owner',
+        email: adminEmail,
+        role: 'ADMIN',
+        points: 1000,
+      },
+      update: {
+        role: 'ADMIN',
+      },
+    });
+
     // Authentication succeeded
     const adminToken =
       'adm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
@@ -29,9 +46,9 @@ export async function POST(req: Request) {
     const response = NextResponse.json({
       success: true,
       user: {
-        id: 'admin_owner',
-        name: 'LessonLagoon Owner',
-        email: 'owner@lessonlagoon.mv',
+        id: dbAdmin.id,
+        name: dbAdmin.name || 'LessonLagoon Owner',
+        email: dbAdmin.email,
         role: 'ADMIN',
       },
     });
@@ -47,10 +64,10 @@ export async function POST(req: Request) {
 
     return response;
   } catch (err: any) {
+    console.error('Admin login error:', err);
     return NextResponse.json(
       { error: err.message || 'Authentication error' },
       { status: 500 }
     );
   }
 }
-

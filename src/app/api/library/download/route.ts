@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 import { INITIAL_PRODUCTS } from '@/lib/data';
 
 export async function GET(req: Request) {
@@ -12,9 +13,32 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'productId is required' }, { status: 400 });
     }
 
-    const product = INITIAL_PRODUCTS.find((p) => p.id === productId);
-    if (!product) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    // 1. Check database for product via Prisma
+    let productTitle = '';
+    let productSlug = '';
+    let productGrade = '';
+    let productCat = '';
+
+    const dbProduct = await prisma.product.findUnique({
+      where: { id: productId },
+      include: { category: true },
+    });
+
+    if (dbProduct) {
+      productTitle = dbProduct.title;
+      productSlug = dbProduct.slug;
+      productGrade = dbProduct.grade;
+      productCat = dbProduct.category?.name || dbProduct.categoryId;
+    } else {
+      const mockProduct = INITIAL_PRODUCTS.find((p) => p.id === productId);
+      if (mockProduct) {
+        productTitle = mockProduct.title;
+        productSlug = mockProduct.slug;
+        productGrade = mockProduct.grade;
+        productCat = mockProduct.cat;
+      } else {
+        return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+      }
     }
 
     const customerEmail = userEmail || 'guest.teacher@lessonlagoon.mv';
@@ -22,12 +46,12 @@ export async function GET(req: Request) {
     const licenceStamp = `Licensed to ${customerEmail} · Order #${orderNo} · ${stampDate} · Single-Teacher Classroom Licence`;
 
     // Return licensing metadata and stamped download payload
-    const mockPdfBytes = `\n%PDF-1.4\n% LessonLagoon Stamped Digital Resource\n% ${licenceStamp}\n% Title: ${product.title}\n% Grade: ${product.grade} - Category: ${product.cat}\n`;
+    const mockPdfBytes = `%PDF-1.4\n% LessonLagoon Stamped Digital Resource\n% ${licenceStamp}\n% Title: ${productTitle}\n% Grade: ${productGrade} - Category: ${productCat}\n`;
 
     return new NextResponse(mockPdfBytes, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${product.slug}-licensed.pdf"`,
+        'Content-Disposition': `attachment; filename="${productSlug || 'resource'}-licensed.pdf"`,
         'X-Licence-Stamp': encodeURIComponent(licenceStamp),
       },
     });

@@ -8,12 +8,33 @@ import { Coins, Share2, Award, Cake, Users, TrendingUp } from 'lucide-react';
 export default function AdminPointsAnalyticsPage() {
   const { user } = useApp();
 
-  const totalPointsIssued = 48500;
-  const totalPointsRedeemed = 12400;
-  const outstandingPoints = totalPointsIssued - totalPointsRedeemed;
+  const [customers, setCustomers] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    fetch('/api/customers')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && Array.isArray(d.customers)) {
+          setCustomers(d.customers);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const totalPointsIssued = customers.reduce((acc, c) => acc + (c.points || 0) + (c.totalSpent > 0 ? 50 : 0), 50);
+  const totalPointsRedeemed = 0;
+  const outstandingPoints = customers.reduce((acc, c) => acc + (c.points || 0), 50);
   const outstandingLiabilityLaari = (outstandingPoints / 10) * 100; // 10 pts = 1 MVR
 
-  const topReferrers: { name: string; code: string; referrals: number; earnedPts: number }[] = [];
+  const topReferrers = customers
+    .filter((c) => c.code)
+    .slice(0, 5)
+    .map((c) => ({
+      name: c.name,
+      code: c.code,
+      referrals: c.ordersCount || 0,
+      earnedPts: (c.ordersCount || 0) * 100,
+    }));
 
   return (
     <div className="space-y-8">

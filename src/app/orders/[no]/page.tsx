@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import { formatMVR, DEFAULT_DELIVERY_ZONES } from '@/lib/pricing';
 import { INITIAL_BANK_DETAILS } from '@/lib/data';
+import { Order } from '@/lib/types';
 import {
   Copy,
   Check,
@@ -23,7 +24,27 @@ export default function OrderPage() {
   const orderNo = params?.no as string;
 
   const { orders, uploadOrderSlip, showToast } = useApp();
-  const order = orders.find((o) => o.no === orderNo);
+  const contextOrder = orders.find((o) => o.no === orderNo);
+
+  const [dbOrder, setDbOrder] = useState<Order | null>(null);
+  const [loadingDb, setLoadingDb] = useState(!contextOrder);
+
+  React.useEffect(() => {
+    if (!contextOrder && orderNo) {
+      setLoadingDb(true);
+      fetch(`/api/orders?orderNo=${encodeURIComponent(orderNo)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && Array.isArray(data.orders) && data.orders.length > 0) {
+            setDbOrder(data.orders[0]);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setLoadingDb(false));
+    }
+  }, [contextOrder, orderNo]);
+
+  const order = contextOrder || dbOrder;
 
   const [senderName, setSenderName] = useState('');
   const [transferRef, setTransferRef] = useState(orderNo || '');
@@ -31,6 +52,14 @@ export default function OrderPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [slipFile, setSlipFile] = useState<File | null>(null);
   const [slipPreview, setSlipPreview] = useState<string | null>(null);
+
+  if (loadingDb) {
+    return (
+      <div className="wrap py-24 text-center space-y-4">
+        <p className="text-sm font-semibold text-mut">Loading order details...</p>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -368,7 +397,7 @@ export default function OrderPage() {
       <div className="bg-white border border-line rounded-3xl p-6 sm:p-8 space-y-4 shadow-xs text-xs">
         <h3 className="font-extrabold text-base text-ink">Order Items Summary</h3>
         <div className="divide-y divide-line">
-          {order.items.map((item, idx) => (
+          {order.items.map((item: any, idx: number) => (
             <div key={idx} className="py-3 flex items-center justify-between">
               <div>
                 <b className="text-ink font-bold block">{item.title}</b>

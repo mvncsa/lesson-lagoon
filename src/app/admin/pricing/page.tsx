@@ -13,6 +13,10 @@ export default function PricingRulesCentrePage() {
   // Working copy state
   const [settings, setSettings] = useState(pricingSettings);
 
+  React.useEffect(() => {
+    setSettings(pricingSettings);
+  }, [pricingSettings]);
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     updatePricingSettings(settings);

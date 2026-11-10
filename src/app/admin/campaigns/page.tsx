@@ -11,19 +11,49 @@ export default function AdminCampaignsPage() {
   const [campaignList, setCampaignList] = useState<Campaign[]>(campaigns);
   const [couponList, setCouponList] = useState<Coupon[]>(coupons);
 
+  // Load from database
+  React.useEffect(() => {
+    fetch('/api/campaigns')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          if (Array.isArray(data.campaigns) && data.campaigns.length > 0) {
+            setCampaignList(data.campaigns);
+          }
+          if (Array.isArray(data.coupons) && data.coupons.length > 0) {
+            setCouponList(data.coupons);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // New coupon form state
   const [newCode, setNewCode] = useState('');
   const [newPct, setNewPct] = useState(15);
   const [newLimit, setNewLimit] = useState(100);
 
-  const toggleCampaign = (id: string) => {
+  const toggleCampaign = async (id: string) => {
+    const target = campaignList.find((c) => c.id === id);
+    const newActive = target ? !target.active : false;
+
     setCampaignList((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, active: !c.active } : c))
+      prev.map((c) => (c.id === id ? { ...c, active: newActive } : c))
     );
     showToast('Campaign status toggled.');
+
+    try {
+      await fetch('/api/campaigns', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind: 'campaign', id, active: newActive }),
+      });
+    } catch (err) {
+      console.warn('Could not persist campaign toggle:', err);
+    }
   };
 
-  const handleAddCoupon = (e: React.FormEvent) => {
+  const handleAddCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCode) return;
     const added: Coupon = {
@@ -37,6 +67,22 @@ export default function AdminCampaignsPage() {
     setCouponList([added, ...couponList]);
     setNewCode('');
     showToast(`Coupon "${added.code}" created.`);
+
+    try {
+      await fetch('/api/campaigns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          kind: 'coupon',
+          code: added.code,
+          pct: added.pct,
+          limit: added.limit,
+          expires: added.expires,
+        }),
+      });
+    } catch (err) {
+      console.warn('Could not save coupon to database:', err);
+    }
   };
 
   return (

@@ -10,6 +10,7 @@ export default function AdminBackupPage() {
 
   const handleDownloadBackup = () => {
     showToast('Snapshot backup archive generated and downloading...', 'success');
+    window.open('/api/admin/backup', '_blank');
   };
 
   return (
